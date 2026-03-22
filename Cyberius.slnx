@@ -1,1 +1,6 @@
-<Solution />
+<Solution>
+  <Project Path="src/Cyberius.Api/Cyberius.Api.csproj" />
+  <Project Path="src/Cyberius.Application/Cyberius.Application.csproj" />
+  <Project Path="src/Cyberius.Domain/Cyberius.Domain.csproj" />
+  <Project Path="src/Cyberius.Infrastructure/Cyberius.Infrastructure.csproj" />
+</Solution>

@@ -2,7 +2,7 @@
 
 public class User
 {
-    public Guid Id { get; set; } = Guid.CreateVersion7();
+    public Guid UserId { get; set; } = Guid.CreateVersion7();
     public string Email { get; set; } = string.Empty;
     public string UserName { get; set; } = string.Empty;
     public string? PasswordHash { get; set; } = string.Empty;
@@ -13,5 +13,6 @@ public class User
     public DateTime JoinedDate { get; set; } = DateTime.UtcNow;
     public bool IsActive { get; set; } = true;
 
-    public virtual ICollection<Role>? Roles { get; set; }
+    public virtual ICollection<UserRole> UserRoles { get; set; } = [];
+    public virtual RefreshToken? RefreshToken { get; set; }
 }

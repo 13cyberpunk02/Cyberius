@@ -6,5 +6,5 @@ public class Role
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     
-    public virtual ICollection<User>? Users { get; set; }
+    public virtual ICollection<UserRole> UserRoles { get; set; } = [];
 }

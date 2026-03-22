@@ -10,9 +10,39 @@ public class UserConfigurations : IEntityTypeConfiguration<User>
     {
         builder.ToTable("Users");
         
-        builder.HasKey(x => x.Id);
-        builder.HasIndex(x => x.Id).IsUnique();
+        builder.HasKey(x => x.UserId);
+        builder.Property(u => u.UserId)
+            .ValueGeneratedOnAdd()
+            .IsRequired();
+        builder.HasIndex(x => x.UserId).IsUnique();
         builder.HasIndex(x => x.Email).IsUnique();
         builder.HasIndex(x => x.UserName).IsUnique();
+        
+        builder.Property(u => u.Email)
+            .IsRequired()
+            .HasMaxLength(100);
+        
+        builder.Property(u => u.UserName)
+            .IsRequired()
+            .HasMaxLength(100);
+        
+        builder.Property(u => u.FirstName)
+            .IsRequired()
+            .HasMaxLength(100);
+        
+        builder.Property(u => u.LastName)
+            .IsRequired()
+            .HasMaxLength(100);
+        
+        builder.Property(u => u.DateOfBirth)
+            .IsRequired();
+        
+        builder.Property(u => u.JoinedDate)
+            .IsRequired();
+        
+        builder.HasOne(u => u.RefreshToken)
+            .WithOne(rt => rt.User)
+            .HasForeignKey<RefreshToken>("UserId")
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

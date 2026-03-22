@@ -4,9 +4,10 @@ namespace Cyberius.Domain.Interfaces;
 
 public interface IUnitOfWork : IAsyncDisposable
 {
-    IUserRepository      Users     { get; }
-    IRoleRepository      Roles     { get; }
-    IUserRoleRepository  UserRoles { get; }
+    IUserRepository          Users         { get; }
+    IRoleRepository          Roles         { get; }
+    IUserRoleRepository      UserRoles     { get; }
+    IRefreshTokenRepository  RefreshTokens { get; }
 
     Task<int> SaveChangesAsync(CancellationToken ct = default);
 

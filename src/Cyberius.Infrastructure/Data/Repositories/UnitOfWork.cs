@@ -6,9 +6,10 @@ namespace Cyberius.Infrastructure.Data.Repositories;
 
 public class UnitOfWork(AppDbContext db) : IUnitOfWork
 {
-    public IUserRepository      Users    { get; } = new UserRepository(db);
-    public IRoleRepository      Roles     { get; } = new RoleRepository(db);
-    public IUserRoleRepository  UserRoles { get; } = new UserRoleRepository(db);
+    public IUserRepository         Users         => field is null ? field ??= new  UserRepository(db) : field;
+    public IRoleRepository         Roles         => field is null ? field ??= new  RoleRepository(db) : field;
+    public IUserRoleRepository     UserRoles     => field is null ? field ??= new  UserRoleRepository(db) : field;
+    public IRefreshTokenRepository RefreshTokens => field is null ? field ??= new RefreshTokenRepository(db) : field;
     public Task<int> SaveChangesAsync(CancellationToken ct = default)
         => db.SaveChangesAsync(ct);
 

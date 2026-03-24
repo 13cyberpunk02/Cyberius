@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Cyberius — C# .NET & Angular</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta name="description" content="Практические статьи о разработке на C# .NET 10 и Angular 21+. Архитектура, паттерны, производительность.">
+  <meta name="theme-color" content="#040d18">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="DevBlog — C# .NET & Angular">
+  <meta property="og:description" content="Практические статьи о разработке на C# .NET 10 и Angular 21+">
+  <meta property="og:type" content="website">
+
+  <!-- Favicon (code bracket emoji as SVG favicon) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💻</text></svg>">
+
+  <!-- Google Fonts — Inter + JetBrains Mono (здесь, а не в CSS, чтобы не конфликтовать с @import tailwindcss) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- ⚡ Prevent Flash of Wrong Theme -->
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('blog-theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var theme = saved || (prefersDark ? 'dark' : 'light');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light');
+          document.body && document.body.classList.add('light');
+        } else {
+          document.documentElement.classList.add('dark');
+        }
+      } catch(e) {}
+    })();
+  </script>
+</head>
+<body>
+  <app-root></app-root>
+</body>
+</html>

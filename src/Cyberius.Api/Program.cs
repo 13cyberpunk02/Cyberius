@@ -1,3 +1,6 @@
+using Cyberius.Api.Common;
+using Cyberius.Api.Common.Extensions;
+using Cyberius.Application;
 using Cyberius.Infrastructure;
 using Scalar.AspNetCore;
 
@@ -9,11 +12,14 @@ builder.Logging.AddSimpleConsole(options =>
     options.UseUtcTimestamp = true;
     options.TimestampFormat = "dd.MM.yyyy HH:mm:ss.fff ";
 });
-
+builder.Services.AddOpenApiExtension();
 builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.MapAllServices(builder.Configuration);
 
 builder.Services.AddInfrastructure(builder.Configuration);
-
+builder.Services.AddApplication();
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -25,7 +31,10 @@ if (app.Environment.IsDevelopment())
         options.WithTitle("Cyberius Api");
     });
 }
-
+app.UseCors("CorsPolicy");
 app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapAllEndpoints();
 
 app.Run();

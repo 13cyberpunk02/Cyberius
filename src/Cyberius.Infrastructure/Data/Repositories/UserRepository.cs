@@ -1,10 +1,14 @@
 ﻿using Cyberius.Domain.Entities;
 using Cyberius.Domain.Interfaces;
 using Cyberius.Infrastructure.Data.Context;
+using Microsoft.EntityFrameworkCore;
 
 namespace Cyberius.Infrastructure.Data.Repositories;
 
 public class UserRepository(AppDbContext db) : GenericRepository<User>(db), IUserRepository
 {
-    
+    private readonly AppDbContext _db = db;
+
+    public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default) => 
+        await _db.Users.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
 }

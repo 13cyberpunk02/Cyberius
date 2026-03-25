@@ -119,6 +119,10 @@
   --input-bg:             rgba(8, 20, 40, 0.8);
   --btn-secondary-bg:     rgba(255, 255, 255, 0.06);
   --btn-secondary-border: rgba(255, 255, 255, 0.12);
+
+  /* Дефолты для динамических CSS-переменных компонентов */
+  --card-outline:         rgba(12, 162, 231, 0.4);
+  --badge-color:          #0ca2e7;
 }
 
 /* ─────────────────────────────────────────
@@ -360,8 +364,6 @@ code, pre, .font-mono { font-family: var(--font-mono); }
 .email-input {
   background: var(--input-bg);
   border: 1px solid var(--glass-border);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   color: var(--text-primary);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -675,4 +677,72 @@ body.light .group:hover .heading-text {
 .category-badge .category-icon svg g {
   fill: var(--badge-color) !important;
   stroke: none !important;
+}
+
+/* ─────────────────────────────────────────
+   AUTH — Avatar & User menu
+   ───────────────────────────────────────── */
+.user-avatar-btn {
+  background: linear-gradient(135deg, #0ca2e7 0%, #06b6d4 100%);
+  box-shadow: 0 0 14px rgba(12, 162, 231, 0.4);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  border: none;
+}
+
+.user-avatar-btn:hover {
+  box-shadow: 0 0 22px rgba(12, 162, 231, 0.6);
+}
+
+.user-menu-item {
+  color: var(--text-secondary);
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  text-decoration: none;
+  display: flex;
+}
+
+.user-menu-item:hover {
+  background: var(--glass-hover-bg);
+  color: var(--text-primary);
+}
+
+.user-menu-item:hover svg {
+  color: var(--text-accent);
+}
+
+.user-menu-logout:hover {
+  background: rgba(244, 63, 94, 0.08) !important;
+}
+
+/* ─────────────────────────────────────────
+   AUTH — Login modal backdrop
+   ───────────────────────────────────────── */
+.modal-backdrop {
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ─────────────────────────────────────────
+   LOGIN MODAL — field icons
+   ───────────────────────────────────────── */
+.field-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* fa-icon рендерит <svg> внутри себя — передаём color вниз */
+.field-icon svg {
+  color: inherit;
 }

@@ -40,7 +40,7 @@ export class Hero implements OnInit, OnDestroy {
   }
 
   techBadges = [
-    { label: 'C# 13', color: 'badge-blue' },
+    { label: 'C# 14', color: 'badge-blue' },
     { label: '.NET 10', color: 'badge-purple' },
     { label: 'Angular 21', color: 'badge-rose' },
     { label: 'Minimal API', color: 'badge-teal' },

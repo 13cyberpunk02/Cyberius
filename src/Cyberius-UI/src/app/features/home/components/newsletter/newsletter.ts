@@ -1,10 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-newsletter',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, FaIconComponent],
   templateUrl: './newsletter.html',
   styleUrl: './newsletter.css',
 })
@@ -20,4 +22,6 @@ export class Newsletter {
     this.status.set('success');
     this.email = '';
   }
+
+  protected readonly faSpinner = faSpinner;
 }

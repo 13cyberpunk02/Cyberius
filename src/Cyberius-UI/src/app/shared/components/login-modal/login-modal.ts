@@ -1,9 +1,20 @@
-import { Component, inject, output, signal } from '@angular/core';
+import { Component, inject, output, signal, ViewEncapsulation } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faCode } from '@fortawesome/free-solid-svg-icons';
+import {
+  faArrowRightToBracket,
+  faCode,
+  faEnvelope,
+  faExclamation,
+  faExclamationTriangle,
+  faEye,
+  faEyeSlash,
+  faLock,
+  faSpinner,
+  faXmark,
+} from '@fortawesome/free-solid-svg-icons';
 
 type FormStatus = 'idle' | 'loading' | 'error';
 
@@ -12,6 +23,7 @@ type FormStatus = 'idle' | 'loading' | 'error';
   imports: [CommonModule, FormsModule, FaIconComponent],
   templateUrl: './login-modal.html',
   styleUrl: './login-modal.css',
+  encapsulation: ViewEncapsulation.None,
 })
 export class LoginModal {
   private auth = inject(AuthService);
@@ -61,4 +73,13 @@ export class LoginModal {
   }
 
   protected readonly faCode = faCode;
+  protected readonly faEnvelope = faEnvelope;
+  protected readonly faLock = faLock;
+  protected readonly faEye = faEye;
+  protected readonly faEyeSlash = faEyeSlash;
+  protected readonly faXmark = faXmark;
+  protected readonly faArrowRightToBracket = faArrowRightToBracket;
+  protected readonly faSpinner = faSpinner;
+  protected readonly faExclamation = faExclamation;
+  protected readonly faExclamationTriangle = faExclamationTriangle;
 }

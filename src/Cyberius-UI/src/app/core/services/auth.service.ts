@@ -14,7 +14,7 @@ export class AuthService {
   private router = inject(Router);
 
   // API URL — замените на свой
-  private readonly API = 'https://localhost:7043/api';
+  private readonly API = 'http://localhost:5273/api/auth';
 
   // ── State ──────────────────────────────────────────────────────
   private state = signal<AuthState>(this.loadFromStorage());
@@ -41,7 +41,7 @@ export class AuthService {
 
   // ── Login ──────────────────────────────────────────────────────
   login(body: LoginRequest) {
-    return this.http.post<AuthResponse>(`${this.API}/auth/login`, body).pipe(
+    return this.http.post<AuthResponse>(`${this.API}/login`, body).pipe(
       tap((res) => {
         const user = this.decodeUser(res.accessToken);
         this.setState(user, res.accessToken, res.refreshToken);

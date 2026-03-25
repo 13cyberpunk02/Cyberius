@@ -1,15 +1,20 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { faGithub, faLinkedin, faTelegram } from '@fortawesome/free-brands-svg-icons';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faCode } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-footer',
-  imports: [CommonModule],
+  imports: [CommonModule, FontAwesomeModule],
   templateUrl: './footer.html',
   styleUrl: './footer.css',
 })
 export class Footer {
   currentYear = new Date().getFullYear();
-
+  githubIcon = faGithub;
+  tgIcon = faTelegram;
+  linkedinIcon = faLinkedin;
   links = {
     blog: [
       { label: 'Все статьи', href: '/posts' },
@@ -24,10 +29,5 @@ export class Footer {
       { label: 'RSS Feed', href: '/feed.xml' },
     ],
   };
-
-  social = [
-    { name: 'GitHub', href: '#', icon: 'github' },
-    { name: 'Telegram', href: '#', icon: 'telegram' },
-    { name: 'LinkedIn', href: '#', icon: 'linkedin' },
-  ];
+  protected readonly faCode = faCode;
 }

@@ -422,3 +422,257 @@ code, pre, .font-mono { font-family: var(--font-mono); }
 }
 ::view-transition-old(root) { animation: 200ms ease view-fade-out; }
 ::view-transition-new(root) { animation: 300ms ease view-fade-in; }
+
+/* ═══════════════════════════════════════════
+   LIGHT THEME — OVERRIDES FOR HARDCODED COLORS
+   Перебиваем text-white / text-slate-* из шаблонов
+   ═══════════════════════════════════════════ */
+
+/* ── Глобальные text-* перебивки ── */
+html.light .text-white,
+body.light .text-white {
+  color: #0f172a !important;
+}
+html.light .text-slate-300,
+body.light .text-slate-300 {
+  color: #334155 !important;
+}
+html.light .text-slate-400,
+body.light .text-slate-400 {
+  color: #475569 !important;
+}
+html.light .text-slate-500,
+body.light .text-slate-500 {
+  color: #64748b !important;
+}
+html.light .text-slate-600,
+body.light .text-slate-600 {
+  color: #1e293b !important;
+}
+
+/* ── Заголовки h1 / h2 / h3 ── */
+html.light h1,
+body.light h1 {
+  color: #0f172a;
+}
+html.light h2,
+body.light h2 {
+  color: #0f172a;
+}
+html.light h3,
+body.light h3 {
+  color: #0f172a;
+}
+
+/* ── Post card title hover ── */
+html.light .group:hover h3,
+body.light .group:hover h3 {
+  color: #0081c5;
+}
+
+/* ── Nav links ── */
+html.light .nav-link,
+body.light .nav-link {
+  color: #334155;
+}
+html.light .nav-link:hover,
+body.light .nav-link:hover {
+  color: #0f172a;
+}
+
+/* ── Btn secondary ── */
+html.light .btn-secondary,
+body.light .btn-secondary {
+  color: #0f172a;
+}
+html.light .btn-secondary:hover,
+body.light .btn-secondary:hover {
+  color: #0081c5;
+}
+
+/* ── Теги постов (#tag) ── */
+html.light .bg-white\/5,
+body.light .bg-white\/5 {
+  background: rgba(12,162,231,0.07) !important;
+  color: #475569 !important;
+}
+html.light .border-white\/10,
+body.light .border-white\/10 {
+  border-color: rgba(12,162,231,0.18) !important;
+}
+html.light .border-white\/5,
+body.light .border-white\/5 {
+  border-color: rgba(12,162,231,0.1) !important;
+}
+
+/* ── Footer ── */
+html.light .logo-sub,
+body.light .logo-sub {
+  color: #64748b;
+}
+
+/* ── Code window hero ── */
+html.light .text-slate-600 svg,
+body.light .text-slate-600 svg {
+  color: #334155;
+}
+
+/* ═══════════════════════════════════════════
+   SEMANTIC COLOR CLASSES
+   Используются вместо text-white / text-slate-*
+   ═══════════════════════════════════════════ */
+
+/* Основные заголовки — белые в тёмной, тёмные в светлой */
+.heading-text {
+  color: #f1f5f9;
+}
+html.light .heading-text,
+body.light .heading-text {
+  color: #0f172a;
+}
+
+/* Hero h1 spans */
+.hero-heading-text {
+  color: #f1f5f9;
+  display: block;
+}
+html.light .hero-heading-text,
+body.light .hero-heading-text {
+  color: #0f172a;
+}
+
+/* Hero description paragraph */
+.hero-desc-text {
+  color: #94a3b8;
+  line-height: 1.75;
+  max-width: 32rem;
+}
+html.light .hero-desc-text,
+body.light .hero-desc-text {
+  color: #334155;
+}
+
+/* Post card h3 hover в светлой теме */
+html.light .group:hover .heading-text,
+body.light .group:hover .heading-text {
+  color: #0081c5;
+}
+
+/* ─────────────────────────────────────────
+   TECH STACK SVG ICONS
+   ───────────────────────────────────────── */
+.tech-icon-wrap svg {
+  width: 32px;
+  height: 32px;
+  display: block;
+}
+
+/* ─────────────────────────────────────────
+   TECH CARD — dynamic outline via CSS var
+   ───────────────────────────────────────── */
+.tech-card {
+  border: 1px solid var(--glass-border);
+  transform: translateY(0);
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tech-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--card-outline);
+  box-shadow:
+    0 0 0 1px var(--card-outline),
+    0 8px 32px color-mix(in srgb, var(--card-outline) 30%, transparent),
+    var(--card-shadow);
+}
+
+/* Внутренний glow-слой при ховере */
+.tech-card-glow {
+  background: radial-gradient(
+    ellipse 80% 60% at 50% 0%,
+    color-mix(in srgb, var(--card-outline) 15%, transparent),
+    transparent 70%
+  );
+}
+
+/* ─────────────────────────────────────────
+   TECH CARD — dynamic outline via CSS var
+   ───────────────────────────────────────── */
+.tech-card {
+  border: 1px solid var(--glass-border);
+  transform: translateY(0);
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tech-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--card-outline);
+  box-shadow:
+    0 0 0 1px var(--card-outline),
+    0 8px 32px color-mix(in srgb, var(--card-outline) 30%, transparent),
+    var(--card-shadow);
+}
+
+/* Внутренний glow-слой при ховере */
+.tech-card-glow {
+  background: radial-gradient(
+    ellipse 80% 60% at 50% 0%,
+    color-mix(in srgb, var(--card-outline) 15%, transparent),
+    transparent 70%
+  );
+}
+
+
+
+/* ─────────────────────────────────────────
+   TECH STACK ICON — оригинальные цвета SVG
+   Официальные логотипы уже покрашены сами,
+   фильтр не нужен — только размер
+   ───────────────────────────────────────── */
+.tech-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tech-icon-wrap svg {
+  width: 32px;
+  height: 32px;
+  display: block;
+  /* NO filter — SVG keeps its original brand colors */
+}
+
+/* ─────────────────────────────────────────
+   CATEGORY BADGE — outline + icon
+   ───────────────────────────────────────── */
+.category-badge {
+  background: color-mix(in srgb, var(--badge-color) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--badge-color) 55%, transparent);
+  color: var(--badge-color);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--badge-color) 20%, transparent);
+  white-space: nowrap;
+}
+
+.category-badge .category-icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.category-badge .category-icon svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+/* Перекрашиваем все части SVG в цвет бейджа */
+.category-badge .category-icon svg,
+.category-badge .category-icon svg path,
+.category-badge .category-icon svg rect,
+.category-badge .category-icon svg circle,
+.category-badge .category-icon svg polygon,
+.category-badge .category-icon svg ellipse,
+.category-badge .category-icon svg g {
+  fill: var(--badge-color) !important;
+  stroke: none !important;
+}

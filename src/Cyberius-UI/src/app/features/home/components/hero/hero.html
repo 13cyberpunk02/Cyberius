@@ -24,14 +24,14 @@
         <!-- Heading -->
         <div class="animate-fadeInUp animation-delay-100">
           <h1 class="text-5xl sm:text-6xl lg:text-7xl font-black leading-none tracking-tight">
-            <span class="block text-white dark:text-white light-text-primary">Код,</span>
+            <span class="block hero-heading-text">Код,</span>
             <span class="block hero-gradient-text">архитектура</span>
-            <span class="block text-white dark:text-white light-text-primary">и .NET</span>
+            <span class="block hero-heading-text">и .NET</span>
           </h1>
         </div>
 
         <!-- Description -->
-        <p class="text-slate-400 dark:text-slate-400 light-text-secondary text-lg leading-relaxed max-w-lg animate-fadeInUp animation-delay-200">
+        <p class="hero-desc-text text-lg leading-relaxed max-w-lg animate-fadeInUp animation-delay-200">
           Практические статьи о C# 13, .NET 10 и Angular 21+. Паттерны, чистая архитектура,
           производительность и всё что нужно современному fullstack-разработчику.
         </p>
@@ -80,7 +80,7 @@
           </div>
 
           <!-- Code -->
-          <div class="p-6 font-mono text-sm leading-7 min-h-70">
+          <div class="p-6 font-mono text-sm leading-7 min-h-[280px]">
             @for (line of codeLines; track $index) {
               @if ($index < visibleLines()) {
                 <div class="code-line animate-typeIn" [class]="line.color || 'text-transparent'">

@@ -2,7 +2,7 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { tap, catchError, throwError } from 'rxjs';
-import { LoginRequest, AuthResponse, User, AuthState } from '../models/auth.model';
+import { LoginRequest, RegisterRequest, AuthResponse, User, AuthState } from '../models/auth.model';
 
 const ACCESS_TOKEN_KEY = 'blog_access_token';
 const REFRESH_TOKEN_KEY = 'blog_refresh_token';
@@ -14,7 +14,7 @@ export class AuthService {
   private router = inject(Router);
 
   // API URL — замените на свой
-  private readonly API = 'http://localhost:5273/api/auth';
+  private readonly API = 'http://localhost:5273/api';
 
   // ── State ──────────────────────────────────────────────────────
   private state = signal<AuthState>(this.loadFromStorage());
@@ -41,7 +41,18 @@ export class AuthService {
 
   // ── Login ──────────────────────────────────────────────────────
   login(body: LoginRequest) {
-    return this.http.post<AuthResponse>(`${this.API}/login`, body).pipe(
+    return this.http.post<AuthResponse>(`${this.API}/auth/login`, body).pipe(
+      tap((res) => {
+        const user = this.decodeUser(res.accessToken);
+        this.setState(user, res.accessToken, res.refreshToken);
+      }),
+      catchError((err) => throwError(() => err)),
+    );
+  }
+
+  // ── Register ───────────────────────────────────────────────────
+  register(body: RegisterRequest) {
+    return this.http.post<AuthResponse>(`${this.API}/auth/register`, body).pipe(
       tap((res) => {
         const user = this.decodeUser(res.accessToken);
         this.setState(user, res.accessToken, res.refreshToken);

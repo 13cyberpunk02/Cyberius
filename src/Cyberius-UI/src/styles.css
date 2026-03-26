@@ -1,5 +1,5 @@
 /* =====================================================
-   DEVBLOG — Global Styles
+   Cyberius — Global Styles
    Tailwind CSS v4  (@import "tailwindcss" + @theme)
    Glassmorphism + Azure palette + Dark / Light themes
    ===================================================== */
@@ -745,4 +745,49 @@ body.light .group:hover .heading-text {
 /* fa-icon рендерит <svg> внутри себя — передаём color вниз */
 .field-icon svg {
   color: inherit;
+}
+
+/* ─────────────────────────────────────────
+   FORM VALIDATION
+   ───────────────────────────────────────── */
+.input-error {
+  border-color: rgba(244, 63, 94, 0.6) !important;
+  box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.1) !important;
+}
+
+.field-error-msg {
+  font-size: 11px;
+  color: #fb7185;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.field-error-msg::before {
+  content: '⚠';
+  font-size: 10px;
+}
+
+/* ─────────────────────────────────────────
+   MODAL SCROLL CONTAINER
+   Скролл на обёртке, а не на карточке —
+   так border-radius не обрезается
+   ───────────────────────────────────────── */
+.modal-scroll-container {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(12, 162, 231, 0.3) transparent;
+}
+
+.modal-scroll-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.modal-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-scroll-container::-webkit-scrollbar-thumb {
+  background: rgba(12, 162, 231, 0.3);
+  border-radius: 2px;
 }

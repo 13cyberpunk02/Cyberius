@@ -3,6 +3,16 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface RegisterRequest {
+  email: string;
+  userName: string;
+  password: string;
+  confirmPassword: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+}
+
 export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
@@ -19,3 +29,10 @@ export interface AuthState {
   refreshToken: string | null;
   isAuthenticated: boolean;
 }
+
+// ── Validation ──────────────────────────────────────────────────
+export interface FieldError {
+  message: string;
+}
+
+export type FormErrors<T> = Partial<Record<keyof T, string>>;

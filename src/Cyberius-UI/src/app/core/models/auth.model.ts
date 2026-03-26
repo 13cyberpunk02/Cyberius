@@ -13,14 +13,20 @@ export interface RegisterRequest {
   dateOfBirth: string;
 }
 
+export interface RefreshTokenRequest {
+  accessToken: string;
+  refreshToken: string;
+}
+
 export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
 }
 
 export interface User {
+  userId: string;
   email: string;
-  userName: string;
+  userName?: string;
 }
 
 export interface AuthState {

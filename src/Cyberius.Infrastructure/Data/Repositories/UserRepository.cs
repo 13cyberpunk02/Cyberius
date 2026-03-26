@@ -11,4 +11,10 @@ public class UserRepository(AppDbContext db) : GenericRepository<User>(db), IUse
 
     public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default) => 
         await _db.Users.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+
+    public async Task<User?> GetUserWithRolesByIdAsync(Guid userId, CancellationToken cancellationToken = default) =>
+        await _db.Users
+            .Include(u => u.UserRoles)
+            .ThenInclude(ur => ur.Role)
+            .FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken);
 }

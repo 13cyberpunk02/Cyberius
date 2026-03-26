@@ -1,12 +1,22 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { tap, catchError, throwError } from 'rxjs';
-import { LoginRequest, RegisterRequest, AuthResponse, User, AuthState } from '../models/auth.model';
+import { Observable, tap, catchError, throwError, shareReplay, switchMap } from 'rxjs';
+import {
+  LoginRequest,
+  RegisterRequest,
+  RefreshTokenRequest,
+  AuthResponse,
+  User,
+  AuthState,
+} from '../models/auth.model';
 
 const ACCESS_TOKEN_KEY = 'blog_access_token';
 const REFRESH_TOKEN_KEY = 'blog_refresh_token';
 const USER_KEY = 'blog_user';
+
+// Буфер до истечения токена — обновляем за 30 секунд до конца
+const EXPIRY_BUFFER_MS = 30_000;
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -14,17 +24,20 @@ export class AuthService {
   private router = inject(Router);
 
   // API URL — замените на свой
-  private readonly API = 'http://localhost:5273/api';
+  readonly API = 'http://localhost:5273/api';
 
   // ── State ──────────────────────────────────────────────────────
   private state = signal<AuthState>(this.loadFromStorage());
 
-  // Публичные readonly сигналы
+  // Идёт ли сейчас refresh (чтобы не дублировать запросы)
+  private refreshInProgress$: Observable<AuthResponse> | null = null;
+
+  // Публичные computed сигналы
   readonly user = computed(() => this.state().user);
   readonly isAuthenticated = computed(() => this.state().isAuthenticated);
   readonly accessToken = computed(() => this.state().accessToken);
+  readonly refreshToken = computed(() => this.state().refreshToken);
 
-  // Инициалы пользователя для аватара
   readonly initials = computed(() => {
     const u = this.state().user;
     if (!u) return '';
@@ -39,59 +52,116 @@ export class AuthService {
     return u.email[0].toUpperCase();
   });
 
+  // ── Проверка истечения ─────────────────────────────────────────
+
+  /** true — токен уже истёк или истечёт в течение EXPIRY_BUFFER_MS */
+  isAccessTokenExpiredOrExpiring(): boolean {
+    const token = this.state().accessToken;
+    if (!token) return true;
+    try {
+      const payload = this.decodePayload(token);
+      return Number(payload['exp']) * 1000 < Date.now() + EXPIRY_BUFFER_MS;
+    } catch {
+      return true;
+    }
+  }
+
+  isRefreshTokenExpired(): boolean {
+    // Refresh token — это непрозрачная строка, не JWT.
+    // Мы не можем декодировать его — просто проверяем наличие.
+    return !this.state().refreshToken;
+  }
+
   // ── Login ──────────────────────────────────────────────────────
-  login(body: LoginRequest) {
+  login(body: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.API}/auth/login`, body).pipe(
-      tap((res) => {
-        const user = this.decodeUser(res.accessToken);
-        this.setState(user, res.accessToken, res.refreshToken);
-      }),
+      tap((res) => this.setState(res.accessToken, res.refreshToken)),
       catchError((err) => throwError(() => err)),
     );
   }
 
   // ── Register ───────────────────────────────────────────────────
-  register(body: RegisterRequest) {
+  register(body: RegisterRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.API}/auth/register`, body).pipe(
-      tap((res) => {
-        const user = this.decodeUser(res.accessToken);
-        this.setState(user, res.accessToken, res.refreshToken);
-      }),
+      tap((res) => this.setState(res.accessToken, res.refreshToken)),
       catchError((err) => throwError(() => err)),
     );
   }
 
+  // ── Refresh ────────────────────────────────────────────────────
+  // shareReplay(1) — если несколько запросов попали на 401 одновременно,
+  // все ждут одного refresh, а не посылают N параллельных запросов
+  refresh(): Observable<AuthResponse> {
+    if (this.refreshInProgress$) return this.refreshInProgress$;
+
+    const { accessToken, refreshToken } = this.state();
+
+    if (!accessToken || !refreshToken) {
+      return throwError(() => new Error('No tokens'));
+    }
+
+    const body: RefreshTokenRequest = { accessToken, refreshToken };
+
+    this.refreshInProgress$ = this.http
+      .post<AuthResponse>(`${this.API}/auth/refresh-token`, body)
+      .pipe(
+        tap((res) => {
+          this.setState(res.accessToken, res.refreshToken);
+          this.refreshInProgress$ = null;
+        }),
+        catchError((err) => {
+          this.refreshInProgress$ = null;
+          this.clearState();
+          return throwError(() => err);
+        }),
+        shareReplay(1),
+      );
+
+    return this.refreshInProgress$;
+  }
+
   // ── Logout ─────────────────────────────────────────────────────
+  // Вызывает API endpoint с userId, потом очищает локальное состояние
   logout(): void {
+    const userId = this.state().user?.userId;
+
+    if (userId && this.isAuthenticated()) {
+      // fire-and-forget — даже если запрос упадёт, локально всё равно выходим
+      this.http
+        .post(`${this.API}/auth/logout/${userId}`, {})
+        .pipe(catchError(() => throwError(() => null)))
+        .subscribe({ error: () => {} });
+    }
+
+    this.clearState();
+  }
+
+  // ── Helpers ────────────────────────────────────────────────────
+  private setState(accessToken: string, refreshToken: string): void {
+    const user = this.decodeUser(accessToken);
+    localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+    localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    this.state.set({ user, accessToken, refreshToken, isAuthenticated: true });
+  }
+
+  private clearState(): void {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
     this.state.set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false });
   }
 
-  // ── Refresh ────────────────────────────────────────────────────
-  refresh() {
-    const refreshToken = this.state().refreshToken;
-    if (!refreshToken) return throwError(() => new Error('No refresh token'));
-
-    return this.http.post<AuthResponse>(`${this.API}/auth/refresh`, { refreshToken }).pipe(
-      tap((res) => {
-        const user = this.decodeUser(res.accessToken);
-        this.setState(user, res.accessToken, res.refreshToken);
-      }),
-      catchError((err) => {
-        this.logout();
-        return throwError(() => err);
-      }),
-    );
-  }
-
-  // ── Helpers ────────────────────────────────────────────────────
-  private setState(user: User, accessToken: string, refreshToken: string): void {
-    localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
-    localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
-    this.state.set({ user, accessToken, refreshToken, isAuthenticated: true });
+  // base64url → base64 → JSON
+  // JWT использует base64url: '-' вместо '+', '_' вместо '/', без '=' padding
+  // atob() понимает только стандартный base64 — нужно конвертировать
+  private decodePayload(token: string): Record<string, unknown> {
+    const base64url = token.split('.')[1];
+    const base64 = base64url
+      .replace(/-/g, '+')
+      .replace(/_/g, '/')
+      .padEnd(base64url.length + ((4 - (base64url.length % 4)) % 4), '=');
+    return JSON.parse(atob(base64));
   }
 
   private loadFromStorage(): AuthState {
@@ -104,36 +174,63 @@ export class AuthService {
         return { user: null, accessToken: null, refreshToken: null, isAuthenticated: false };
       }
 
-      // Проверяем не истёк ли access token
-      if (this.isTokenExpired(accessToken)) {
-        return { user: null, accessToken: null, refreshToken, isAuthenticated: false };
+      const accessExpired = this.isTokenExpired(accessToken);
+      // Refresh token — опaque строка, не JWT. Истечение контролирует сервер.
+      // Просто проверяем что он есть.
+      const refreshExpired = !refreshToken;
+
+      // Попытаемся декодировать для дополнительной диагностики
+      try {
+        const payload = this.decodePayload(accessToken);
+      } catch (e) {
+        console.error('[Auth] Failed to decode access token', e);
+      }
+
+      if (refreshExpired) {
+        return { user: null, accessToken: null, refreshToken: null, isAuthenticated: false };
       }
 
       const user = JSON.parse(userRaw) as User;
-      return { user, accessToken, refreshToken, isAuthenticated: true };
-    } catch {
+      const state: AuthState = {
+        user,
+        accessToken: accessExpired ? null : accessToken,
+        refreshToken,
+        isAuthenticated: true,
+      };
+      return state;
+    } catch (e) {
       return { user: null, accessToken: null, refreshToken: null, isAuthenticated: false };
     }
   }
 
-  // Декодируем JWT без библиотек — берём payload из base64
+  // Декодируем JWT payload из base64url — без сторонних библиотек
   private decodeUser(token: string): User {
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      const payload = this.decodePayload(token);
       return {
-        email: payload.email ?? payload.sub ?? '',
-        userName: payload.name ?? payload.given_name ?? undefined,
+        userId: String(
+          payload['sub'] ??
+            payload['nameid'] ??
+            payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] ??
+            '',
+        ),
+        email: String(payload['email'] ?? ''),
+        userName:
+          payload['name'] != null
+            ? String(payload['name'])
+            : payload['given_name'] != null
+              ? String(payload['given_name'])
+              : undefined,
       };
     } catch {
-      return { email: '', userName: '' };
+      return { userId: '', email: '' };
     }
   }
 
   private isTokenExpired(token: string): boolean {
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      // exp в секундах, Date.now() в миллисекундах
-      return payload.exp * 1000 < Date.now();
+      const payload = this.decodePayload(token);
+      return Number(payload['exp']) * 1000 < Date.now();
     } catch {
       return true;
     }

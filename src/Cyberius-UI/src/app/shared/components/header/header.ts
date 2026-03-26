@@ -32,10 +32,17 @@ export class Header {
   themeService = inject(ThemeService);
   authService = inject(AuthService);
 
-  moonIcon = faMoon;
-  sunIcon = faSun;
+  protected readonly moonIcon = faMoon;
+  protected readonly sunIcon = faSun;
   protected readonly faCode = faCode;
   protected readonly faBell = faBell;
+  protected readonly faArrowRightToBracket = faArrowRightToBracket;
+  protected readonly faArrowRightFromBracket = faArrowRightFromBracket;
+  protected readonly faUser = faUser;
+  protected readonly faBookmark = faBookmark;
+  protected readonly faBurger = faBurger;
+  protected readonly faXmark = faXmark;
+  protected readonly faBars = faBars;
 
   isScrolled = signal(false);
   isMobileMenuOpen = signal(false);
@@ -87,12 +94,4 @@ export class Header {
     this.authService.logout();
     this.showUserMenu.set(false);
   }
-
-  protected readonly faArrowRightToBracket = faArrowRightToBracket;
-  protected readonly faArrowRightFromBracket = faArrowRightFromBracket;
-  protected readonly faUser = faUser;
-  protected readonly faBookmark = faBookmark;
-  protected readonly faBurger = faBurger;
-  protected readonly faXmark = faXmark;
-  protected readonly faBars = faBars;
 }

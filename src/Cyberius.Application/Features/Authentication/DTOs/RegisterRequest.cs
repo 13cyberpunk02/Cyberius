@@ -7,4 +7,4 @@ public record RegisterRequest(
     string ConfirmPassword,
     string FirstName,
     string LastName,
-    DateTime DateOfBirth);
+    DateOnly DateOfBirth);

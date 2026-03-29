@@ -57,7 +57,7 @@ public class AuthenticationService(IUnitOfWork uof, IJwtService jwtService) : IA
             FirstName = request.FirstName,
             LastName = request.LastName,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-            DateOfBirth = request.DateOfBirth.ToUniversalTime(),
+            DateOfBirth = request.DateOfBirth,
             JoinedDate = DateTime.UtcNow
         };
 

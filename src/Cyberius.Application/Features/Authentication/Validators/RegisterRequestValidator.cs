@@ -47,5 +47,5 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
             .Must(BeValidDate).WithMessage("Дата рождения указано неверно.");
     }
     
-    private bool BeValidDate(DateTime date) => !date.Equals(default(DateTime));
+    private bool BeValidDate(DateOnly date) => !date.Equals(default(DateOnly));
 }

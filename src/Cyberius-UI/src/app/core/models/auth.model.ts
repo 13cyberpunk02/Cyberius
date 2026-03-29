@@ -23,14 +23,29 @@ export interface AuthResponse {
   refreshToken: string;
 }
 
-export interface User {
+// Полный профиль пользователя с /me endpoint
+export interface UserProfile {
   userId: string;
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string | null;
+  dateOfBirth: string;
+  joinedDate: string;
+  roles: string[] | null;
+}
+
+// Краткая модель для auth state (из JWT)
+export interface User {
+  id: string;
   email: string;
   userName?: string;
 }
 
 export interface AuthState {
   user: User | null;
+  profile: UserProfile | null; // полный профиль
   accessToken: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;

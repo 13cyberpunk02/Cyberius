@@ -89,7 +89,9 @@ export class Header {
     event.stopPropagation();
     this.showUserMenu.update((v) => !v);
   }
-
+  closeUserMenu() {
+    this.showUserMenu.set(false);
+  }
   logout() {
     this.authService.logout();
     this.showUserMenu.set(false);

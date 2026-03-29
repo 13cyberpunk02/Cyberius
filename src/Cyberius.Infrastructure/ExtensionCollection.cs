@@ -2,10 +2,12 @@
 using Cyberius.Domain.Options;
 using Cyberius.Infrastructure.Data.Context;
 using Cyberius.Infrastructure.Data.Repositories;
+using Cyberius.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Minio;
 
 namespace Cyberius.Infrastructure;
 
@@ -27,6 +29,24 @@ public static class ExtensionCollection
                 sqlOptions.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName);
             });
         });
+        
+        services
+            .AddOptions<MinioOptions>()
+            .BindConfiguration(MinioOptions.SectionName)
+            .ValidateOnStart();
+        services.AddSingleton<IMinioClient>(sp =>
+        {
+            var opts = sp.GetRequiredService<IOptions<MinioOptions>>().Value;
+
+            return new MinioClient()
+                .WithEndpoint(opts.Endpoint)
+                .WithCredentials(opts.AccessKey, opts.SecretKey)
+                .WithSSL(opts.UseSSL)
+                .Build();
+        });
+
+        services.AddScoped<IStorageService, MinioStorageService>();
+        
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         return services;
     }

@@ -1,7 +1,9 @@
 using System.Security.Claims;
 using Cyberius.Api.Common.Extensions;
 using Cyberius.Api.Common.Filters;
+using Cyberius.Application.Features.Users.DTOs;
 using Cyberius.Application.Features.Users.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace Cyberius.Api.Endpoints;
@@ -23,6 +25,10 @@ public static class UserEndpoints
             })
             .WithSummary("Me");
         
+        group.MapPut("/{id:guid}", Update)
+            .DisableAntiforgery()
+            .Accepts<IFormFile>("multipart/form-data")
+            .WithSummary("Update user");
         return group;
     }
 
@@ -35,4 +41,12 @@ public static class UserEndpoints
         var response = await userService.Me(Guid.Parse(userId), cancellationToken);
         return response.ToHttpResponse();
     }
+
+    private static async Task<IResult> Update(
+        Guid id,
+        [FromForm] UpdateUserRequest request,
+        IFormFile? avatar,
+        IUserService userService,
+        CancellationToken cancellationToken) =>
+        await userService.UpdateUserAsync(id, avatar, request, cancellationToken).ToHttpResponseAsync();
 }

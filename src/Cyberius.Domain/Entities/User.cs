@@ -8,8 +8,8 @@ public class User
     public string? PasswordHash { get; set; } = string.Empty;
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
-    public string? AvatarUrl { get; set; }
-    public DateTime DateOfBirth { get; set; }
+    public string? AvatarObjectName { get; set; }
+    public DateOnly DateOfBirth { get; set; }
     public DateTime JoinedDate { get; set; } = DateTime.UtcNow;
     public bool IsActive { get; set; } = true;
 

@@ -1,0 +1,263 @@
+<div class="min-h-screen pt-28 pb-16">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    @if (!profile()) {
+      <!-- Skeleton -->
+      <div class="glass-card rounded-2xl p-8 animate-pulse">
+        <div class="flex items-center gap-6 mb-8">
+          <div class="w-20 h-20 rounded-full bg-white/10"></div>
+          <div class="space-y-3">
+            <div class="w-48 h-5 rounded-lg bg-white/10"></div>
+            <div class="w-32 h-4 rounded-lg bg-white/10"></div>
+            <div class="w-40 h-3 rounded-lg bg-white/10"></div>
+          </div>
+        </div>
+        <div class="space-y-4">
+          @for (i of [1,2,3,4]; track i) {
+            <div class="h-12 rounded-xl bg-white/5"></div>
+          }
+        </div>
+      </div>
+    } @else {
+
+      <!-- Profile header card -->
+      <div class="glass-card rounded-2xl p-8 mb-6">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+
+          <!-- Avatar with upload -->
+          <div class="relative group">
+            @if (fullAvatarUrl()) {
+              <img [src]="fullAvatarUrl()" [alt]="displayName"
+                   class="w-20 h-20 rounded-full object-cover ring-2"
+                   [class]="avatarPreview() ? 'ring-sky-500/60' : 'ring-sky-500/40'"
+              />
+            } @else {
+              <div class="user-avatar-btn w-20 h-20 rounded-full flex items-center justify-center text-2xl font-black text-white select-none">
+                {{ initials }}
+              </div>
+            }
+
+            <!-- Кнопка смены аватара -->
+            <button
+              type="button"
+              (click)="openAvatarPicker()"
+              class="absolute inset-0 rounded-full flex items-center justify-center cursor-pointer
+                     bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              title="Сменить аватар"
+            >
+              <fa-icon [icon]="faCamera" class="text-white" />
+            </button>
+
+            <!-- Online dot -->
+            <span class="absolute bottom-1 right-1 w-4 h-4 bg-emerald-400 rounded-full ring-2 ring-(--bg-base)"></span>
+
+            <!-- Скрытый file input -->
+            <input
+              #avatarInput
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              class="hidden"
+              (change)="onAvatarSelected($event)"
+            />
+          </div>
+
+          <!-- Info -->
+          <div class="flex-1 min-w-0">
+            <h1 class="text-2xl font-black heading-text mb-1">{{ displayName }}</h1>
+            <p class="text-sky-400 font-mono text-sm mb-3">&#64;{{ profile()!.username }}</p>
+            <div class="flex flex-wrap gap-4 text-xs text-slate-400">
+              <span class="flex items-center gap-1.5">
+                <fa-icon [icon]="faAt" />
+                {{ profile()!.email }}
+              </span>
+              <span class="flex items-center gap-1.5">
+                <fa-icon [icon]="faCalendar" />
+                На сайте с {{ formatDate(profile()!.joinedDate) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Roles -->
+          @if (profile()!.roles?.length) {
+            <div class="flex flex-wrap gap-2">
+              @for (role of profile()!.roles; track role) {
+                <span class="px-3 py-1 rounded-lg text-xs font-semibold font-mono"
+                      [class]="role === 'Admin'
+                    ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
+                    : 'bg-sky-500/15 text-sky-400 border border-sky-500/30'">
+                  {{ role }}
+                </span>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Новый аватар выбран — показываем подсказку -->
+        @if (avatarPreview()) {
+          <div class="mt-4 flex items-center gap-3 px-4 py-3 rounded-xl bg-sky-500/10 border border-sky-500/30 text-sky-400 text-sm animate-fadeInUp">
+            <fa-icon [icon]="faInfoCircle" class="shrink-0" />
+            Новый аватар выбран — нажмите «Сохранить», чтобы применить
+            <button (click)="clearAvatar()" class="ml-auto text-slate-400 hover:text-white cursor-pointer transition-colors">
+              <fa-icon [icon]="faXmark" />
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- Tabs -->
+      <div class="flex gap-2 mb-6">
+        <button
+          (click)="activeTab.set('info')"
+          class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer"
+          [class.filter-active]="activeTab() === 'info'"
+          [class.filter-inactive]="activeTab() !== 'info'">
+          <fa-icon [icon]="faUserCheck" />
+          Личные данные</button>
+        <button
+          (click)="activeTab.set('security')"
+          class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer"
+          [class.filter-active]="activeTab() === 'security'"
+          [class.filter-inactive]="activeTab() !== 'security'">
+          <fa-icon [icon]="faShieldVirus" />
+          Безопасность</button>
+      </div>
+
+      <!-- Tab: Info -->
+      @if (activeTab() === 'info') {
+        <div class="glass-card rounded-2xl p-8">
+          <h2 class="text-lg font-bold heading-text mb-6">Редактировать профиль</h2>
+
+          <form (ngSubmit)="save()" class="space-y-5" novalidate>
+
+            <!-- Имя + Фамилия -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <label class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Имя</label>
+                <input type="text" [(ngModel)]="form.firstName" name="firstName"
+                       placeholder="Иван"
+                       class="email-input w-full px-4 py-3 rounded-xl text-sm"/>
+              </div>
+              <div class="space-y-1.5">
+                <label class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Фамилия</label>
+                <input type="text" [(ngModel)]="form.lastName" name="lastName"
+                       placeholder="Иванов"
+                       class="email-input w-full px-4 py-3 rounded-xl text-sm"/>
+              </div>
+            </div>
+
+            <!-- Username -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Имя пользователя</label>
+              <div class="relative">
+                  <fa-icon [icon]="faAt" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm font-mono select-none" />
+                <input type="text" [(ngModel)]="form.userName" name="userName"
+                       placeholder="ivan_dev"
+                       class="email-input w-full pl-8 pr-4 py-3 rounded-xl text-sm font-mono ml-2"/>
+              </div>
+            </div>
+
+            <!-- Дата рождения -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Дата рождения</label>
+              <input type="date" [(ngModel)]="form.dateOfBirth" name="dateOfBirth"
+                     class="email-input w-full px-4 py-3 rounded-xl text-sm"/>
+            </div>
+
+            <!-- Email readonly -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+                Email
+                <span class="ml-2 text-slate-600 normal-case font-normal">— нельзя изменить</span>
+              </label>
+              <input type="email" [value]="profile()!.email" readonly
+                     class="email-input w-full px-4 py-3 rounded-xl text-sm opacity-50 cursor-not-allowed"/>
+            </div>
+
+            <!-- Error -->
+            @if (saveStatus() === 'error') {
+              <div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-sm animate-fadeInUp">
+                <fa-icon [icon]="faExclamationTriangle" />
+                {{ errorMsg() }}
+              </div>
+            }
+
+            <!-- Success -->
+            @if (saveStatus() === 'success') {
+              <div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm animate-fadeInUp">
+                <fa-icon [icon]="faThumbsUp" class="shrink-0"/>
+                Профиль успешно обновлён
+              </div>
+            }
+
+            <!-- Submit -->
+            <div class="flex justify-end">
+              <button type="submit"
+                      [disabled]="saveStatus() === 'saving'"
+                      class="btn-primary px-8 py-3 cursor-pointer rounded-xl font-semibold text-white transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100 flex items-center gap-2">
+                <fa-icon [icon]="faFloppyDisk" />
+                @if (saveStatus() === 'saving') {
+                  <fa-icon [icon]="faSpinner" animation="spin-pulse" />
+                  Сохранение...
+                } @else {
+                  Сохранить изменения
+                }
+              </button>
+            </div>
+
+          </form>
+        </div>
+      }
+
+      <!-- Tab: Security -->
+      @if (activeTab() === 'security') {
+        <div class="glass-card rounded-2xl p-8">
+          <h2 class="text-lg font-bold heading-text mb-6">Безопасность</h2>
+
+          <div class="space-y-4 mb-8">
+            <div class="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-sky-500/15 border border-sky-500/30 flex items-center justify-center">
+                  <fa-icon [icon]="faKey" class="text-sky-400" />
+                </div>
+                <div>
+                  <p class="text-sm font-semibold heading-text">Пароль</p>
+                  <p class="text-xs text-slate-400">Последнее изменение неизвестно</p>
+                </div>
+              </div>
+              <button class="btn-secondary px-4 py-2 rounded-xl text-sm font-medium cursor-pointer">Изменить</button>
+            </div>
+
+            <div class="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center">
+                  <fa-icon [icon]="faShieldAlt" class="text-emerald-400" />
+                </div>
+                <div>
+                  <p class="text-sm font-semibold heading-text">Активная сессия</p>
+                  <p class="text-xs text-slate-400">Текущая сессия активна</p>
+                </div>
+              </div>
+              <span class="px-3 py-1 rounded-lg text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">Активна</span>
+            </div>
+          </div>
+
+          <!-- Danger zone -->
+          <div class="border-t border-white/10 pt-6">
+            <h3 class="text-sm font-semibold text-rose-400 uppercase tracking-wider mb-4">Опасная зона</h3>
+            <div class="p-4 rounded-xl bg-rose-500/5 border border-rose-500/20">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-semibold heading-text">Удалить аккаунт</p>
+                  <p class="text-xs text-slate-400 mt-0.5">Это действие необратимо</p>
+                </div>
+                <button class="px-4 py-2 cursor-pointer rounded-xl text-sm font-semibold text-rose-400 border border-rose-500/30 hover:bg-rose-500/10 transition-all duration-200">
+                  Удалить
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

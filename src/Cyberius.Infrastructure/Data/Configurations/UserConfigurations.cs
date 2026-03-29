@@ -35,7 +35,8 @@ public class UserConfigurations : IEntityTypeConfiguration<User>
             .HasMaxLength(100);
         
         builder.Property(u => u.DateOfBirth)
-            .IsRequired();
+            .IsRequired()
+            .HasColumnType("date");
         
         builder.Property(u => u.JoinedDate)
             .IsRequired();

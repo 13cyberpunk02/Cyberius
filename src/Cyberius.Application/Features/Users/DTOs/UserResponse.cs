@@ -7,6 +7,6 @@ public record UserResponse(
     string FirstName, 
     string LastName,
     string? AvatarUrl,
-    DateTime DateOfBirth,
+    DateOnly DateOfBirth,
     DateTime JoinedDate,
     List<string>? Roles);

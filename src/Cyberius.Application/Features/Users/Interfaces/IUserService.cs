@@ -9,4 +9,6 @@ public interface IUserService
 
     Task<Result<UserResponse>> UpdateUserAsync(Guid userId, IFormFile? avatar, UpdateUserRequest request,
         CancellationToken cancellationToken = default);
+    
+    Task<Result<string>> ChangePasswordAsync(Guid userId, ChangePasswordRequest request, CancellationToken cancellationToken = default);
 }

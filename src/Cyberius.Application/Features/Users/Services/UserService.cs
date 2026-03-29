@@ -65,7 +65,23 @@ public class UserService(IUnitOfWork uow, IStorageService storage) : IUserServic
         
         return MapToResponse(user);
     }
-    
+
+    public async Task<Result<string>> ChangePasswordAsync(Guid userId, ChangePasswordRequest request, CancellationToken cancellationToken = default)
+    {
+        var user = await uow.Users.GetByIdAsync(userId, cancellationToken);
+        if(user is null)
+            return Errors.NotFound(nameof(User), userId.ToString());
+        
+        var isOldPasswordCorrect = BCrypt.Net.BCrypt.Verify(request.OldPassword, user.PasswordHash);
+        if (!isOldPasswordCorrect)
+            return Errors.BadRequest("Старый пароль не совпадает, проверьте правильно ли вы набрали ваш старый пароль");
+        
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+        uow.Users.Update(user);
+        await uow.SaveChangesAsync(cancellationToken);
+        return Result<string>.Success("Пароль успешно изменен");
+    }
+
     private UserResponse MapToResponse(User user)
     {
         var avatarUrl = string.IsNullOrEmpty(user.AvatarObjectName)

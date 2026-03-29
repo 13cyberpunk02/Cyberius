@@ -4,28 +4,23 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { UserProfile } from '../../core/models/auth.model';
 import { HttpClient } from '@angular/common/http';
-import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { ChangePasswordModal } from '../../shared/components/change-password-modal/change-password-modal';
 import {
-  faAlarmClock,
+  faCamera,
   faAt,
   faCalendar,
-  faCamera,
-  faCameraAlt,
-  faExclamationTriangle,
-  faFloppyDisk,
-  faInfo,
   faInfoCircle,
-  faKey,
-  faShield,
-  faShieldAlt,
-  faShieldHalved,
-  faShieldHeart,
-  faShieldVirus,
-  faSpinner,
-  faThumbsUp,
-  faUserCheck,
   faXmark,
+  faUserCheck,
+  faShieldVirus,
+  faFloppyDisk,
+  faSpinner,
+  faExclamationTriangle,
+  faThumbsUp,
+  faKey,
+  faShieldAlt,
 } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 interface UpdateProfileForm {
   firstName: string;
@@ -41,7 +36,7 @@ const FILES_BASE_URL = 'http://localhost:5273/api/files/';
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, FaIconComponent],
+  imports: [CommonModule, FormsModule, FontAwesomeModule, ChangePasswordModal],
   templateUrl: './profile.html',
 })
 export class Profile implements OnInit {
@@ -50,33 +45,37 @@ export class Profile implements OnInit {
 
   @ViewChild('avatarInput') avatarInput!: ElementRef<HTMLInputElement>;
 
+  // Icons
+  faCamera = faCamera;
+  faAt = faAt;
+  faCalendar = faCalendar;
+  faInfoCircle = faInfoCircle;
+  faXmark = faXmark;
+  faUserCheck = faUserCheck;
+  faShieldVirus = faShieldVirus;
+  faFloppyDisk = faFloppyDisk;
+  faSpinner = faSpinner;
+  faExclamationTriangle = faExclamationTriangle;
+  faThumbsUp = faThumbsUp;
+  faKey = faKey;
+  faShieldAlt = faShieldAlt;
+
   profile = signal<UserProfile | null>(null);
   saveStatus = signal<SaveStatus>('idle');
   errorMsg = signal('');
   activeTab = signal<'info' | 'security'>('info');
   avatarPreview = signal<string | null>(null);
   avatarFile = signal<File | null>(null);
+  showChangePassword = signal(false);
 
-  // Полный URL аватара — берём из превью (новый) или строим из profile.avatarUrl
   fullAvatarUrl = computed(() => {
     const preview = this.avatarPreview();
     if (preview) return preview;
-
     const avatarPath = this.profile()?.avatarUrl;
     if (!avatarPath) return null;
-
-    // Если уже полный URL — возвращаем как есть
     if (avatarPath.startsWith('http')) return avatarPath;
-
     return FILES_BASE_URL + avatarPath;
   });
-
-  form: UpdateProfileForm = {
-    firstName: '',
-    lastName: '',
-    userName: '',
-    dateOfBirth: '',
-  };
 
   get initials(): string {
     return this.auth.initials();
@@ -110,7 +109,14 @@ export class Profile implements OnInit {
     };
   }
 
-  // ── Avatar pick ─────────────────────────────────────────────────
+  form: UpdateProfileForm = {
+    firstName: '',
+    lastName: '',
+    userName: '',
+    dateOfBirth: '',
+  };
+
+  // ── Avatar ─────────────────────────────────────────────────────
   openAvatarPicker(): void {
     this.avatarInput.nativeElement.click();
   }
@@ -120,7 +126,6 @@ export class Profile implements OnInit {
     const file = input.files?.[0];
     if (!file) return;
 
-    // Валидация: только изображения, не более 5 MB
     if (!file.type.startsWith('image/')) {
       this.errorMsg.set('Выберите изображение (jpg, png, webp)');
       return;
@@ -132,8 +137,6 @@ export class Profile implements OnInit {
 
     this.errorMsg.set('');
     this.avatarFile.set(file);
-
-    // Показываем превью
     const reader = new FileReader();
     reader.onload = (e) => this.avatarPreview.set(e.target?.result as string);
     reader.readAsDataURL(file);
@@ -145,7 +148,7 @@ export class Profile implements OnInit {
     if (this.avatarInput) this.avatarInput.nativeElement.value = '';
   }
 
-  // ── Save ────────────────────────────────────────────────────────
+  // ── Save profile ───────────────────────────────────────────────
   save(): void {
     const userId = this.auth.user()?.id;
     if (!userId) return;
@@ -153,27 +156,20 @@ export class Profile implements OnInit {
     this.saveStatus.set('saving');
     this.errorMsg.set('');
 
-    // Собираем multipart/form-data
     const formData = new FormData();
     formData.append('firstName', this.form.firstName);
     formData.append('lastName', this.form.lastName);
     formData.append('userName', this.form.userName);
     formData.append('dateOfBirth', this.form.dateOfBirth);
 
-    // Файл добавляем только если выбран
     const avatar = this.avatarFile();
-    if (avatar) {
-      formData.append('avatar', avatar, avatar.name);
-    }
+    if (avatar) formData.append('avatar', avatar, avatar.name);
 
     this.http.put(`${this.auth.API}/users/${userId}`, formData).subscribe({
       next: () => {
         this.saveStatus.set('success');
         this.clearAvatar();
-        // Обновляем профиль с сервера чтобы подтянуть новый avatarUrl
-        this.auth.fetchMe().subscribe({
-          next: (p) => this.profile.set(p),
-        });
+        this.auth.fetchMe().subscribe({ next: (p) => this.profile.set(p) });
         setTimeout(() => this.saveStatus.set('idle'), 3000);
       },
       error: (err) => {
@@ -192,18 +188,4 @@ export class Profile implements OnInit {
       year: 'numeric',
     }).format(new Date(dateStr));
   }
-
-  protected readonly faCamera = faCamera;
-  protected readonly faAt = faAt;
-  protected readonly faCalendar = faCalendar;
-  protected readonly faInfoCircle = faInfoCircle;
-  protected readonly faXmark = faXmark;
-  protected readonly faExclamationTriangle = faExclamationTriangle;
-  protected readonly faThumbsUp = faThumbsUp;
-  protected readonly faSpinner = faSpinner;
-  protected readonly faKey = faKey;
-  protected readonly faShieldAlt = faShieldAlt;
-  protected readonly faFloppyDisk = faFloppyDisk;
-  protected readonly faUserCheck = faUserCheck;
-  protected readonly faShieldVirus = faShieldVirus;
 }

@@ -28,7 +28,14 @@ public static class UserEndpoints
         group.MapPut("/{id:guid}", Update)
             .DisableAntiforgery()
             .Accepts<IFormFile>("multipart/form-data")
+            .WithRequestValidation<UpdateUserRequest>()
             .WithSummary("Update user");
+        
+        group.MapPut("/{userId:guid}/change-password", ChangePassword)
+            .RequireAuthorization()
+            .WithRequestValidation<ChangePasswordRequest>()
+            .WithSummary("Change password");
+        
         return group;
     }
 
@@ -49,4 +56,11 @@ public static class UserEndpoints
         IUserService userService,
         CancellationToken cancellationToken) =>
         await userService.UpdateUserAsync(id, avatar, request, cancellationToken).ToHttpResponseAsync();
+
+    private static async Task<IResult> ChangePassword(
+        Guid userId,
+        ChangePasswordRequest request,
+        IUserService userService,
+        CancellationToken cancellationToken) =>
+        await userService.ChangePasswordAsync(userId, request, cancellationToken).ToHttpResponseAsync();
 }

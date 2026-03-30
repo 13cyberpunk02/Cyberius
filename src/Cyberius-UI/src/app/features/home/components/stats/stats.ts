@@ -9,18 +9,10 @@ import { PostsService } from '../../../../core/services/posts.service';
   styleUrl: './stats.css',
 })
 export class Stats {
-  private postsService = inject(PostsService);
-  stats = this.postsService.getStats();
-
   items = [
-    { value: this.stats.posts + '+', label: 'Статей', icon: '📝', color: 'text-sky-400' },
-    { value: this.stats.readers, label: 'Читателей', icon: '👥', color: 'text-cyan-400' },
-    { value: this.stats.topics.toString(), label: 'Тем', icon: '🗂', color: 'text-indigo-400' },
-    {
-      value: this.stats.experience + ' лет',
-      label: 'Опыта',
-      icon: '🚀',
-      color: 'text-emerald-400',
-    },
+    { value: '48+', label: 'Статей', icon: '📝', color: 'text-sky-400' },
+    { value: '12K', label: 'Читателей', icon: '👥', color: 'text-cyan-400' },
+    { value: '5', label: 'Тем', icon: '🗂', color: 'text-indigo-400' },
+    { value: '8 лет', label: 'Опыта', icon: '🚀', color: 'text-emerald-400' },
   ];
 }

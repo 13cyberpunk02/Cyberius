@@ -1,0 +1,307 @@
+<div class="min-h-screen pt-24 pb-16">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    @if (loading()) {
+      <div class="animate-pulse space-y-4">
+        <div class="h-10 w-2/3 rounded-xl bg-white/10"></div>
+        <div class="h-64 rounded-2xl bg-white/5"></div>
+      </div>
+    } @else {
+
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-8">
+        <h1 class="text-3xl font-black heading-text">
+          {{ isEdit() ? 'Редактировать статью' : 'Новая статья' }}
+        </h1>
+        <a routerLink="/posts" class="btn-secondary px-4 py-2 rounded-xl text-sm transition-all">
+          ← Отмена
+        </a>
+      </div>
+
+      <!-- Error banner -->
+      @if (saveStatus() === 'error') {
+        <div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-sm mb-6 animate-fadeInUp">
+          <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+          </svg>
+          {{ errorMsg() }}
+        </div>
+      }
+
+      <!-- Meta section -->
+      <div class="glass-card rounded-2xl p-6 mb-6 space-y-5">
+        <h2 class="text-sm font-semibold text-sky-400 uppercase tracking-widest">Настройки статьи</h2>
+
+        <!-- Title -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Заголовок *</label>
+          <input
+            type="text"
+            [ngModel]="title()"
+            (ngModelChange)="title.set($event)"
+            name="title"
+            placeholder="Введите заголовок статьи..."
+            class="email-input w-full px-4 py-3 rounded-xl text-sm font-bold"
+          />
+        </div>
+
+        <!-- Excerpt -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Краткое описание</label>
+          <textarea
+            [ngModel]="excerpt()"
+            (ngModelChange)="excerpt.set($event)"
+            name="excerpt"
+            placeholder="Один-два предложения о чём эта статья..."
+            rows="2"
+            class="email-input w-full px-4 py-3 rounded-xl text-sm resize-none"
+          ></textarea>
+        </div>
+
+        <!-- Category + Tags row -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Категория *</label>
+            <select
+              [ngModel]="categoryId()"
+              (ngModelChange)="categoryId.set($event)"
+              name="categoryId"
+              class="email-input w-full px-4 py-3 rounded-xl text-sm"
+            >
+              <option value="">Выберите категорию...</option>
+              @for (cat of categories(); track cat.id) {
+                <option [value]="cat.id">{{ cat.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Теги</label>
+            <input
+              type="text"
+              [ngModel]="tags()"
+              (ngModelChange)="tags.set($event)"
+              name="tags"
+              placeholder="C# 13, .NET 10, Signals"
+              class="email-input w-full px-4 py-3 rounded-xl text-sm font-mono"
+            />
+            <p class="text-xs text-slate-500">Через запятую</p>
+          </div>
+        </div>
+
+        <!-- Cover image -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Обложка</label>
+          <div class="flex gap-3 items-start">
+            <input
+              type="text"
+              [ngModel]="coverImageUrl()"
+              (ngModelChange)="coverImageUrl.set($event)"
+              name="coverImageUrl"
+              placeholder="URL обложки или загрузите файл..."
+              class="email-input flex-1 px-4 py-3 rounded-xl text-sm"
+            />
+            <label class="btn-secondary px-4 py-3 rounded-xl text-sm font-medium cursor-pointer shrink-0 transition-all">
+              @if (uploadingCover()) {
+                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+              } @else {
+                📎 Загрузить
+              }
+              <input type="file" accept="image/*" class="hidden" (change)="onCoverFileSelected($event)" [disabled]="uploadingCover()"/>
+            </label>
+          </div>
+          @if (coverImageUrl()) {
+            <img [src]="coverImageUrl()" alt="Обложка" class="mt-2 h-32 rounded-xl object-cover"/>
+          }
+        </div>
+      </div>
+
+      <!-- Content blocks -->
+      <div class="glass-card rounded-2xl p-6 mb-6">
+        <h2 class="text-sm font-semibold text-sky-400 uppercase tracking-widest mb-6">Содержимое</h2>
+
+        <div class="space-y-4">
+          @for (block of blocks(); track block.id; let i = $index) {
+            <div class="group relative border border-white/10 rounded-xl p-4 hover:border-sky-400/30 transition-colors">
+
+              <!-- Block controls -->
+              <div class="absolute -top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span class="px-2 py-0.5 rounded text-xs font-mono bg-sky-500/20 text-sky-400 border border-sky-500/30">
+                  {{ block.type }}
+                </span>
+                <button (click)="moveBlock(i, -1)" [disabled]="i === 0"
+                        class="w-6 h-6 rounded glass-card flex items-center justify-center text-slate-400 hover:text-white disabled:opacity-30 text-xs">↑</button>
+                <button (click)="moveBlock(i, 1)" [disabled]="i === blocks().length - 1"
+                        class="w-6 h-6 rounded glass-card flex items-center justify-center text-slate-400 hover:text-white disabled:opacity-30 text-xs">↓</button>
+                <button (click)="removeBlock(i)"
+                        class="w-6 h-6 rounded glass-card flex items-center justify-center text-rose-400 hover:text-rose-300 text-xs">✕</button>
+              </div>
+
+              <!-- Block-specific editor -->
+              @switch (block.type) {
+
+                @case ('Heading2') {
+                  <input type="text" [ngModel]="block.content" (ngModelChange)="updateBlock(i, {content: $event})"
+                         placeholder="Заголовок раздела..."
+                         class="email-input w-full px-3 py-2 rounded-lg text-xl font-bold"/>
+                }
+
+                @case ('Heading3') {
+                  <input type="text" [ngModel]="block.content" (ngModelChange)="updateBlock(i, {content: $event})"
+                         placeholder="Подзаголовок..."
+                         class="email-input w-full px-3 py-2 rounded-lg text-lg font-semibold"/>
+                }
+
+                @case ('Paragraph') {
+                  <textarea [ngModel]="block.content" (ngModelChange)="updateBlock(i, {content: $event})"
+                            placeholder="Начните писать..."
+                            rows="4"
+                            class="email-input w-full px-3 py-2 rounded-lg text-sm leading-relaxed resize-y"></textarea>
+                }
+
+                @case ('Code') {
+                  <div class="space-y-2">
+                    <select [ngModel]="block.language" (ngModelChange)="updateBlock(i, {language: $event})"
+                            class="email-input px-3 py-1.5 rounded-lg text-xs font-mono">
+                      <option value="csharp">C#</option>
+                      <option value="typescript">TypeScript</option>
+                      <option value="javascript">JavaScript</option>
+                      <option value="html">HTML</option>
+                      <option value="css">CSS</option>
+                      <option value="bash">Bash</option>
+                      <option value="json">JSON</option>
+                      <option value="sql">SQL</option>
+                      <option value="yaml">YAML</option>
+                      <option value="dockerfile">Dockerfile</option>
+                    </select>
+                    <textarea [ngModel]="block.content" (ngModelChange)="updateBlock(i, {content: $event})"
+                              placeholder="// Вставьте код здесь..."
+                              rows="8"
+                              class="email-input w-full px-3 py-2 rounded-lg text-sm font-mono leading-relaxed resize-y"></textarea>
+                  </div>
+                }
+
+                @case ('Image') {
+                  <div class="space-y-2">
+                    <div class="flex gap-2">
+                      <input type="text" [ngModel]="block.imageUrl" (ngModelChange)="updateBlock(i, {imageUrl: $event})"
+                             placeholder="URL изображения..."
+                             class="email-input flex-1 px-3 py-2 rounded-lg text-sm"/>
+                      <label class="btn-secondary px-3 py-2 rounded-lg text-sm cursor-pointer shrink-0">
+                        📎
+                        <input type="file" accept="image/*" class="hidden" (change)="onBlockImageSelected($event, i)"/>
+                      </label>
+                    </div>
+                    <input type="text" [ngModel]="block.imageCaption" (ngModelChange)="updateBlock(i, {imageCaption: $event})"
+                           placeholder="Подпись к изображению (необязательно)..."
+                           class="email-input w-full px-3 py-2 rounded-lg text-sm"/>
+                    @if (block.imageUrl) {
+                      <img [src]="block.imageUrl" class="rounded-lg max-h-48 object-cover" loading="lazy"/>
+                    }
+                  </div>
+                }
+
+                @case ('Quote') {
+                  <textarea [ngModel]="block.content" (ngModelChange)="updateBlock(i, {content: $event})"
+                            placeholder="Текст цитаты..."
+                            rows="3"
+                            class="email-input w-full px-3 py-2 rounded-lg text-sm italic border-l-4 border-sky-400/50 resize-none"></textarea>
+                }
+
+                @case ('Callout') {
+                  <div class="space-y-2">
+                    <select [ngModel]="block.calloutType" (ngModelChange)="updateBlock(i, {calloutType: $event})"
+                            class="email-input px-3 py-1.5 rounded-lg text-xs">
+                      <option value="info">ℹ️ Info</option>
+                      <option value="tip">💡 Tip</option>
+                      <option value="warning">⚠️ Warning</option>
+                      <option value="danger">🚨 Danger</option>
+                    </select>
+                    <textarea [ngModel]="block.content" (ngModelChange)="updateBlock(i, {content: $event})"
+                              placeholder="Текст callout-блока..."
+                              rows="3"
+                              class="email-input w-full px-3 py-2 rounded-lg text-sm resize-none"></textarea>
+                  </div>
+                }
+
+                @case ('Divider') {
+                  <div class="flex items-center gap-3 text-slate-500 text-xs">
+                    <hr class="flex-1 border-white/20"/>
+                    <span>Разделитель</span>
+                    <hr class="flex-1 border-white/20"/>
+                  </div>
+                }
+
+              }
+
+              <!-- Add block after this one -->
+              <div class="flex justify-center mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div class="flex flex-wrap gap-1 justify-center">
+                  @for (bt of blockTypes; track bt.type) {
+                    <button (click)="addBlock(bt.type, i)"
+                            class="px-2 py-1 rounded text-xs font-mono glass-card text-slate-400 hover:text-sky-400 hover:border-sky-400/30 transition-all border border-white/10">
+                      {{ bt.icon }} {{ bt.label }}
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Add first / end block -->
+        <div class="mt-6 pt-4 border-t border-white/10">
+          <p class="text-xs text-slate-500 mb-3 text-center">Добавить блок</p>
+          <div class="flex flex-wrap gap-2 justify-center">
+            @for (bt of blockTypes; track bt.type) {
+              <button (click)="addBlock(bt.type)"
+                      class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm glass-card text-slate-300 hover:text-sky-400 hover:border-sky-400/30 transition-all border border-white/10">
+                <span class="font-mono text-base">{{ bt.icon }}</span>
+                {{ bt.label }}
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-end">
+        <button
+          (click)="save(false)"
+          [disabled]="saveStatus() === 'saving' || saveStatus() === 'publishing'"
+          class="btn-secondary px-6 py-3 rounded-xl text-sm font-semibold transition-all hover:scale-105 disabled:opacity-50 flex items-center gap-2 justify-center"
+        >
+          @if (saveStatus() === 'saving') {
+            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+            Сохраняем...
+          } @else {
+            💾 Сохранить черновик
+          }
+        </button>
+
+        <button
+          (click)="save(true)"
+          [disabled]="saveStatus() === 'saving' || saveStatus() === 'publishing'"
+          class="btn-primary px-6 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:scale-105 disabled:opacity-50 flex items-center gap-2 justify-center"
+        >
+          @if (saveStatus() === 'publishing') {
+            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+            Публикуем...
+          } @else {
+            🚀 Опубликовать
+          }
+        </button>
+      </div>
+
+    }
+  </div>
+</div>

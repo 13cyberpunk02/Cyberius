@@ -1,88 +1,107 @@
-import { Injectable } from '@angular/core';
-import { Post } from '../models/post.model';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import {
+  PostSummary,
+  PostDetailModel,
+  PagedResponse,
+  CreatePostRequest,
+  UpdatePostRequest,
+  GetPostsParams,
+  SearchPostsParams,
+  ReactionType,
+} from '../models/post.model';
+import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class PostsService {
-  getFeaturedPosts(): Post[] {
-    return [
-      {
-        id: 1,
-        title: 'Новые возможности C# 13 — что стоит знать разработчику',
-        excerpt:
-          'Разбираем extension members, field keyword, params collections и другие крутые фичи нового стандарта языка.',
-        category: 'csharp',
-        tags: ['C# 13', 'language features', '.NET 10'],
-        readTime: 8,
-        date: '2025-03-15',
-        slug: 'csharp-13-new-features',
-        featured: true,
-      },
-      {
-        id: 2,
-        title: 'Angular Signals: полное руководство с практическими примерами',
-        excerpt:
-          'От computed() и effect() до linkedSignal и resource API — всё что нужно знать о реактивности в Angular 21.',
-        category: 'angular',
-        tags: ['Angular 21', 'Signals', 'Reactivity'],
-        readTime: 12,
-        date: '2025-03-10',
-        slug: 'angular-signals-guide',
-        featured: true,
-      },
-      {
-        id: 3,
-        title: 'Minimal API в .NET 10: производительность и новый синтаксис',
-        excerpt:
-          'AOT компиляция, Native AOT endpoints, улучшенный OpenAPI — строим production-ready API с минимальным бойлерплейтом.',
-        category: 'dotnet',
-        tags: ['.NET 10', 'Minimal API', 'Performance'],
-        readTime: 10,
-        date: '2025-03-05',
-        slug: 'dotnet10-minimal-api',
-        featured: true,
-      },
-      {
-        id: 4,
-        title: 'Чистая архитектура на .NET 10 + Angular: полный стек',
-        excerpt:
-          'Проектируем слоёную архитектуру для enterprise-приложений: домен, приложение, инфраструктура, UI.',
-        category: 'architecture',
-        tags: ['Clean Architecture', 'CQRS', 'Full-Stack'],
-        readTime: 15,
-        date: '2025-02-28',
-        slug: 'clean-architecture-dotnet-angular',
-      },
-      {
-        id: 5,
-        title: 'RxJS в Angular 21: когда Signals недостаточно',
-        excerpt:
-          'WebSockets, сложные async-потоки, interop с Signals — практическое руководство по RxJS в современном Angular.',
-        category: 'angular',
-        tags: ['RxJS', 'Angular 21', 'Observables'],
-        readTime: 9,
-        date: '2025-02-20',
-        slug: 'rxjs-angular-21',
-      },
-      {
-        id: 6,
-        title: 'Docker + GitHub Actions для .NET 10 приложений',
-        excerpt:
-          'Полный CI/CD пайплайн: мультистейдж Docker образы, кэширование слоёв, деплой в Kubernetes.',
-        category: 'devops',
-        tags: ['Docker', 'CI/CD', 'Kubernetes'],
-        readTime: 11,
-        date: '2025-02-15',
-        slug: 'docker-github-actions-dotnet',
-      },
-    ];
+  private http = inject(HttpClient);
+  private auth = inject(AuthService);
+
+  private get base(): string {
+    return `${this.auth.API}/posts`;
   }
 
-  getStats() {
-    return {
-      posts: 48,
-      readers: '12K',
-      topics: 5,
-      experience: 8,
-    };
+  // ── Queries ────────────────────────────────────────────────────
+
+  getPublished(params: GetPostsParams = {}): Observable<PagedResponse<PostSummary>> {
+    const httpParams = this.buildPageParams(params);
+    return this.http.get<PagedResponse<PostSummary>>(this.base, { params: httpParams });
+  }
+
+  getById(id: string): Observable<PostDetailModel> {
+    return this.http.get<PostDetailModel>(`${this.base}/${id}`);
+  }
+
+  getBySlug(slug: string): Observable<PostDetailModel> {
+    return this.http.get<PostDetailModel>(`${this.base}/slug/${slug}`);
+  }
+
+  search(params: SearchPostsParams): Observable<PagedResponse<PostSummary>> {
+    const httpParams = this.buildPageParams(params).set('q', params.q);
+    return this.http.get<PagedResponse<PostSummary>>(`${this.base}/search`, { params: httpParams });
+  }
+
+  getByCategory(
+    categoryId: string,
+    params: GetPostsParams = {},
+  ): Observable<PagedResponse<PostSummary>> {
+    const httpParams = this.buildPageParams(params);
+    return this.http.get<PagedResponse<PostSummary>>(`${this.base}/category/${categoryId}`, {
+      params: httpParams,
+    });
+  }
+
+  getByTag(tagSlug: string, params: GetPostsParams = {}): Observable<PagedResponse<PostSummary>> {
+    const httpParams = this.buildPageParams(params);
+    return this.http.get<PagedResponse<PostSummary>>(`${this.base}/tag/${tagSlug}`, {
+      params: httpParams,
+    });
+  }
+
+  getDrafts(): Observable<PagedResponse<PostSummary>> {
+    return this.http.get<PagedResponse<PostSummary>>(`${this.base}/drafts`);
+  }
+
+  // ── Commands ───────────────────────────────────────────────────
+
+  create(request: CreatePostRequest): Observable<PostDetailModel> {
+    return this.http.post<PostDetailModel>(this.base, request);
+  }
+
+  update(id: string, request: UpdatePostRequest): Observable<PostDetailModel> {
+    return this.http.put<PostDetailModel>(`${this.base}/${id}`, request);
+  }
+
+  publish(id: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/publish`, {});
+  }
+
+  unpublish(id: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/unpublish`, {});
+  }
+
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}`);
+  }
+
+  react(id: string, type: ReactionType): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/react/${type}`, {});
+  }
+
+  // ── Helpers ────────────────────────────────────────────────────
+
+  private buildPageParams(params: GetPostsParams): HttpParams {
+    let p = new HttpParams();
+    if (params.page) p = p.set('page', params.page);
+    if (params.pageSize) p = p.set('pageSize', params.pageSize);
+    return p;
+  }
+
+  // Строим полный URL аватара/изображения через FILES_BASE
+  getImageUrl(path: string | null): string | null {
+    if (!path) return null;
+    if (path.startsWith('http')) return path;
+    return this.auth.FILES_BASE + path;
   }
 }

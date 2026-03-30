@@ -1,0 +1,98 @@
+<article
+  class="glass-card rounded-2xl overflow-hidden group hover:scale-[1.02] transition-all duration-300 hover:shadow-glow flex flex-col h-full"
+  [style.--card-outline]="categoryColor"
+>
+  <!-- Cover image -->
+  @if (coverUrl) {
+    <a [routerLink]="['/posts', post().slug]" class="block overflow-hidden h-48">
+      <img
+        [src]="coverUrl!"
+        [alt]="post().title"
+        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        loading="lazy"
+      />
+    </a>
+  } @else {
+    <!-- Placeholder с цветом категории -->
+    <div
+      class="h-2"
+      [style.background]="'linear-gradient(to right, ' + categoryColor + ', ' + categoryColor + '66)'"
+    ></div>
+  }
+
+  <div class="p-6 flex flex-col flex-1">
+
+    <!-- Category + read time -->
+    <div class="flex items-center justify-between mb-3">
+      <span
+        class="px-3 py-1 rounded-lg text-xs font-semibold border"
+        [style.color]="categoryColor"
+        [style.border-color]="categoryColor + '55'"
+        [style.background]="categoryColor + '15'"
+      >
+        {{ post().category.name }}
+      </span>
+      <span class="text-xs text-slate-400 font-mono flex items-center gap-1">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        {{ post().readTimeMinutes }} мин
+      </span>
+    </div>
+
+    <!-- Title -->
+    <h2 class="text-lg font-bold heading-text mb-2 line-clamp-2 leading-snug">
+      <a [routerLink]="['/posts', post().slug]" class="hover:text-sky-300 transition-colors">
+        {{ post().title }}
+      </a>
+    </h2>
+
+    <!-- Excerpt -->
+    @if (post().excerpt) {
+      <p class="text-slate-400 text-sm leading-relaxed line-clamp-3 flex-1 mb-4">
+        {{ post().excerpt }}
+      </p>
+    }
+
+    <!-- Tags -->
+    @if (post().tags.length > 0) {
+      <div class="flex flex-wrap gap-1.5 mb-4">
+        @for (tag of post().tags.slice(0, 3); track tag) {
+          <span class="px-2 py-0.5 rounded text-xs font-mono bg-white/5 text-slate-400 border border-white/10">
+            #{{ tag }}
+          </span>
+        }
+      </div>
+    }
+
+    <!-- Footer: author + date + stats -->
+    <div class="flex items-center justify-between pt-4 border-t border-white/10 mt-auto">
+      <div class="flex items-center gap-2">
+        <div class="user-avatar-btn w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0">
+          {{ post().author.fullName[0] ?? '?' }}
+        </div>
+        <span class="text-xs text-slate-400 truncate max-w-25">
+          {{ post().author.fullName }}
+        </span>
+      </div>
+      <div class="flex items-center gap-3 text-xs text-slate-500">
+        <!-- Views -->
+        <span class="flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+          </svg>
+          {{ post().viewCount }}
+        </span>
+        <!-- Comments -->
+        <span class="flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+          </svg>
+          {{ post().commentCount }}
+        </span>
+        <span class="font-mono">{{ formatDate(post().publishedAt) }}</span>
+      </div>
+    </div>
+  </div>
+</article>

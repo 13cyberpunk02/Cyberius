@@ -1,17 +1,18 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PostsService } from '../../../../core/services/posts.service';
-import { CATEGORY_META, Post, PostCategory } from '../../../../core/models/post.model';
+import { CATEGORY_META, PostSummary } from '../../../../core/models/post.model';
 import { SafeHtml } from '@angular/platform-browser';
 import { SvgIconService } from '../../../../core/services/svgIcon.service';
 
 type CategoryMeta = {
-  label: string;
-  color: string;
-  iconFile: string;
+  label:        string;
   outlineColor: string;
-  icon?: SafeHtml;
+  iconFile:     string;
+  icon?:        SafeHtml;
 };
+
+type FilterValue = 'all' | string; // slug категории
 
 @Component({
   selector: 'app-featured-posts',
@@ -23,18 +24,15 @@ export class FeaturedPosts implements OnInit {
   private postsService = inject(PostsService);
   private svgService = inject(SvgIconService);
 
-  allPosts = this.postsService.getFeaturedPosts();
-  activeFilter = signal<PostCategory | 'all'>('all');
+  posts = signal<PostSummary[]>([]);
+  loading = signal(true);
+  activeFilter = signal<FilterValue>('all');
 
-  // Мета с загруженными SVG
-  categoryMeta = signal<Record<PostCategory, CategoryMeta>>(
-    Object.fromEntries(Object.entries(CATEGORY_META).map(([k, v]) => [k, { ...v }])) as Record<
-      PostCategory,
-      CategoryMeta
-    >,
+  categoryMeta = signal<Record<string, CategoryMeta>>(
+    Object.fromEntries(Object.entries(CATEGORY_META).map(([k, v]) => [k, { ...v }])),
   );
 
-  filters: { label: string; value: PostCategory | 'all' }[] = [
+  filters: { label: string; value: FilterValue }[] = [
     { label: 'Все', value: 'all' },
     { label: 'C#', value: 'csharp' },
     { label: '.NET', value: 'dotnet' },
@@ -44,34 +42,59 @@ export class FeaturedPosts implements OnInit {
   ];
 
   ngOnInit(): void {
-    // Загружаем SVG для каждой категории через SvgIconService (с кэшем)
-    (Object.keys(CATEGORY_META) as PostCategory[]).forEach((category) => {
-      const { iconFile } = CATEGORY_META[category];
-      this.svgService.load(iconFile).subscribe((svg) => {
-        this.categoryMeta.update((meta) => ({
-          ...meta,
-          [category]: { ...meta[category], icon: svg },
+    // Загружаем SVG иконки категорий
+    Object.entries(CATEGORY_META).forEach(([key, meta]) => {
+      this.svgService.load(meta.iconFile).subscribe((svg) => {
+        this.categoryMeta.update((m) => ({
+          ...m,
+          [key]: { ...m[key], icon: svg },
         }));
       });
     });
+
+    // Загружаем посты с API
+    this.loadPosts();
   }
 
-  get filteredPosts(): Post[] {
+  private loadPosts(): void {
+    this.loading.set(true);
+    this.postsService.getPublished({ page: 1, pageSize: 6 }).subscribe({
+      next: (res) => {
+        this.posts.set(res.items);
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false),
+    });
+  }
+
+  get filteredPosts(): PostSummary[] {
     const f = this.activeFilter();
-    return f === 'all' ? this.allPosts : this.allPosts.filter((p) => p.category === f);
+    if (f === 'all') return this.posts();
+    return this.posts().filter((p) => p.category.slug === f);
   }
 
-  setFilter(value: PostCategory | 'all') {
+  setFilter(value: FilterValue): void {
     this.activeFilter.set(value);
   }
 
-  getMeta(category: PostCategory): CategoryMeta {
-    return this.categoryMeta()[category];
+  getMeta(categorySlug: string): CategoryMeta {
+    return (
+      this.categoryMeta()[categorySlug] ?? {
+        label: categorySlug,
+        outlineColor: '#0ca2e7',
+        iconFile: '',
+      }
+    );
   }
 
   formatDate(dateStr: string): string {
-    return new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long' }).format(
-      new Date(dateStr),
-    );
+    return new Intl.DateTimeFormat('ru-RU', {
+      day: 'numeric',
+      month: 'long',
+    }).format(new Date(dateStr));
+  }
+
+  getReadDate(post: PostSummary): string {
+    return this.formatDate(post.publishedAt ?? post.createdAt);
   }
 }

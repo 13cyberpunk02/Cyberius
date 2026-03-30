@@ -1,0 +1,83 @@
+<div class="post-content space-y-6">
+  @for (block of sortedBlocks; track block.id) {
+
+    @switch (block.type) {
+
+      @case ('Heading1') {
+        <h1 class="text-4xl font-black heading-text leading-tight">{{ block.content }}</h1>
+      }
+
+      @case ('Heading2') {
+        <h2 class="text-3xl font-bold heading-text leading-tight pt-4">{{ block.content }}</h2>
+      }
+
+      @case ('Heading3') {
+        <h3 class="text-2xl font-bold heading-text leading-snug pt-2">{{ block.content }}</h3>
+      }
+
+      @case ('Paragraph') {
+        <p class="text-slate-300 leading-relaxed text-lg">{{ block.content }}</p>
+      }
+
+      @case ('Code') {
+        <div class="glass-card rounded-xl overflow-hidden">
+          <!-- Window chrome -->
+          <div class="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-white/5">
+            <div class="w-3 h-3 rounded-full bg-rose-500/70"></div>
+            <div class="w-3 h-3 rounded-full bg-amber-500/70"></div>
+            <div class="w-3 h-3 rounded-full bg-emerald-500/70"></div>
+            @if (block.language) {
+              <span class="ml-2 text-xs text-slate-400 font-mono">{{ block.language }}</span>
+            }
+          </div>
+          <pre class="p-5 overflow-x-auto text-sm font-mono text-slate-200 leading-relaxed"><code>{{ block.content }}</code></pre>
+        </div>
+      }
+
+      @case ('Image') {
+        <figure class="my-2">
+          <img
+            [src]="getImageUrl(block.imageUrl)"
+            [alt]="block.imageCaption ?? ''"
+            class="w-full rounded-2xl object-cover shadow-lg"
+            loading="lazy"
+          />
+          @if (block.imageCaption) {
+            <figcaption class="text-center text-sm text-slate-500 mt-3 italic">
+              {{ block.imageCaption }}
+            </figcaption>
+          }
+        </figure>
+      }
+
+      @case ('Quote') {
+        <blockquote class="border-l-4 border-sky-400 pl-6 py-2">
+          <p class="text-xl text-slate-300 italic leading-relaxed">{{ block.content }}</p>
+        </blockquote>
+      }
+
+      @case ('Callout') {
+        <div
+          class="flex gap-4 p-5 rounded-xl border"
+          [class]="block.calloutType === 'warning' ? 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+                 : block.calloutType === 'danger'  ? 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+                 : block.calloutType === 'tip'     ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                 :                                   'bg-sky-500/10 border-sky-500/30 text-sky-300'"
+        >
+          <span class="text-xl shrink-0">
+            {{ block.calloutType === 'warning' ? '⚠️'
+            : block.calloutType === 'danger'  ? '🚨'
+              : block.calloutType === 'tip'     ? '💡'
+                :                                   'ℹ️' }}
+          </span>
+          <p class="leading-relaxed">{{ block.content }}</p>
+        </div>
+      }
+
+      @case ('Divider') {
+        <hr class="border-white/10 my-2"/>
+      }
+
+    }
+  }
+</div>

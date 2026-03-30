@@ -26,78 +26,117 @@
       </div>
     </div>
 
-    <!-- Posts Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      @for (post of filteredPosts; track post.id) {
-        <article class="glass-card rounded-2xl overflow-hidden group hover:scale-[1.02] transition-all duration-300 hover:shadow-glow cursor-pointer flex flex-col">
-
-          <!-- Top color band -->
-          <div class="h-1.5 bg-linear-to-r {{ getMeta(post.category).color }}"></div>
-
-          <div class="p-6 flex flex-col flex-1">
-
-            <!-- Category badge + read time -->
-            <div class="flex items-center justify-between mb-4">
-              <span
-                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold category-badge"
-                [style]="'--badge-color:' + getMeta(post.category).outlineColor"
-              >
-                @if (getMeta(post.category).icon) {
-                  <span class="category-icon" [innerHTML]="getMeta(post.category).icon"></span>
-                }
-                {{ getMeta(post.category).label }}
-              </span>
-              <span class="flex items-center gap-1 text-xs text-slate-400 font-mono">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                {{ post.readTime }} мин
-              </span>
-            </div>
-
-            <!-- Title -->
-            <h3 class="text-lg font-bold heading-text mb-3 group-hover:text-sky-300 transition-colors line-clamp-2 leading-snug">
-              {{ post.title }}
-            </h3>
-
-            <!-- Excerpt -->
-            <p class="text-slate-400 text-sm leading-relaxed flex-1 line-clamp-3 mb-4">
-              {{ post.excerpt }}
-            </p>
-
-            <!-- Tags -->
-            <div class="flex flex-wrap gap-2 mb-4">
-              @for (tag of post.tags.slice(0, 3); track tag) {
-                <span class="px-2 py-0.5 rounded-md text-xs font-mono bg-white/5 text-slate-400 border border-white/10">
-                  #{{ tag }}
-                </span>
-              }
-            </div>
-
-            <!-- Footer -->
-            <div class="flex items-center justify-between pt-4 border-t border-white/10">
-              <span class="text-xs text-slate-500 font-mono">{{ formatDate(post.date) }}</span>
-              <a [href]="'/posts/' + post.slug"
-                 class="flex items-center gap-1 text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors group/link">
-                Читать
-                <svg class="w-4 h-4 group-hover/link:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-                </svg>
-              </a>
+    <!-- Skeleton loading -->
+    @if (loading()) {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (i of [1,2,3,4,5,6]; track i) {
+          <div class="glass-card rounded-2xl overflow-hidden animate-pulse">
+            <div class="h-1.5 bg-white/10"></div>
+            <div class="p-6 space-y-3">
+              <div class="flex justify-between">
+                <div class="w-20 h-6 rounded-lg bg-white/10"></div>
+                <div class="w-16 h-4 rounded-lg bg-white/10"></div>
+              </div>
+              <div class="w-full h-5 rounded-lg bg-white/10"></div>
+              <div class="w-3/4 h-5 rounded-lg bg-white/10"></div>
+              <div class="w-full h-4 rounded-lg bg-white/5"></div>
+              <div class="w-full h-4 rounded-lg bg-white/5"></div>
             </div>
           </div>
-        </article>
-      }
-    </div>
+        }
+      </div>
+    }
 
-    <!-- View All -->
-    <div class="text-center mt-12">
-      <a href="/posts" class="btn-secondary inline-flex items-center gap-2 px-8 py-3.5 rounded-xl font-semibold transition-all duration-300 hover:scale-105 active:scale-95">
-        Все статьи
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h10"/>
-        </svg>
-      </a>
-    </div>
+    <!-- Posts Grid -->
+    @if (!loading()) {
+      @if (filteredPosts.length === 0) {
+        <div class="text-center py-16">
+          <p class="text-slate-400 text-lg">Статей в этой категории пока нет</p>
+        </div>
+      } @else {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          @for (post of filteredPosts; track post.id) {
+            <article
+              class="glass-card rounded-2xl overflow-hidden group hover:scale-[1.02] transition-all duration-300 hover:shadow-glow cursor-pointer flex flex-col"
+            >
+              <!-- Top color band -->
+              <div
+                class="h-1.5"
+                [style.background]="'linear-gradient(to right, ' + getMeta(post.category.slug).outlineColor + ', ' + getMeta(post.category.slug).outlineColor + '88)'"
+              ></div>
+
+              <div class="p-6 flex flex-col flex-1">
+
+                <!-- Category badge + read time -->
+                <div class="flex items-center justify-between mb-4">
+                  <span
+                    class="category-badge inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold"
+                    [style]="'--badge-color:' + getMeta(post.category.slug).outlineColor"
+                  >
+                    @if (getMeta(post.category.slug).icon) {
+                      <span class="category-icon" [innerHTML]="getMeta(post.category.slug).icon"></span>
+                    }
+                    {{ post.category.name }}
+                  </span>
+                  <span class="flex items-center gap-1 text-xs text-slate-400 font-mono">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    {{ post.readTimeMinutes }} мин
+                  </span>
+                </div>
+
+                <!-- Title -->
+                <h3 class="text-lg font-bold heading-text mb-3 group-hover:text-sky-300 transition-colors line-clamp-2 leading-snug">
+                  {{ post.title }}
+                </h3>
+
+                <!-- Excerpt -->
+                <p class="text-slate-400 text-sm leading-relaxed flex-1 line-clamp-3 mb-4">
+                  {{ post.excerpt }}
+                </p>
+
+                <!-- Tags -->
+                <div class="flex flex-wrap gap-2 mb-4">
+                  @for (tag of post.tags.slice(0, 3); track tag) {
+                    <span class="px-2 py-0.5 rounded-md text-xs font-mono bg-white/5 text-slate-400 border border-white/10">
+                      #{{ tag }}
+                    </span>
+                  }
+                </div>
+
+                <!-- Footer -->
+                <div class="flex items-center justify-between pt-4 border-t border-white/10">
+                  <span class="text-xs text-slate-500 font-mono">{{ getReadDate(post) }}</span>
+                  <a
+                    [href]="'/posts/' + post.slug"
+                    class="flex items-center gap-1 text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors group/link"
+                  >
+                    Читать
+                    <svg class="w-4 h-4 group-hover/link:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      }
+
+      <!-- View All Button -->
+      <div class="text-center mt-12">
+        <a
+          href="/posts"
+          class="btn-secondary inline-flex items-center gap-2 px-8 py-3.5 rounded-xl font-semibold transition-all duration-300 hover:scale-105 active:scale-95"
+        >
+          Все статьи
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h10"/>
+          </svg>
+        </a>
+      </div>
+    }
+
   </div>
 </section>

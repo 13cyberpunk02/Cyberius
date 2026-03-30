@@ -9,6 +9,10 @@ public static class EndpointsMappingExtension
         endpoints.MapAuthenticationEndpoints();
         endpoints.MapUserEndpoints();
         endpoints.MapFilesEndpoints();
+        endpoints.MapPostEndpoints();
+        endpoints.MapCommentEndpoints();
+        endpoints.MapCategoryEndpoints();
+        endpoints.MapTagEndpoints();
         return endpoints;
     }
 }

@@ -9,6 +9,11 @@ public static class ResultsExtension
         => result.IsSuccess
             ? Results.Ok(result.Value)
             : result.Error.ToHttpError();
+    
+    public static IResult ToHttpResponse(this Result result)
+        => result.IsSuccess
+            ? Results.Ok(result)
+            : result.Error.ToHttpError();
 
     // Async варианты
     public static async Task<IResult> ToHttpResponseAsync<T>(

@@ -9,9 +9,7 @@ namespace Cyberius.Application.Features.Blog.Posts.Services;
 
 public sealed class PostService(IUnitOfWork uow, IStorageService storageService) : IPostService
 {
-        // ── Queries ────────────────────────────────────────────────────────────
- 
-    public async Task<Result<PostDetailResponse>> GetByIdAsync(
+        public async Task<Result<PostDetailResponse>> GetByIdAsync(
         Guid id, Guid? currentUserId, CancellationToken ct = default)
     {
         var post = await uow.Posts.GetFullAsync(id, ct);
@@ -61,7 +59,7 @@ public sealed class PostService(IUnitOfWork uow, IStorageService storageService)
         string query, int page, int pageSize, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(query))
-            return new BadRequestError("Поисковый запрос не может быть пустым");
+            return new ValidationError("Поисковый запрос не может быть пустым", []);
  
         var (items, total) = await uow.Posts.SearchAsync(query.Trim(), page, pageSize, ct);
         return ToPagedResult(items, total, page, pageSize);
@@ -376,7 +374,8 @@ public sealed class PostService(IUnitOfWork uow, IStorageService storageService)
             ViewCount: p.Views?.Count ?? 0,
             CommentCount: p.Comments?.Count(c => !c.IsDeleted) ?? 0);
     }
-    
+    // Извлекаем objectName из публичного URL
+    // http://host/files/covers/uuid_file.jpg → covers/uuid_file.jpg
     private static string? ExtractObjectName(string url)
     {
         const string marker = "/files/";

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth-guard';
+import { adminGuard } from './core/guards/admin-guard';
 
 export const routes: Routes = [
   {
@@ -34,6 +35,14 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/posts/pages/post-detail/post-detail').then(
         (m) => m.PostDetail,
+      ),
+  },
+  {
+    path: 'admin/categories',
+    canActivate: [adminGuard],
+    loadComponent: () =>
+      import('./features/admin/category/category').then(
+        (m) => m.Category,
       ),
   },
   {

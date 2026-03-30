@@ -10,7 +10,10 @@ public class UserRepository(AppDbContext db) : GenericRepository<User>(db), IUse
     private readonly AppDbContext _db = db;
 
     public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default) => 
-        await _db.Users.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+        await _db.Users
+            .Include(ur => ur.UserRoles)
+            .ThenInclude(ur => ur.Role)
+            .FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
 
     public async Task<User?> GetUserWithRolesByIdAsync(Guid userId, CancellationToken cancellationToken = default) =>
         await _db.Users

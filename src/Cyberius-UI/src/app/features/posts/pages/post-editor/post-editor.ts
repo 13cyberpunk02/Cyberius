@@ -165,13 +165,15 @@ export class PostEditor implements OnInit {
     const fd = new FormData();
     fd.append('file', file);
 
-    this.http.post<{ url: string }>(`${this.auth.API}/files/covers`, fd).subscribe({
-      next: (res) => {
-        this.coverImageUrl.set(res.url);
-        this.uploadingCover.set(false);
-      },
-      error: () => this.uploadingCover.set(false),
-    });
+    this.http
+      .post<{ objectName: string; url: string }>(`${this.auth.FILES_BASE}covers`, fd)
+      .subscribe({
+        next: (res) => {
+          this.coverImageUrl.set(res.url);
+          this.uploadingCover.set(false);
+        },
+        error: () => this.uploadingCover.set(false),
+      });
   }
 
   // ── Block image upload ─────────────────────────────────────────
@@ -184,9 +186,11 @@ export class PostEditor implements OnInit {
     const fd = new FormData();
     fd.append('file', file);
 
-    this.http.post<{ url: string }>(`${this.auth.API}/files/blocks`, fd).subscribe({
-      next: (res) => this.updateBlock(index, { imageUrl: res.url }),
-    });
+    this.http
+      .post<{ objectName: string; url: string }>(`${this.auth.FILES_BASE}blocks`, fd)
+      .subscribe({
+        next: (res) => this.updateBlock(index, { imageUrl: res.url }),
+      });
   }
 
   // ── Save / Publish ─────────────────────────────────────────────

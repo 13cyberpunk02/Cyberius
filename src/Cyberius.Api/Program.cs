@@ -12,6 +12,10 @@ builder.Logging.AddSimpleConsole(options =>
     options.UseUtcTimestamp = true;
     options.TimestampFormat = "dd.MM.yyyy HH:mm:ss.fff ";
 });
+builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>
+{
+    options.SerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+});
 builder.Services.AddOpenApiExtension();
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();

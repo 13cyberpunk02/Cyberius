@@ -28,26 +28,17 @@ public static class CategoryEndpoints
  
         // ── Admin only ─────────────────────────────────────────────────────
         group.MapPost("/", Create)
-            .RequireAuthorization(options =>
-            {
-                options.AddRequirements(new ClaimsAuthorizationRequirement(ClaimTypes.Role, ["Admin"]));
-            })
+            .RequireAuthorization(policy => policy.RequireRole("Admin"))
             .WithRequestValidation<CreateCategoryRequest>()
             .WithSummary("Create category");
  
         group.MapPut("{id:guid}", Update)
-            .RequireAuthorization(options =>
-            {
-                options.AddRequirements(new ClaimsAuthorizationRequirement(ClaimTypes.Role, ["Admin"]));
-            })
+            .RequireAuthorization(policy => policy.RequireRole("Admin"))
             .WithRequestValidation<UpdateCategoryRequest>()
             .WithSummary("Update category");
  
         group.MapDelete("{id:guid}", Delete)
-            .RequireAuthorization(options =>
-            {
-                options.AddRequirements(new ClaimsAuthorizationRequirement(ClaimTypes.Role, ["Admin"]));
-            })
+            .RequireAuthorization(policy => policy.RequireRole("Admin"))
             .WithSummary("Delete category (fails if has posts)");
  
         return group;

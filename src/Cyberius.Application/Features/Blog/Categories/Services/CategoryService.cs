@@ -9,7 +9,7 @@ namespace Cyberius.Application.Features.Blog.Categories.Services;
 public sealed class CategoryService(
     IUnitOfWork uow) : ICategoryService
 {
-    public async Task<Result<List<CategoryResponse>>> GetAllAsync(CancellationToken ct = default)
+        public async Task<Result<List<CategoryResponse>>> GetAllAsync(CancellationToken ct = default)
     {
         var result = await uow.Categories.GetWithPostCountAsync(ct);
         return result

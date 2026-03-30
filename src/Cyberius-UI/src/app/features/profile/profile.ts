@@ -21,6 +21,8 @@ import {
   faShieldAlt,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { Router } from '@angular/router';
+import { ConfirmDialog, ConfirmDialogConfig } from '../../shared/components/confirm-dialog/confirm-dialog';
 
 interface UpdateProfileForm {
   firstName: string;
@@ -36,11 +38,12 @@ const FILES_BASE_URL = 'http://localhost:5273/api/files/';
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, FontAwesomeModule, ChangePasswordModal],
+  imports: [CommonModule, FormsModule, FontAwesomeModule, ChangePasswordModal, ConfirmDialog],
   templateUrl: './profile.html',
 })
 export class Profile implements OnInit {
   private auth = inject(AuthService);
+  private router = inject(Router);
   private http = inject(HttpClient);
 
   @ViewChild('avatarInput') avatarInput!: ElementRef<HTMLInputElement>;
@@ -67,6 +70,17 @@ export class Profile implements OnInit {
   avatarPreview = signal<string | null>(null);
   avatarFile = signal<File | null>(null);
   showChangePassword = signal(false);
+  showDeleteConfirm = signal(false);
+  deleteLoading = signal(false);
+
+  deleteDialogConfig: ConfirmDialogConfig = {
+    title: 'Удалить аккаунт?',
+    message:
+      'Это действие необратимо. Ваш профиль, статьи и все данные будут безвозвратно удалены.',
+    confirmLabel: 'Да, удалить',
+    cancelLabel: 'Отмена',
+    danger: true,
+  };
 
   fullAvatarUrl = computed(() => {
     const preview = this.avatarPreview();
@@ -177,6 +191,25 @@ export class Profile implements OnInit {
         this.errorMsg.set(
           err?.error?.message ?? err?.error?.title ?? 'Не удалось сохранить изменения',
         );
+      },
+    });
+  }
+
+  deleteAccount(): void {
+    const userId = this.auth.user()?.id;
+    if (!userId) return;
+
+    this.deleteLoading.set(true);
+
+    this.http.post(`${this.auth.API}/auth/delete-user/${userId}`, {}).subscribe({
+      next: () => {
+        this.auth.logout();
+        this.router.navigate(['/']);
+      },
+      error: (err) => {
+        this.deleteLoading.set(false);
+        this.showDeleteConfirm.set(false);
+        console.error('Delete account failed', err);
       },
     });
   }

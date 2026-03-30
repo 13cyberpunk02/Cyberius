@@ -9,4 +9,5 @@ public interface IAuthenticationService
     Task<Result<LoginResponse>> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default);
     Task<Result<LoginResponse>> RefreshTokenAsync(RefreshTokenRequest request, CancellationToken cancellationToken = default);
     Task<Result<string>> LogoutAsync(Guid requestUserId, Guid userId, CancellationToken cancellationToken = default);
+    Task<Result<string>> DisableUser(Guid userId, CancellationToken cancellationToken = default);
 }

@@ -153,6 +153,7 @@ export class AuthService {
     }
 
     this.clearState();
+    this.router.navigate(['/']);
   }
 
   // ── Helpers ────────────────────────────────────────────────────

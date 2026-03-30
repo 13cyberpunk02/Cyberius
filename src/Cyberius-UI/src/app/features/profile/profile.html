@@ -250,7 +250,8 @@
                   <p class="text-sm font-semibold heading-text">Удалить аккаунт</p>
                   <p class="text-xs text-slate-400 mt-0.5">Это действие необратимо</p>
                 </div>
-                <button class="px-4 py-2 cursor-pointer rounded-xl text-sm font-semibold text-rose-400 border border-rose-500/30 hover:bg-rose-500/10 transition-all duration-200">
+                <button class="px-4 py-2 cursor-pointer rounded-xl text-sm font-semibold text-rose-400 border border-rose-500/30 hover:bg-rose-500/10 transition-all duration-200"
+                (click)="showDeleteConfirm.set(true)">
                   Удалить
                 </button>
               </div>
@@ -264,4 +265,14 @@
 
 @if (showChangePassword()) {
   <app-change-password-modal (closed)="showChangePassword.set(false)" />
+}
+
+
+@if (showDeleteConfirm()) {
+  <app-confirm-dialog
+    [config]="deleteDialogConfig"
+    [loading]="deleteLoading()"
+    (confirmed)="deleteAccount()"
+    (cancelled)="showDeleteConfirm.set(false)"
+  />
 }

@@ -4,10 +4,18 @@ namespace Cyberius.Domain.Interfaces;
 
 public interface IUnitOfWork : IAsyncDisposable
 {
-    IUserRepository          Users         { get; }
-    IRoleRepository          Roles         { get; }
-    IUserRoleRepository      UserRoles     { get; }
-    IRefreshTokenRepository  RefreshTokens { get; }
+    IUserRepository Users { get; }
+    IRoleRepository Roles { get; }
+    IUserRoleRepository UserRoles { get; }
+    IRefreshTokenRepository RefreshTokens { get; }
+    ICategoryRepository Categories { get; }
+    ICommentReactionRepository CommentReactions { get; }
+    ICommentRepository Comments { get; }
+    IContentBlockRepository ContentBlocks { get; }
+    IPostReactionRepository PostReactions { get; }
+    IPostRepository Posts { get; }
+    IPostViewRepository PostViews { get; }
+    ITagRepository Tags { get; }
 
     Task<int> SaveChangesAsync(CancellationToken ct = default);
 

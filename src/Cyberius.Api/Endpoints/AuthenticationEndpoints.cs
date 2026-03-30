@@ -37,6 +37,9 @@ public static class AuthenticationEndpoints
             })
             .WithSummary("Logout");
         
+        group.MapPost("delete-user/{userId:guid}", DisableUser)
+            .WithSummary("Disable User");
+        
         return group;
     }
 
@@ -74,4 +77,9 @@ public static class AuthenticationEndpoints
         var response = await authenticationService.LogoutAsync(Guid.Parse(requestUserId), userId, cancellationToken);
         return response.ToHttpResponse();
     }
+
+    private static async Task<IResult> DisableUser(Guid userId, IAuthenticationService authenticationService,
+        CancellationToken cancellationToken) =>
+        await authenticationService.DisableUser(userId, cancellationToken).ToHttpResponseAsync();
+
 }

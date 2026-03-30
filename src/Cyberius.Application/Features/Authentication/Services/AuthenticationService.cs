@@ -8,12 +8,12 @@ using Cyberius.Domain.Shared;
 
 namespace Cyberius.Application.Features.Authentication.Services;
 
-public class AuthenticationService(IUnitOfWork uof, IJwtService jwtService) : IAuthenticationService
+public class AuthenticationService(IUnitOfWork uow, IJwtService jwtService) : IAuthenticationService
 {
     public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
-        var user = await uof.Users.GetByEmailAsync(request.Email, cancellationToken);
-        if(user is null)
+        var user = await uow.Users.GetByEmailAsync(request.Email, cancellationToken);
+        if(user is null || !user.IsActive)
             return Errors.NotFound(nameof(User), "");
 
         var isPasswordCorrect = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
@@ -23,7 +23,7 @@ public class AuthenticationService(IUnitOfWork uof, IJwtService jwtService) : IA
         var accessToken = jwtService.GenerateJwtToken(user);
         var refreshToken = jwtService.GenerateRefreshToken();
 
-        var refreshTokenEntity = await uof.RefreshTokens.GetRefreshTokenByUserId(user.UserId, cancellationToken);
+        var refreshTokenEntity = await uow.RefreshTokens.GetRefreshTokenByUserId(user.UserId, cancellationToken);
         if (refreshTokenEntity is null)
         {
             var newRefreshToken = new RefreshToken
@@ -31,22 +31,22 @@ public class AuthenticationService(IUnitOfWork uof, IJwtService jwtService) : IA
                 Token = refreshToken,
                 User = user
             };
-            await uof.RefreshTokens.AddAsync(newRefreshToken, cancellationToken);
+            await uow.RefreshTokens.AddAsync(newRefreshToken, cancellationToken);
         }
         else
         {
             refreshTokenEntity.Token = refreshToken;
             refreshTokenEntity.User = user;
-            uof.RefreshTokens.Update(refreshTokenEntity);
+            uow.RefreshTokens.Update(refreshTokenEntity);
         }
         
-        await uof.SaveChangesAsync(cancellationToken);
+        await uow.SaveChangesAsync(cancellationToken);
         return Result<LoginResponse>.Success(new LoginResponse(accessToken, refreshToken));
     }
 
     public async Task<Result<LoginResponse>> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
     {
-        var userExists = await uof.Users.GetByEmailAsync(request.Email, cancellationToken);
+        var userExists = await uow.Users.GetByEmailAsync(request.Email, cancellationToken);
         if (userExists is not null)
             return Errors.Conflict("Пользователь с такой эл. почтой уже зарегистрирован");
 
@@ -61,8 +61,8 @@ public class AuthenticationService(IUnitOfWork uof, IJwtService jwtService) : IA
             JoinedDate = DateTime.UtcNow
         };
 
-        await uof.Users.AddAsync(newUser, cancellationToken);
-        var role = await uof.Roles.GetByNameAsync("User", cancellationToken);
+        await uow.Users.AddAsync(newUser, cancellationToken);
+        var role = await uow.Roles.GetByNameAsync("User", cancellationToken);
 
         var userRoleEntity = new UserRole
         {
@@ -70,10 +70,10 @@ public class AuthenticationService(IUnitOfWork uof, IJwtService jwtService) : IA
             UserId = newUser.UserId
         };
 
-        await uof.UserRoles.AddAsync(userRoleEntity, cancellationToken);
-        await uof.SaveChangesAsync(cancellationToken);
+        await uow.UserRoles.AddAsync(userRoleEntity, cancellationToken);
+        await uow.SaveChangesAsync(cancellationToken);
 
-        var user = await uof.Users.GetByIdAsync(newUser.UserId, cancellationToken);
+        var user = await uow.Users.GetByIdAsync(newUser.UserId, cancellationToken);
         if (user is null)
             return Errors.NotFound(nameof(User), newUser.UserId.ToString());
         
@@ -86,8 +86,8 @@ public class AuthenticationService(IUnitOfWork uof, IJwtService jwtService) : IA
             User = user
         };
 
-        await uof.RefreshTokens.AddAsync(refreshTokenEntity, cancellationToken);
-        await uof.SaveChangesAsync(cancellationToken);
+        await uow.RefreshTokens.AddAsync(refreshTokenEntity, cancellationToken);
+        await uow.SaveChangesAsync(cancellationToken);
         
         return Result<LoginResponse>.Success(new LoginResponse(accessToken, refreshToken));
     }
@@ -102,11 +102,11 @@ public class AuthenticationService(IUnitOfWork uof, IJwtService jwtService) : IA
         if (string.IsNullOrWhiteSpace(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
             return Errors.BadRequest("Токен доступа не валидный");
         
-        var user = await uof.Users.GetByIdAsync(userId, cancellationToken);
+        var user = await uow.Users.GetByIdAsync(userId, cancellationToken);
         if (user is null)
             return Errors.BadRequest("Токен доступа не валидный");
         
-        var refreshTokenEntity = await uof.RefreshTokens.GetRefreshTokenByUserId(user.UserId, cancellationToken);
+        var refreshTokenEntity = await uow.RefreshTokens.GetRefreshTokenByUserId(user.UserId, cancellationToken);
         if(refreshTokenEntity is null || refreshTokenEntity.Token != request.RefreshToken)
             return Errors.BadRequest("Токен доступа не валидный");
         
@@ -115,9 +115,9 @@ public class AuthenticationService(IUnitOfWork uof, IJwtService jwtService) : IA
         
         refreshTokenEntity.Token = newRefreshToken;
         refreshTokenEntity.User = user;
-        uof.RefreshTokens.Update(refreshTokenEntity);
+        uow.RefreshTokens.Update(refreshTokenEntity);
         
-        await uof.SaveChangesAsync(cancellationToken);
+        await uow.SaveChangesAsync(cancellationToken);
         
         return Result<LoginResponse>.Success(new LoginResponse(newAccessToken, newRefreshToken));
     }
@@ -128,17 +128,30 @@ public class AuthenticationService(IUnitOfWork uof, IJwtService jwtService) : IA
             return Errors.BadRequest(
                 "ID авторизованного пользователя и ID пользователя отправившего запрос на выход из системы не совпадают");
 
-        var user = await uof.Users.GetByIdAsync(userId, cancellationToken);
+        var user = await uow.Users.GetByIdAsync(userId, cancellationToken);
         if(user is null)
             return Errors.NotFound(nameof(User), userId.ToString());
         
-        var refreshTokenEntity = await uof.RefreshTokens.GetRefreshTokenByUserId(user.UserId,  cancellationToken);
+        var refreshTokenEntity = await uow.RefreshTokens.GetRefreshTokenByUserId(user.UserId,  cancellationToken);
         if (refreshTokenEntity is null)
             return Errors.BadRequest("Вы и не были авторизованы, чтобы выйти из системы");
 
         refreshTokenEntity.Token = string.Empty;
-        uof.RefreshTokens.Update(refreshTokenEntity);
-        await uof.SaveChangesAsync(cancellationToken);
+        uow.RefreshTokens.Update(refreshTokenEntity);
+        await uow.SaveChangesAsync(cancellationToken);
         return Result<string>.Success("Вы теперь не авторизованы в системе");
+    }
+
+    public async Task<Result<string>> DisableUser(Guid userId, CancellationToken cancellationToken = default)
+    {
+        var user = await uow.Users.GetByIdAsync(userId, cancellationToken);
+        if (user is null)
+            return Errors.NotFound(nameof(User), userId.ToString());
+        
+        user.IsActive = false;
+        uow.Users.Update(user);
+        await uow.SaveChangesAsync(cancellationToken);
+
+        return Result<string>.Success("Пользователь с данного момента не активен.");
     }
 }

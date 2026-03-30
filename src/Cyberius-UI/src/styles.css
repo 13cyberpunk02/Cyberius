@@ -1,5 +1,5 @@
 /* =====================================================
-   Cyberius — Global Styles
+   CYBERIUS — Global Styles
    Tailwind CSS v4  (@import "tailwindcss" + @theme)
    Glassmorphism + Azure palette + Dark / Light themes
    ===================================================== */
@@ -685,7 +685,7 @@ body.light .group:hover .heading-text {
 .user-avatar-btn {
   background: linear-gradient(135deg, #0ca2e7 0%, #06b6d4 100%);
   box-shadow: 0 0 14px rgba(12, 162, 231, 0.4);
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   cursor: pointer;
   border: none;
 }
@@ -790,4 +790,15 @@ body.light .group:hover .heading-text {
 .modal-scroll-container::-webkit-scrollbar-thumb {
   background: rgba(12, 162, 231, 0.3);
   border-radius: 2px;
+}
+
+/* ─────────────────────────────────────────
+   CONFIRM DIALOG — danger button
+   ───────────────────────────────────────── */
+.confirm-btn-danger {
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+  box-shadow: 0 4px 20px rgba(244, 63, 94, 0.35);
+}
+.confirm-btn-danger:hover {
+  box-shadow: 0 8px 32px rgba(244, 63, 94, 0.55);
 }

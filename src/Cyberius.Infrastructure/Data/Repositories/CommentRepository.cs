@@ -62,6 +62,16 @@ public class CommentRepository(AppDbContext db)
         return (items, total);
     }
  
+    public async Task<Comment?> GetWithAuthorAsync(Guid id, CancellationToken ct = default) =>
+        await _db.Comments
+            .Include(c => c.Author)
+            .Include(c => c.Reactions)
+            .Include(c => c.Replies.Where(r => !r.IsDeleted).OrderBy(r => r.CreatedAt))
+                .ThenInclude(r => r.Author)
+            .Include(c => c.Replies)
+                .ThenInclude(r => r.Reactions)
+            .FirstOrDefaultAsync(c => c.Id == id, ct);
+ 
     public async Task<int> GetCountByPostAsync(
         Guid postId, CancellationToken ct = default) =>
         await _db.Comments

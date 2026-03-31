@@ -9,6 +9,7 @@ import {
 import { PostsService } from '../../../../core/services/posts.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { PostDetailModel, ReactionType } from '../../../../core/models/post.model';
+import { Comments } from '../../components/comments/comments';
 
 const REACTION_EMOJI: Record<string, string> = {
   Like: '👍',
@@ -20,7 +21,7 @@ const REACTION_EMOJI: Record<string, string> = {
 
 @Component({
   selector: 'app-post-detail',
-  imports: [CommonModule, RouterModule, BlockRenderer, ConfirmDialog],
+  imports: [CommonModule, RouterModule, BlockRenderer, ConfirmDialog, Comments],
   templateUrl: './post-detail.html',
   styleUrl: './post-detail.css',
 })

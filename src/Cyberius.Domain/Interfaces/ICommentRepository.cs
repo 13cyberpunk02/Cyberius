@@ -23,6 +23,9 @@ public interface ICommentRepository: IGenericRepository<Comment>
         int pageSize,
         CancellationToken ct = default);
  
+    // Получить с автором и реакциями — для ответа после создания/обновления
+    Task<Comment?> GetWithAuthorAsync(Guid id, CancellationToken ct = default);
+ 
     // Количество комментариев статьи (для карточки)
     Task<int> GetCountByPostAsync(
         Guid postId,

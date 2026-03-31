@@ -15,9 +15,20 @@ public class MinioStorageService(
 {
     private readonly MinioOptions _options = options.Value;
 
+    // Папки для аватаров и блога лежат в разных bucket-ах
+    private const string BlogBucket   = "blog-files";   // обложки и блоки статей
+    // AvatarBucket берём из настроек (_options.BucketName = "avatars")
+ 
+    // ── Public URL ─────────────────────────────────────────────────────────
+    // Файлы отдаются через API: GET /api/files/{objectName}
+    // При этом objectName может содержать слэш: "covers/uuid_file.jpg"
+    // — его нужно НЕ экранировать, иначе роут не совпадёт
     public string GetPublicUrl(string objectName)
-        => $"{_options.PublicBaseUrl}/files/{Uri.EscapeDataString(objectName)}";
-    
+        => $"{_options.PublicBaseUrl}/api/files/{objectName}";
+ 
+    // ── Upload ─────────────────────────────────────────────────────────────
+    // fileName приходит уже с уникальным именем от FilesEndpoint
+    // ("covers/uuid_file.jpg") — просто кладём как есть, без доп. UUID
     public async Task<Result<string>> UploadAsync(
         Stream stream,
         string fileName,
@@ -26,24 +37,23 @@ public class MinioStorageService(
     {
         try
         {
-            await EnsureBucketExistsAsync(ct);
-
-            // Уникальное имя объекта чтобы не было коллизий
-            var objectName = $"{Guid.NewGuid()}_{fileName}";
-
+            var bucket = BucketFor(fileName);
+            await EnsureBucketExistsAsync(bucket, ct);
+ 
             var putArgs = new PutObjectArgs()
-                .WithBucket(_options.BucketName)
-                .WithObject(objectName)
+                .WithBucket(bucket)
+                .WithObject(fileName)           // используем как есть
                 .WithStreamData(stream)
                 .WithObjectSize(stream.Length)
                 .WithContentType(contentType);
-
+ 
             await minioClient.PutObjectAsync(putArgs, ct);
-
-            logger.LogInformation("Файл {FileName} загружен как {ObjectName}", 
-                fileName, objectName);
-
-            return objectName; 
+ 
+            logger.LogInformation(
+                "Файл загружен: bucket={Bucket}, object={Object}",
+                bucket, fileName);
+ 
+            return fileName;
         }
         catch (Exception ex)
         {
@@ -51,26 +61,28 @@ public class MinioStorageService(
             return Errors.Internal("Ошибка при загрузке файла", ex);
         }
     }
-
+ 
+    // ── Get stream ─────────────────────────────────────────────────────────
     public async Task<Result<Stream>> GetFileStreamAsync(
         string objectName,
         CancellationToken ct = default)
     {
         try
         {
+            var bucket = BucketFor(objectName);
             var memoryStream = new MemoryStream();
-
+ 
             var getArgs = new GetObjectArgs()
-                .WithBucket(_options.BucketName)
+                .WithBucket(bucket)
                 .WithObject(objectName)
                 .WithCallbackStream(async (stream, token) =>
                 {
                     await stream.CopyToAsync(memoryStream, token);
                 });
-
+ 
             await minioClient.GetObjectAsync(getArgs, ct);
             memoryStream.Position = 0;
-
+ 
             return memoryStream;
         }
         catch (Exception ex)
@@ -79,19 +91,21 @@ public class MinioStorageService(
             return Errors.Internal("Ошибка при получении файла", ex);
         }
     }
-
+ 
+    // ── Delete ─────────────────────────────────────────────────────────────
     public async Task<Result> DeleteAsync(
         string objectName,
         CancellationToken ct = default)
     {
         try
         {
+            var bucket = BucketFor(objectName);
+ 
             var removeArgs = new RemoveObjectArgs()
-                .WithBucket(_options.BucketName)
+                .WithBucket(bucket)
                 .WithObject(objectName);
-
+ 
             await minioClient.RemoveObjectAsync(removeArgs, ct);
-
             return Result.Success();
         }
         catch (Exception ex)
@@ -100,20 +114,29 @@ public class MinioStorageService(
             return Errors.Internal("Ошибка при удалении файла", ex);
         }
     }
-
-    private async Task EnsureBucketExistsAsync(CancellationToken ct)
+ 
+    // ── Helpers ────────────────────────────────────────────────────────────
+ 
+    // Определяем bucket по prefix имени файла:
+    //   "covers/..."  → blog-files
+    //   "blocks/..."  → blog-files
+    //   "avatars/..." → avatars  (настройка BucketName)
+    //   всё остальное → avatars  (обратная совместимость)
+    private string BucketFor(string objectName) =>
+        objectName.StartsWith("covers/") || objectName.StartsWith("blocks/")
+            ? BlogBucket
+            : _options.BucketName;
+ 
+    private async Task EnsureBucketExistsAsync(string bucket, CancellationToken ct)
     {
-        var existsArgs = new BucketExistsArgs()
-            .WithBucket(_options.BucketName);
-
-        var exists = await minioClient.BucketExistsAsync(existsArgs, ct);
+        var exists = await minioClient.BucketExistsAsync(
+            new BucketExistsArgs().WithBucket(bucket), ct);
+ 
         if (exists) return;
-
-        var makeArgs = new MakeBucketArgs()
-            .WithBucket(_options.BucketName);
-
-        await minioClient.MakeBucketAsync(makeArgs, ct);
-
-        logger.LogInformation("Bucket {BucketName} создан", _options.BucketName);
+ 
+        await minioClient.MakeBucketAsync(
+            new MakeBucketArgs().WithBucket(bucket), ct);
+ 
+        logger.LogInformation("Bucket создан: {BucketName}", bucket);
     }
 }

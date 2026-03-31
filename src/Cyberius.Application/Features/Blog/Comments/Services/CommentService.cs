@@ -74,14 +74,14 @@ public sealed class CommentService(IUnitOfWork uow) : ICommentService
         await uow.Comments.AddAsync(comment, ct);
         await uow.SaveChangesAsync(ct);
  
-        // Перезагружаем с автором
-        var created = await uow.Comments.GetByIdAsync(comment.Id, ct);
+        // GetWithAuthorAsync — загружаем с Author, Reactions, Replies
+        var created = await uow.Comments.GetWithAuthorAsync(comment.Id, ct);
         return MapComment(created!, null, []);
     }
  
     public async Task<Result<CommentResponse>> UpdateAsync(
         Guid commentId, Guid currentUserId, UpdateCommentRequest request, CancellationToken ct = default)
-    {
+    { 
         var comment = await uow.Comments.GetByIdAsync(commentId, ct);
         if (comment is null)
             return Errors.Comment.NotFound(commentId.ToString());
@@ -96,10 +96,11 @@ public sealed class CommentService(IUnitOfWork uow) : ICommentService
         uow.Comments.Update(comment);
         await uow.SaveChangesAsync(ct);
  
+        var updated = await uow.Comments.GetWithAuthorAsync(commentId, ct);
         var reactionCounts = await uow.CommentReactions
             .GetCountsByCommentsAsync([commentId], ct);
  
-        return MapComment(comment, currentUserId, reactionCounts);
+        return MapComment(updated!, currentUserId, reactionCounts);
     }
  
     public async Task<Result> DeleteAsync(

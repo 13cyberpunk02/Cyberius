@@ -16,6 +16,7 @@ public interface IUnitOfWork : IAsyncDisposable
     IPostRepository Posts { get; }
     IPostViewRepository PostViews { get; }
     ITagRepository Tags { get; }
+    IPostTagRepository PostTags { get; }
 
     Task<int> SaveChangesAsync(CancellationToken ct = default);
 

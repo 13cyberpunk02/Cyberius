@@ -18,6 +18,7 @@ public class UnitOfWork(AppDbContext db) : IUnitOfWork
     public IPostRepository Posts => field is null ? field ??= new PostRepository(db) : field;
     public IPostViewRepository PostViews => field is null ? field ??= new PostViewRepository(db) : field;
     public ITagRepository Tags => field is null ? field ??= new TagRepository(db) : field;
+    public IPostTagRepository PostTags => field is null ? field ??= new PostTagRepository(db) : field;
 
     public Task<int> SaveChangesAsync(CancellationToken ct = default)
         => db.SaveChangesAsync(ct);

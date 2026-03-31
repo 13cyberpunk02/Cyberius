@@ -9,6 +9,11 @@ public interface IPostViewRepository : IGenericRepository<PostView>
         Guid postId,
         CancellationToken ct = default);
  
+    // Количество просмотров для списка постов — один запрос вместо N
+    Task<Dictionary<Guid, int>> GetCountsByPostsAsync(
+        IEnumerable<Guid> postIds,
+        CancellationToken ct = default);
+ 
     // Проверка — смотрел ли этот юзер/IP статью
     // (для дедупликации: не считать повторные просмотры)
     Task<bool> HasViewedAsync(

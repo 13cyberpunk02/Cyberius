@@ -64,12 +64,21 @@ export class PostDetail implements OnInit {
       next: (post) => {
         this.post.set(post);
         this.loading.set(false);
+        // Трекаем просмотр после загрузки статьи
+        this.trackView(post.id);
       },
       error: (err) => {
         this.loading.set(false);
         if (err.status === 404) this.notFound.set(true);
       },
     });
+  }
+
+  private trackView(postId: string): void {
+    // Небольшая задержка — считаем просмотр только если пользователь реально открыл статью
+    setTimeout(() => {
+      this.postsService.trackView(postId).subscribe({ error: () => {} });
+    }, 3000);
   }
 
   react(type: ReactionType): void {

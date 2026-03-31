@@ -70,8 +70,15 @@
       <!-- Author + actions -->
       <div class="flex items-center justify-between mb-10 pb-6 border-b border-white/10">
         <div class="flex items-center gap-3">
-          <div class="user-avatar-btn w-11 h-11 rounded-full flex items-center justify-center font-bold text-white text-lg">
-            {{ post.author.fullName[0] }}
+          <!-- Author avatar -->
+          <div class="w-11 h-11 rounded-full overflow-hidden shrink-0">
+            @if (getImageUrl(post.author.avatarUrl); as url) {
+              <img [src]="url" [alt]="post.author.fullName" class="w-full h-full object-cover"/>
+            } @else {
+              <div class="user-avatar-btn w-full h-full flex items-center justify-center font-bold text-white text-lg">
+                {{ post.author.fullName[0] }}
+              </div>
+            }
           </div>
           <div>
             <p class="font-semibold heading-text text-sm">{{ post.author.fullName }}</p>
@@ -173,7 +180,10 @@
           {{ post.commentCount }} комментариев
         </span>
       </div>
+
+      <!-- Comments -->
       <app-comments [postId]="post.id" />
+
     </div>
   }
 </div>

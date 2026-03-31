@@ -76,4 +76,15 @@ public class CommentRepository(AppDbContext db)
         Guid postId, CancellationToken ct = default) =>
         await _db.Comments
             .CountAsync(c => c.PostId == postId && !c.IsDeleted, ct);
+ 
+    public async Task<Dictionary<Guid, int>> GetCountsByPostsAsync(
+        IEnumerable<Guid> postIds, CancellationToken ct = default)
+    {
+        var ids = postIds.ToList();
+        return await _db.Comments
+            .Where(c => ids.Contains(c.PostId) && !c.IsDeleted)
+            .GroupBy(c => c.PostId)
+            .Select(g => new { PostId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.PostId, x => x.Count, ct);
+    }
 }

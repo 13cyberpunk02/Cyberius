@@ -89,6 +89,11 @@ export class PostsService {
     return this.http.post<void>(`${this.base}/${id}/react/${type}`, {});
   }
 
+  // Трекинг просмотра — POST /api/posts/{id}/view
+  trackView(id: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/view`, {});
+  }
+
   // ── Helpers ────────────────────────────────────────────────────
 
   private buildPageParams(params: GetPostsParams): HttpParams {

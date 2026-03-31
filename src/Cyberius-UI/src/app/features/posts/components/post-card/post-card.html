@@ -6,7 +6,7 @@
   @if (coverUrl) {
     <a [routerLink]="['/posts', post().slug]" class="block overflow-hidden h-48">
       <img
-        [src]="coverUrl!"
+        [src]="coverUrl"
         [alt]="post().title"
         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         loading="lazy"
@@ -68,8 +68,14 @@
     <!-- Footer: author + date + stats -->
     <div class="flex items-center justify-between pt-4 border-t border-white/10 mt-auto">
       <div class="flex items-center gap-2">
-        <div class="user-avatar-btn w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0">
-          {{ post().author.fullName[0]}}
+        <div class="w-7 h-7 rounded-full overflow-hidden shrink-0">
+          @if (authorAvatarUrl()) {
+            <img [src]="authorAvatarUrl()!" [alt]="post().author.fullName" class="w-full h-full object-cover"/>
+          } @else {
+            <div class="user-avatar-btn w-full h-full flex items-center justify-center text-xs font-bold text-white">
+              {{ post().author.fullName[0]}}
+            </div>
+          }
         </div>
         <span class="text-xs text-slate-400 truncate max-w-25">
           {{ post().author.fullName }}

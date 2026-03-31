@@ -1,7 +1,8 @@
-import { Component, input } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { PostSummary } from '../../../../core/models/post.model';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-post-card',
@@ -11,9 +12,17 @@ import { PostSummary } from '../../../../core/models/post.model';
 })
 export class PostCard {
   post = input.required<PostSummary>();
+  private auth = inject(AuthService);
 
-  get coverUrl(): string {
-    return this.post().coverImageUrl!;
+  readonly authorAvatarUrl = computed(() => {
+    const path = this.post().author.avatarUrl;
+    if (!path) return null;
+    if (path.startsWith('http')) return path;
+    return this.auth.FILES_BASE + path;
+  });
+
+  get coverUrl(): string | null {
+    return this.post().coverImageUrl;
   }
 
   get categoryColor(): string {

@@ -15,6 +15,17 @@ public class PostViewRepository(AppDbContext db)
         await _db.PostViews
             .CountAsync(v => v.PostId == postId, ct);
  
+    public async Task<Dictionary<Guid, int>> GetCountsByPostsAsync(
+        IEnumerable<Guid> postIds, CancellationToken ct = default)
+    {
+        var ids = postIds.ToList();
+        return await _db.PostViews
+            .Where(v => ids.Contains(v.PostId))
+            .GroupBy(v => v.PostId)
+            .Select(g => new { PostId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.PostId, x => x.Count, ct);
+    }
+ 
     public async Task<bool> HasViewedAsync(
         Guid postId,
         Guid? userId,
@@ -43,8 +54,8 @@ public class PostViewRepository(AppDbContext db)
  
         var raw = await _db.PostViews
             .Where(v => v.PostId == postId
-                        && v.ViewedAt >= fromDt
-                        && v.ViewedAt <= toDt)
+                     && v.ViewedAt >= fromDt
+                     && v.ViewedAt <= toDt)
             .GroupBy(v => v.ViewedAt.Date)
             .Select(g => new { Date = g.Key, Count = g.Count() })
             .OrderBy(x => x.Date)

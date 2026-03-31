@@ -69,6 +69,10 @@ public static class PostEndpoints
             .RequireAuthorization()
             .WithSummary("React to post (toggle)");
 
+        // Публичный — трекинг просмотра (анонимные тоже считаются)
+        group.MapPost("{id:guid}/view", TrackView)
+            .WithSummary("Track post view");
+
         return group;
     }
 
@@ -240,6 +244,19 @@ public static class PostEndpoints
         var userId = GetCurrentUserIdRequired(httpContext);
         var result = await postService.ReactAsync(id, userId, reactionType, ct);
         return result.ToHttpResponse();
+    }
+
+    private static async Task<IResult> TrackView(
+        [FromRoute] Guid id,
+        IPostViewService viewService,
+        HttpContext httpContext,
+        CancellationToken ct)
+    {
+        var userId = GetCurrentUserId(httpContext);
+        var ipAddress = httpContext.Connection.RemoteIpAddress?.ToString();
+        var userAgent = httpContext.Request.Headers.UserAgent.ToString();
+        await viewService.TrackAsync(id, userId, ipAddress, userAgent, ct);
+        return Results.NoContent();
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────

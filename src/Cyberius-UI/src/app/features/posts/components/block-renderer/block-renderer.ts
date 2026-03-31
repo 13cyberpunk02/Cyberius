@@ -3,10 +3,11 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ContentBlockDto } from '../../../../core/models/post.model';
 import { HighlightDirective } from '../../../../shared/directives/highlight.directive';
+import { SafeUrlPipe } from '../../../../core/pipes/safe-url-pipe';
 
 @Component({
   selector: 'app-block-renderer',
-  imports: [CommonModule, HighlightDirective],
+  imports: [CommonModule, HighlightDirective, SafeUrlPipe],
   templateUrl: './block-renderer.html',
   styleUrl: './block-renderer.css',
 })

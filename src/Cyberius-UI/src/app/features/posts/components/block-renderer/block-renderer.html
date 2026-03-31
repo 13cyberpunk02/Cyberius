@@ -98,6 +98,24 @@
         </div>
       }
 
+      @case ('VideoEmbed') {
+        @if (block.imageUrl) {
+          <div class="my-2">
+            <div class="relative aspect-video rounded-2xl overflow-hidden shadow-lg bg-black">
+              <iframe
+                [src]="block.imageUrl | safeUrl"
+                class="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen
+                loading="lazy"
+              ></iframe>
+            </div>
+            @if (block.imageCaption) {
+              <p class="text-center text-sm text-slate-500 mt-3 italic">{{ block.imageCaption }}</p>
+            }
+          </div>
+        }
+      }
       @case ('Divider') {
         <hr class="border-white/10 my-2"/>
       }

@@ -14,6 +14,7 @@ import { CategoryService } from '../../../../core/services/category.service';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../core/services/auth.service';
 import { CategoryResponse } from '../../../../core/models/category.model';
+import { SafeUrlPipe } from '../../../../core/pipes/safe-url-pipe';
 
 interface EditorBlock extends CreateContentBlockRequest {
   id: string; // локальный id для track-by
@@ -27,6 +28,7 @@ const BLOCK_TYPES: { type: BlockType; label: string; icon: string }[] = [
   { type: 'Heading3', label: 'Подзаголовок', icon: 'H3' },
   { type: 'Code', label: 'Код', icon: '</>' },
   { type: 'Image', label: 'Изображение', icon: '🖼' },
+  { type: 'VideoEmbed', label: 'Видео', icon: '▶' },
   { type: 'Quote', label: 'Цитата', icon: '"' },
   { type: 'Callout', label: 'Callout', icon: 'ℹ' },
   { type: 'Divider', label: 'Разделитель', icon: '—' },
@@ -34,7 +36,7 @@ const BLOCK_TYPES: { type: BlockType; label: string; icon: string }[] = [
 
 @Component({
   selector: 'app-post-editor',
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, SafeUrlPipe],
   templateUrl: './post-editor.html',
   styleUrl: './post-editor.css',
 })
@@ -191,6 +193,35 @@ export class PostEditor implements OnInit {
       .subscribe({
         next: (res) => this.updateBlock(index, { imageUrl: res.url }),
       });
+  }
+
+  // Извлекает embed URL из ссылки YouTube / Vimeo / Rutube
+  static extractEmbedUrl(url: string): string | null {
+    try {
+      // YouTube: youtu.be/ID или youtube.com/watch?v=ID или youtube.com/shorts/ID
+      const ytShort  = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+      const ytWatch  = url.match(/youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/);
+      const ytShorts = url.match(/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/);
+      const ytId = (ytShort ?? ytWatch ?? ytShorts)?.[1];
+      if (ytId) return `https://www.youtube.com/embed/${ytId}`;
+
+      // Vimeo: vimeo.com/ID
+      const vimeo = url.match(/vimeo\.com\/(\d+)/);
+      if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`;
+
+      // Rutube: rutube.ru/video/ID
+      const rutube = url.match(/rutube\.ru\/video\/([a-zA-Z0-9]+)/);
+      if (rutube) return `https://rutube.ru/play/embed/${rutube[1]}`;
+
+      // Уже embed URL — возвращаем как есть
+      if (url.includes('/embed/') || url.includes('player.')) return url;
+    } catch { /* ignore */ }
+    return null;
+  }
+
+  onVideoUrlChange(index: number, url: string): void {
+    const embedUrl = PostEditor.extractEmbedUrl(url) ?? url;
+    this.updateBlock(index, { content: url, imageUrl: embedUrl });
   }
 
   // ── Save / Publish ─────────────────────────────────────────────

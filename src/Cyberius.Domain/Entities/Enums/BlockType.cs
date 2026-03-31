@@ -9,4 +9,5 @@ public enum BlockType
     Quote,
     Callout,
     Divider,
+    VideoEmbed
 }

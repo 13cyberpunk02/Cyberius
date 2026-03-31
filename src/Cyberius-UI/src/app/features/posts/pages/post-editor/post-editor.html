@@ -227,6 +227,31 @@
                   </div>
                 }
 
+                @case ('VideoEmbed') {
+                  <div class="space-y-2">
+                    <label class="text-xs text-slate-400">Вставьте ссылку на видео</label>
+                    <input
+                      type="text"
+                      [ngModel]="block.content"
+                      (ngModelChange)="onVideoUrlChange(i, $event)"
+                      placeholder="https://youtu.be/dQw4w9WgXcQ"
+                      class="email-input w-full px-3 py-2 rounded-lg text-sm font-mono"
+                    />
+                    <p class="text-xs text-slate-500">Поддерживается: YouTube, Vimeo, Rutube</p>
+                    @if (block.imageUrl) {
+                      <div class="aspect-video rounded-lg overflow-hidden bg-black/40">
+                        <iframe
+                          [src]="block.imageUrl | safeUrl"
+                          class="w-full h-full"
+                          frameborder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowfullscreen
+                        ></iframe>
+                      </div>
+                    }
+                  </div>
+                }
+
                 @case ('Divider') {
                   <div class="flex items-center gap-3 text-slate-500 text-xs">
                     <hr class="flex-1 border-white/20"/>

@@ -11,9 +11,7 @@
         (click)="openCreate()"
         class="btn-primary flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:scale-105"
       >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-        </svg>
+        <fa-icon [icon]="faPlus" />
         Добавить
       </button>
     </div>
@@ -21,7 +19,8 @@
     <!-- Error banner -->
     @if (errorMsg()) {
       <div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-sm mb-6">
-        ⚠️ {{ errorMsg() }}
+        <fa-icon [icon]="faExclamationTriangle" size="lg" />
+        {{ errorMsg() }}
       </div>
     }
 
@@ -57,7 +56,7 @@
             <div class="flex items-center gap-4 min-w-0">
               <!-- Color swatch -->
               <div
-                class="w-10 h-10 rounded-xl flex-shrink-0 ring-2 ring-white/10"
+                class="w-10 h-10 rounded-xl shrink-0 ring-2 ring-white/10"
                 [style.background]="cat.color ?? '#0ca2e7'"
               ></div>
 
@@ -72,7 +71,7 @@
             </div>
 
             <!-- Actions -->
-            <div class="flex items-center gap-2 flex-shrink-0">
+            <div class="flex items-center gap-2 shrink-0">
               <button
                 (click)="openEdit(cat)"
                 class="btn-secondary px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
@@ -98,7 +97,8 @@
     <!-- Back link -->
     <div class="mt-8">
       <a routerLink="/posts" class="text-sm text-slate-400 hover:text-sky-400 transition-colors flex items-center gap-1 w-fit">
-        ← Вернуться к статьям
+        <fa-icon [icon]="faArrowLeft" size="lg" />
+        Вернуться к статьям
       </a>
     </div>
 
@@ -115,9 +115,7 @@
       <!-- Close -->
       <button (click)="closeForm()"
               class="absolute top-4 right-4 theme-btn w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
+        <fa-icon [icon]="faXmark" />
       </button>
 
       <h2 class="text-xl font-black heading-text mb-6">
@@ -205,9 +203,7 @@
         <!-- Error -->
         @if (errorMsg()) {
           <p class="text-rose-400 text-sm flex items-center gap-1.5">
-            <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-            </svg>
+            <fa-icon [icon]="faInfoCircle" size="lg" class="shrink-0" />
             {{ errorMsg() }}
           </p>
         }
@@ -222,10 +218,7 @@
                   [disabled]="saving()"
                   class="btn-primary flex-1 py-3 rounded-xl text-sm font-semibold text-white disabled:opacity-50 flex items-center justify-center gap-2">
             @if (saving()) {
-              <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-              </svg>
+              <fa-icon [icon]="faSpinner" animation="spin-pulse" />
             }
             {{ editingId() ? 'Сохранить' : 'Создать' }}
           </button>

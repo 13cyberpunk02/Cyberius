@@ -4,6 +4,8 @@ import { PostsService } from '../../../../core/services/posts.service';
 import { CATEGORY_META, PostSummary } from '../../../../core/models/post.model';
 import { SafeHtml } from '@angular/platform-browser';
 import { SvgIconService } from '../../../../core/services/svgIcon.service';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { faArrowRight, faBarsStaggered, faClock } from '@fortawesome/free-solid-svg-icons';
 
 type CategoryMeta = {
   label:        string;
@@ -16,7 +18,7 @@ type FilterValue = 'all' | string; // slug категории
 
 @Component({
   selector: 'app-featured-posts',
-  imports: [CommonModule],
+  imports: [CommonModule, FaIconComponent],
   templateUrl: './featured-posts.html',
   styleUrl: './featured-posts.css',
 })
@@ -97,4 +99,8 @@ export class FeaturedPosts implements OnInit {
   getReadDate(post: PostSummary): string {
     return this.formatDate(post.publishedAt ?? post.createdAt);
   }
+
+  protected readonly faClock = faClock;
+  protected readonly faArrowRight = faArrowRight;
+  protected readonly faBarsStaggered = faBarsStaggered;
 }

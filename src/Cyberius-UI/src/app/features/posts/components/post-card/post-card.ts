@@ -3,10 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { PostSummary } from '../../../../core/models/post.model';
 import { AuthService } from '../../../../core/services/auth.service';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { faClock, faCommentDots, faEye } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-post-card',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FaIconComponent],
   templateUrl: './post-card.html',
   styleUrl: './post-card.css',
 })
@@ -41,4 +43,8 @@ export class PostCard {
   totalReactions(): number {
     return Object.values(this.post().reactions).reduce((a, b) => a + b, 0);
   }
+
+  protected readonly faClock = faClock;
+  protected readonly faEye = faEye;
+  protected readonly faCommentDots = faCommentDots;
 }

@@ -28,7 +28,8 @@
 
         <!-- Hot badge -->
         <div class="absolute top-5 left-5 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/60 backdrop-blur-sm border border-white/20 text-xs font-bold text-amber-400">
-          🔥 Популярное
+          <fa-icon [icon]="faFire" animation="fade" class="text-amber-500" />
+          Популярное
         </div>
 
         <div class="flex flex-col md:flex-row min-h-70">
@@ -50,7 +51,7 @@
               class="w-full md:w-2/5 shrink-0 flex items-center justify-center text-6xl"
               [style.background]="'linear-gradient(135deg, ' + categoryColor + '22, ' + categoryColor + '08)'"
             >
-              📝
+              <fa-icon [icon]="faNewspaper" />
             </div>
           }
 
@@ -69,9 +70,7 @@
                   {{ post.category.name }}
                 </span>
                 <span class="text-xs text-slate-400 font-mono flex items-center gap-1">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
+                  <fa-icon [icon]="faClock" />
                   {{ post.readTimeMinutes }} мин
                 </span>
               </div>
@@ -125,21 +124,17 @@
                 <!-- Stats -->
                 <div class="flex items-center gap-3 text-xs text-slate-500">
                   <span class="flex items-center gap-1">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                    </svg>
+                    <fa-icon [icon]="faEye" />
                     {{ post.viewCount }}
                   </span>
                   <span class="flex items-center gap-1">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                    </svg>
+                    <fa-icon [icon]="faCommentDots" />
                     {{ post.commentCount }}
                   </span>
                   @if (totalReactions() > 0) {
                     <span class="flex items-center gap-1">
-                      ❤️ {{ totalReactions() }}
+                      <fa-icon class="text-red-600" [icon]="faHeart" animation="beat-fade" />
+                      {{ totalReactions() }}
                     </span>
                   }
                 </div>
@@ -150,9 +145,7 @@
                   class="btn-primary flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-300 hover:scale-105 active:scale-95"
                 >
                   Читать
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-                  </svg>
+                  <fa-icon [icon]="faArrowRight" />
                 </a>
               </div>
             </div>

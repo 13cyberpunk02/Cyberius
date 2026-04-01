@@ -4,10 +4,21 @@ import { RouterModule } from '@angular/router';
 import { PostsService } from '../../../../core/services/posts.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { PostSummary } from '../../../../core/models/post.model';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import {
+  faArrowRight,
+  faClock,
+  faCommentDots,
+  faEye,
+  faFire,
+  faHeart,
+  faHeartbeat,
+  faNewspaper,
+} from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-top-post',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FaIconComponent],
   templateUrl: './top-post.html',
   styleUrl: './top-post.css',
 })
@@ -63,4 +74,13 @@ export class TopPost implements OnInit {
   get categoryColor(): string {
     return this.post()?.category.color ?? '#0ca2e7';
   }
+
+  protected readonly faClock = faClock;
+  protected readonly faEye = faEye;
+  protected readonly faCommentDots = faCommentDots;
+  protected readonly faHeartbeat = faHeartbeat;
+  protected readonly faHeart = faHeart;
+  protected readonly faArrowRight = faArrowRight;
+  protected readonly faFire = faFire;
+  protected readonly faNewspaper = faNewspaper;
 }

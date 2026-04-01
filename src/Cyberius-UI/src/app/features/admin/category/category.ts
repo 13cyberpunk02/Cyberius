@@ -8,6 +8,15 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { CategoryService } from '../../../core/services/category.service';
 import { CategoryResponse, CreateCategoryRequest } from '../../../core/models/category.model';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import {
+  faArrowLeft,
+  faExclamationTriangle,
+  faInfoCircle,
+  faPlus,
+  faSpinner,
+  faXmark,
+} from '@fortawesome/free-solid-svg-icons';
 
 interface CategoryForm {
   name: string;
@@ -35,7 +44,7 @@ const COLOR_PALETTE = [
 
 @Component({
   selector: 'app-category',
-  imports: [CommonModule, FormsModule, RouterModule, ConfirmDialog],
+  imports: [CommonModule, FormsModule, RouterModule, ConfirmDialog, FaIconComponent],
   templateUrl: './category.html',
   styleUrl: './category.css',
 })
@@ -226,4 +235,11 @@ export class Category implements OnInit {
       },
     });
   }
+
+  protected readonly faPlus = faPlus;
+  protected readonly faExclamationTriangle = faExclamationTriangle;
+  protected readonly faArrowLeft = faArrowLeft;
+  protected readonly faXmark = faXmark;
+  protected readonly faInfoCircle = faInfoCircle;
+  protected readonly faSpinner = faSpinner;
 }

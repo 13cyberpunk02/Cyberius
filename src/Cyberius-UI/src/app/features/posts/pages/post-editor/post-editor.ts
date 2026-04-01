@@ -15,6 +15,30 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../core/services/auth.service';
 import { CategoryResponse } from '../../../../core/models/category.model';
 import { SafeUrlPipe } from '../../../../core/pipes/safe-url-pipe';
+import { FaIconComponent, IconDefinition } from '@fortawesome/angular-fontawesome';
+import {
+  faArrowDown,
+  faArrowUp,
+  faClipboardList,
+  faCode,
+  faDivide,
+  faExclamationTriangle,
+  faFeatherPointed,
+  faFireBurner,
+  faFloppyDisk,
+  faHeading,
+  faImage,
+  faInfoCircle,
+  faLightbulb,
+  faPaperclip,
+  faParagraph,
+  faPlay,
+  faQuoteLeft,
+  faRocket,
+  faSpinner,
+  faTableList,
+  faXmark,
+} from '@fortawesome/free-solid-svg-icons';
 
 interface EditorBlock extends CreateContentBlockRequest {
   id: string; // локальный id для track-by
@@ -22,21 +46,22 @@ interface EditorBlock extends CreateContentBlockRequest {
 
 type SaveStatus = 'idle' | 'saving' | 'publishing' | 'error';
 
-const BLOCK_TYPES: { type: BlockType; label: string; icon: string }[] = [
-  { type: 'Paragraph', label: 'Параграф', icon: '¶' },
-  { type: 'Heading2', label: 'Заголовок', icon: 'H2' },
-  { type: 'Heading3', label: 'Подзаголовок', icon: 'H3' },
-  { type: 'Code', label: 'Код', icon: '</>' },
-  { type: 'Image', label: 'Изображение', icon: '🖼' },
-  { type: 'VideoEmbed', label: 'Видео', icon: '▶' },
-  { type: 'Quote', label: 'Цитата', icon: '"' },
-  { type: 'Callout', label: 'Callout', icon: 'ℹ' },
-  { type: 'Divider', label: 'Разделитель', icon: '—' },
+const BLOCK_TYPES: { type: BlockType; label: string; icon: IconDefinition }[] = [
+  { type: 'Paragraph', label: 'Параграф', icon: faParagraph },
+  { type: 'Heading2', label: 'Заголовок', icon: faHeading },
+  { type: 'Heading3', label: 'Подзаголовок', icon: faClipboardList },
+  { type: 'Code', label: 'Код', icon: faCode },
+  { type: 'Image', label: 'Изображение', icon: faImage },
+  { type: 'VideoEmbed', label: 'Видео', icon: faPlay },
+  { type: 'Table', label: 'Таблица', icon: faTableList },
+  { type: 'Quote', label: 'Цитата', icon: faQuoteLeft },
+  { type: 'Callout', label: 'Callout', icon: faFeatherPointed },
+  { type: 'Divider', label: 'Разделитель', icon: faDivide },
 ];
 
 @Component({
   selector: 'app-post-editor',
-  imports: [CommonModule, RouterModule, FormsModule, SafeUrlPipe],
+  imports: [CommonModule, RouterModule, FormsModule, SafeUrlPipe, FaIconComponent],
   templateUrl: './post-editor.html',
   styleUrl: './post-editor.css',
 })
@@ -121,7 +146,12 @@ export class PostEditor implements OnInit {
       id: crypto.randomUUID(),
       type,
       order: 0,
-      content: type === 'Divider' ? null : '',
+      content:
+        type === 'Divider'
+          ? null
+          : type === 'Table'
+            ? JSON.stringify({ headers: ['Столбец 1', 'Столбец 2'], rows: [['', '']] })
+            : '',
       language: type === 'Code' ? 'csharp' : null,
       imageUrl: null,
       imageCaption: null,
@@ -199,8 +229,8 @@ export class PostEditor implements OnInit {
   static extractEmbedUrl(url: string): string | null {
     try {
       // YouTube: youtu.be/ID или youtube.com/watch?v=ID или youtube.com/shorts/ID
-      const ytShort  = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
-      const ytWatch  = url.match(/youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/);
+      const ytShort = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+      const ytWatch = url.match(/youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/);
       const ytShorts = url.match(/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/);
       const ytId = (ytShort ?? ytWatch ?? ytShorts)?.[1];
       if (ytId) return `https://www.youtube.com/embed/${ytId}`;
@@ -215,13 +245,70 @@ export class PostEditor implements OnInit {
 
       // Уже embed URL — возвращаем как есть
       if (url.includes('/embed/') || url.includes('player.')) return url;
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     return null;
   }
 
   onVideoUrlChange(index: number, url: string): void {
     const embedUrl = PostEditor.extractEmbedUrl(url) ?? url;
     this.updateBlock(index, { content: url, imageUrl: embedUrl });
+  }
+
+  // ── Table helpers ──────────────────────────────────────────────
+
+  parseTableContent(content: string | null): { headers: string[]; rows: string[][] } {
+    if (!content) return { headers: ['Столбец 1', 'Столбец 2'], rows: [['', '']] };
+    try {
+      return JSON.parse(content);
+    } catch {
+      return { headers: ['Столбец 1', 'Столбец 2'], rows: [['', '']] };
+    }
+  }
+
+  saveTable(index: number, data: { headers: string[]; rows: string[][] }): void {
+    this.updateBlock(index, { content: JSON.stringify(data) });
+  }
+
+  tableAddColumn(index: number): void {
+    const t = this.parseTableContent(this.blocks()[index].content);
+    t.headers.push(`Столбец ${t.headers.length + 1}`);
+    t.rows = t.rows.map((r) => [...r, '']);
+    this.saveTable(index, t);
+  }
+
+  tableRemoveColumn(index: number): void {
+    const t = this.parseTableContent(this.blocks()[index].content);
+    if (t.headers.length <= 1) return;
+    t.headers.pop();
+    t.rows = t.rows.map((r) => r.slice(0, -1));
+    this.saveTable(index, t);
+  }
+
+  tableAddRow(index: number): void {
+    const t = this.parseTableContent(this.blocks()[index].content);
+    t.rows.push(new Array(t.headers.length).fill(''));
+    this.saveTable(index, t);
+  }
+
+  tableRemoveRow(blockIndex: number, rowIndex: number): void {
+    const t = this.parseTableContent(this.blocks()[blockIndex].content);
+    if (t.rows.length <= 1) return;
+    t.rows.splice(rowIndex, 1);
+    this.saveTable(blockIndex, t);
+  }
+
+  tableUpdateHeader(blockIndex: number, colIndex: number, value: string): void {
+    const t = this.parseTableContent(this.blocks()[blockIndex].content);
+    t.headers[colIndex] = value;
+    this.saveTable(blockIndex, t);
+  }
+
+  tableUpdateCell(blockIndex: number, rowIndex: number, colIndex: number, value: string): void {
+    const t = this.parseTableContent(this.blocks()[blockIndex].content);
+    t.rows[rowIndex][colIndex] = value;
+    this.saveTable(blockIndex, t);
   }
 
   // ── Save / Publish ─────────────────────────────────────────────
@@ -280,4 +367,16 @@ export class PostEditor implements OnInit {
       },
     });
   }
+
+  protected readonly faInfoCircle = faInfoCircle;
+  protected readonly faSpinner = faSpinner;
+  protected readonly faPaperclip = faPaperclip;
+  protected readonly faFloppyDisk = faFloppyDisk;
+  protected readonly faRocket = faRocket;
+  protected readonly faLightbulb = faLightbulb;
+  protected readonly faExclamationTriangle = faExclamationTriangle;
+  protected readonly faFireBurner = faFireBurner;
+  protected readonly faXmark = faXmark;
+  protected readonly faArrowDown = faArrowDown;
+  protected readonly faArrowUp = faArrowUp;
 }

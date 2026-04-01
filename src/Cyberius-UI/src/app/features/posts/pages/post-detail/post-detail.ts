@@ -10,6 +10,14 @@ import { PostsService } from '../../../../core/services/posts.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { PostDetailModel, ReactionType } from '../../../../core/models/post.model';
 import { Comments } from '../../components/comments/comments';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import {
+  faAngleLeft,
+  faCommentDots,
+  faEye,
+  faPenToSquare,
+  faTrashCan,
+} from '@fortawesome/free-solid-svg-icons';
 
 const REACTION_EMOJI: Record<string, string> = {
   Like: '👍',
@@ -21,7 +29,7 @@ const REACTION_EMOJI: Record<string, string> = {
 
 @Component({
   selector: 'app-post-detail',
-  imports: [CommonModule, RouterModule, BlockRenderer, ConfirmDialog, Comments],
+  imports: [CommonModule, RouterModule, BlockRenderer, ConfirmDialog, Comments, FaIconComponent],
   templateUrl: './post-detail.html',
   styleUrl: './post-detail.css',
 })
@@ -135,4 +143,10 @@ export class PostDetail implements OnInit {
       year: 'numeric',
     }).format(new Date(dateStr));
   }
+
+  protected readonly faAngleLeft = faAngleLeft;
+  protected readonly faPenToSquare = faPenToSquare;
+  protected readonly faTrashCan = faTrashCan;
+  protected readonly faEye = faEye;
+  protected readonly faCommentDots = faCommentDots;
 }

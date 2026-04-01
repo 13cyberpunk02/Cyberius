@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faCheckCircle, faEnvelope, faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-newsletter',
@@ -24,4 +24,6 @@ export class Newsletter {
   }
 
   protected readonly faSpinner = faSpinner;
+  protected readonly faEnvelope = faEnvelope;
+  protected readonly faCheckCircle = faCheckCircle;
 }

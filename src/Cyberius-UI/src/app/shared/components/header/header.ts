@@ -13,6 +13,7 @@ import {
   faCode,
   faMoon,
   faSun,
+  faTag,
   faUser,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
@@ -96,4 +97,6 @@ export class Header {
     this.authService.logout();
     this.showUserMenu.set(false);
   }
+
+  protected readonly faTag = faTag;
 }

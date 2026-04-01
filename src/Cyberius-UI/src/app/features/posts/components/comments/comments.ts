@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { CommentService } from '../../../../core/services/comment.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { CommentResponse, PagedComments } from '../../../../core/models/comment.model';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { faReply, faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 const REACTION_EMOJI: Record<string, string> = {
   Like: '👍',
@@ -15,7 +17,7 @@ const REACTION_EMOJI: Record<string, string> = {
 
 @Component({
   selector: 'app-comments',
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, FaIconComponent],
   templateUrl: './comments.html',
   styleUrl: './comments.css',
 })
@@ -295,4 +297,7 @@ export class Comments implements OnInit {
       return { ...p, items: p.items.map((c) => (c.id === commentId ? updated : c)) };
     });
   }
+
+  protected readonly faSpinner = faSpinner;
+  protected readonly faReply = faReply;
 }

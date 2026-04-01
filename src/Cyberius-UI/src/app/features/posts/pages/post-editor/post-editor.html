@@ -20,10 +20,8 @@
 
       <!-- Error banner -->
       @if (saveStatus() === 'error') {
-        <div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-sm mb-6 animate-fadeInUp">
-          <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-          </svg>
+        <div>
+          <fa-icon [icon]="faInfoCircle" />
           {{ errorMsg() }}
         </div>
       }
@@ -103,12 +101,9 @@
             />
             <label class="btn-secondary px-4 py-3 rounded-xl text-sm font-medium cursor-pointer shrink-0 transition-all">
               @if (uploadingCover()) {
-                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                </svg>
+                <fa-icon [icon]="faSpinner" animation="spin-pulse" />
               } @else {
-                📎 Загрузить
+                <fa-icon [icon]="faPaperclip" />Загрузить
               }
               <input type="file" accept="image/*" class="hidden" (change)="onCoverFileSelected($event)" [disabled]="uploadingCover()"/>
             </label>
@@ -133,11 +128,11 @@
                   {{ block.type }}
                 </span>
                 <button (click)="moveBlock(i, -1)" [disabled]="i === 0"
-                        class="w-6 h-6 rounded glass-card flex items-center justify-center text-slate-400 hover:text-white disabled:opacity-30 text-xs">↑</button>
+                        class="w-6 h-6 rounded glass-card flex items-center justify-center text-slate-400 hover:text-white disabled:opacity-30 text-xs"><fa-icon [icon]="faArrowUp" /></button>
                 <button (click)="moveBlock(i, 1)" [disabled]="i === blocks().length - 1"
-                        class="w-6 h-6 rounded glass-card flex items-center justify-center text-slate-400 hover:text-white disabled:opacity-30 text-xs">↓</button>
+                        class="w-6 h-6 rounded glass-card flex items-center justify-center text-slate-400 hover:text-white disabled:opacity-30 text-xs"><fa-icon [icon]="faArrowDown" /></button>
                 <button (click)="removeBlock(i)"
-                        class="w-6 h-6 rounded glass-card flex items-center justify-center text-rose-400 hover:text-rose-300 text-xs">✕</button>
+                        class="w-6 h-6 rounded glass-card flex items-center justify-center text-rose-400 hover:text-rose-300 text-xs"><fa-icon [icon]="faXmark" /></button>
               </div>
 
               <!-- Block-specific editor -->
@@ -191,7 +186,7 @@
                              placeholder="URL изображения..."
                              class="email-input flex-1 px-3 py-2 rounded-lg text-sm"/>
                       <label class="btn-secondary px-3 py-2 rounded-lg text-sm cursor-pointer shrink-0">
-                        📎
+                        <fa-icon [icon]="faPaperclip" />
                         <input type="file" accept="image/*" class="hidden" (change)="onBlockImageSelected($event, i)"/>
                       </label>
                     </div>
@@ -215,10 +210,10 @@
                   <div class="space-y-2">
                     <select [ngModel]="block.calloutType" (ngModelChange)="updateBlock(i, {calloutType: $event})"
                             class="email-input px-3 py-1.5 rounded-lg text-xs">
-                      <option value="info">ℹ️ Info</option>
-                      <option value="tip">💡 Tip</option>
-                      <option value="warning">⚠️ Warning</option>
-                      <option value="danger">🚨 Danger</option>
+                      <option value="info"><fa-icon [icon]="faInfoCircle" class="text-blue-600" />Info</option>
+                      <option value="tip"><fa-icon [icon]="faLightbulb" class="text-shadow-yellow-300"/>Tip</option>
+                      <option value="warning"><fa-icon [icon]="faExclamationTriangle" class="text-amber-600"/>Warning</option>
+                      <option value="danger"><fa-icon [icon]="faFireBurner" class="text-red-600"/>Danger</option>
                     </select>
                     <textarea [ngModel]="block.content" (ngModelChange)="updateBlock(i, {content: $event})"
                               placeholder="Текст callout-блока..."
@@ -243,12 +238,70 @@
                         <iframe
                           [src]="block.imageUrl | safeUrl"
                           class="w-full h-full"
-                          frameborder="0"
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                           allowfullscreen
                         ></iframe>
                       </div>
                     }
+                  </div>
+                }
+
+                @case ('Table') {
+                  @let table = parseTableContent(block.content);
+                  <div class="space-y-2">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <button type="button" (click)="tableAddColumn(i)"
+                              class="px-2.5 py-1 rounded-lg text-xs glass-card text-slate-300 hover:text-sky-400 border border-white/10 transition-all">
+                        + Столбец
+                      </button>
+                      <button type="button" (click)="tableRemoveColumn(i)"
+                              [disabled]="table.headers.length <= 1"
+                              class="px-2.5 py-1 rounded-lg text-xs glass-card text-slate-300 hover:text-rose-400 border border-white/10 transition-all disabled:opacity-40">
+                        − Столбец
+                      </button>
+                      <button type="button" (click)="tableAddRow(i)"
+                              class="px-2.5 py-1 rounded-lg text-xs glass-card text-slate-300 hover:text-sky-400 border border-white/10 transition-all">
+                        + Строка
+                      </button>
+                    </div>
+                    <div class="overflow-x-auto rounded-xl border border-white/10">
+                      <table class="w-full text-sm">
+                        <thead>
+                        <tr class="border-b border-white/10 bg-white/5">
+                          @for (header of table.headers; track $index; let ci = $index) {
+                            <th class="p-1">
+                              <input type="text" [value]="header"
+                                     (change)="tableUpdateHeader(i, ci, $any($event.target).value)"
+                                     class="email-input w-full px-2 py-1.5 rounded-lg text-xs font-semibold"
+                                     placeholder="Заголовок"/>
+                            </th>
+                          }
+                          <th class="w-8 p-1"></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                          @for (row of table.rows; track $index; let ri = $index) {
+                            <tr class="border-b border-white/5">
+                              @for (cell of row; track $index; let ci = $index) {
+                                <td class="p-1">
+                                  <input type="text" [value]="cell"
+                                         (change)="tableUpdateCell(i, ri, ci, $any($event.target).value)"
+                                         class="email-input w-full px-2 py-1.5 rounded-lg text-xs"
+                                         placeholder="Ячейка"/>
+                                </td>
+                              }
+                              <td class="p-1 w-8">
+                                <button type="button" (click)="tableRemoveRow(i, ri)"
+                                        [disabled]="table.rows.length <= 1"
+                                        class="w-6 h-6 rounded flex items-center justify-center text-slate-500 hover:text-rose-400 transition-colors disabled:opacity-40">
+                                  ✕
+                                </button>
+                              </td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 }
 
@@ -268,7 +321,8 @@
                   @for (bt of blockTypes; track bt.type) {
                     <button (click)="addBlock(bt.type, i)"
                             class="px-2 py-1 rounded text-xs font-mono glass-card text-slate-400 hover:text-sky-400 hover:border-sky-400/30 transition-all border border-white/10">
-                      {{ bt.icon }} {{ bt.label }}
+                      <fa-icon [icon]="bt.icon" />
+                      {{ bt.label }}
                     </button>
                   }
                 </div>
@@ -284,7 +338,7 @@
             @for (bt of blockTypes; track bt.type) {
               <button (click)="addBlock(bt.type)"
                       class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm glass-card text-slate-300 hover:text-sky-400 hover:border-sky-400/30 transition-all border border-white/10">
-                <span class="font-mono text-base">{{ bt.icon }}</span>
+                <span class="font-mono text-base"><fa-icon [icon]="bt.icon" /></span>
                 {{ bt.label }}
               </button>
             }
@@ -300,13 +354,10 @@
           class="btn-secondary px-6 py-3 rounded-xl text-sm font-semibold transition-all hover:scale-105 disabled:opacity-50 flex items-center gap-2 justify-center"
         >
           @if (saveStatus() === 'saving') {
-            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-            </svg>
+            <fa-icon [icon]="faSpinner" animation="spin-pulse" />
             Сохраняем...
           } @else {
-            💾 Сохранить черновик
+            <fa-icon [icon]="faFloppyDisk" /> Сохранить черновик
           }
         </button>
 
@@ -316,13 +367,10 @@
           class="btn-primary px-6 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:scale-105 disabled:opacity-50 flex items-center gap-2 justify-center"
         >
           @if (saveStatus() === 'publishing') {
-            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-            </svg>
+            <fa-icon [icon]="faSpinner" animation="spin-pulse" />
             Публикуем...
           } @else {
-            🚀 Опубликовать
+            <fa-icon [icon]="faRocket" /> Опубликовать
           }
         </button>
       </div>

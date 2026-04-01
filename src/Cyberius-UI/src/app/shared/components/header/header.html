@@ -101,24 +101,18 @@
                 <!-- Menu items -->
                 <div class="p-2">
                   <a routerLink="/profile" (click)="closeUserMenu()" class="user-menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200">
-                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                    </svg>
+                    <fa-icon [icon]="faUser" class="text-slate-400" />
                     Профиль
                   </a>
                   <a routerLink="/saved" (click)="closeUserMenu()" class="user-menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200">
-                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
-                    </svg>
+                    <fa-icon [icon]="faBookmark" class="text-slate-400" />
                     Сохранённые
                   </a>
                   <!-- Admin links -->
                   @if (authService.profile()?.roles?.includes('Admin') || authService.profile()?.roles?.includes('Manager')) {
                     <div class="my-1.5 border-t border-white/10"></div>
                     <a routerLink="/admin/categories" (click)="closeUserMenu()" class="user-menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200">
-                      <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-                      </svg>
+                      <fa-icon [icon]="faTag" class="text-slate-400" />
                       Категории
                     </a>
                   }
@@ -130,9 +124,7 @@
                     (click)="logout()"
                     class="user-menu-item user-menu-logout w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 text-rose-400 hover:text-rose-300"
                   >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                    </svg>
+                    <fa-icon [icon]="faArrowRightFromBracket" />
                     Выйти
                   </button>
                 </div>

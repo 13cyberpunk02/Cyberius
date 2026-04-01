@@ -1,9 +1,11 @@
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { faAnglesDown, faArrowDown, faArrowRight, faStar } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-hero',
-  imports: [CommonModule],
+  imports: [CommonModule, FaIconComponent],
   templateUrl: './hero.html',
   styleUrl: './hero.css',
 })
@@ -46,4 +48,8 @@ export class Hero implements OnInit, OnDestroy {
     { label: 'Minimal API', color: 'badge-teal' },
     { label: 'Signals', color: 'badge-amber' },
   ];
+  protected readonly faArrowRight = faArrowRight;
+  protected readonly faStar = faStar;
+  protected readonly faArrowDown = faArrowDown;
+  protected readonly faAnglesDown = faAnglesDown;
 }

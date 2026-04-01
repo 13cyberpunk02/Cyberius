@@ -4,10 +4,24 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { ContentBlockDto } from '../../../../core/models/post.model';
 import { HighlightDirective } from '../../../../shared/directives/highlight.directive';
 import { SafeUrlPipe } from '../../../../core/pipes/safe-url-pipe';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import {
+  faCheck,
+  faCopy,
+  faExclamationTriangle,
+  faFireBurner,
+  faInfoCircle,
+  faLightbulb,
+} from '@fortawesome/free-solid-svg-icons';
+
+interface TableData {
+  headers: string[];
+  rows: string[][];
+}
 
 @Component({
   selector: 'app-block-renderer',
-  imports: [CommonModule, HighlightDirective, SafeUrlPipe],
+  imports: [CommonModule, HighlightDirective, SafeUrlPipe, FaIconComponent],
   templateUrl: './block-renderer.html',
   styleUrl: './block-renderer.css',
 })
@@ -27,10 +41,37 @@ export class BlockRenderer {
     return [...this.blocks()].sort((a, b) => a.order - b.order);
   }
 
+  // Параграф: переводим \n → <br> для отображения пустых строк
+  formatParagraph(content: string | null): string {
+    if (!content) return '';
+    return content
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\n/g, '<br>');
+  }
+
+  // Таблица хранится как JSON: { headers: [...], rows: [[...], [...]] }
+  parseTable(content: string | null): TableData | null {
+    if (!content) return null;
+    try {
+      return JSON.parse(content) as TableData;
+    } catch {
+      return null;
+    }
+  }
+
   copyCode(blockId: string, content: string): void {
     navigator.clipboard.writeText(content).then(() => {
       this.copiedId.set(blockId);
       setTimeout(() => this.copiedId.set(null), 2000);
     });
   }
+
+  protected readonly faCheck = faCheck;
+  protected readonly faCopy = faCopy;
+  protected readonly faExclamationTriangle = faExclamationTriangle;
+  protected readonly faFireBurner = faFireBurner;
+  protected readonly faLightbulb = faLightbulb;
+  protected readonly faInfoCircle = faInfoCircle;
 }

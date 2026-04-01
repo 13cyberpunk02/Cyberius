@@ -8,10 +8,18 @@ import { CategoryService } from '../../../../core/services/category.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { PagedResponse, PostSummary } from '../../../../core/models/post.model';
 import { CategoryResponse } from '../../../../core/models/category.model';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import {
+  faAngleLeft,
+  faAngleRight,
+  faMagnifyingGlass,
+  faPlusCircle,
+  faXmark,
+} from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-post-list',
-  imports: [CommonModule, RouterModule, FormsModule, PostCard],
+  imports: [CommonModule, RouterModule, FormsModule, PostCard, FaIconComponent],
   templateUrl: './post-list.html',
   styleUrl: './post-list.css',
 })
@@ -108,4 +116,10 @@ export class PostList implements OnInit {
       queryParamsHandling: 'merge',
     });
   }
+
+  protected readonly faPlusCircle = faPlusCircle;
+  protected readonly faMagnifyingGlass = faMagnifyingGlass;
+  protected readonly faAngleLeft = faAngleLeft;
+  protected readonly faAngleRight = faAngleRight;
+  protected readonly faXmark = faXmark;
 }

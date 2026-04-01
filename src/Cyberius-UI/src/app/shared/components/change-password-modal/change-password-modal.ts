@@ -14,6 +14,7 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
 import {
   faCheck,
+  faExclamationTriangle,
   faEye,
   faEyeSlash,
   faLock,
@@ -193,4 +194,6 @@ export class ChangePasswordModal implements OnInit, OnDestroy {
   toggleConfirm(): void {
     this.showConfirm.update((v) => !v);
   }
+
+  protected readonly faExclamationTriangle = faExclamationTriangle;
 }

@@ -1,5 +1,11 @@
 import { Component, input, OnDestroy, OnInit, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import {
+  faCircleQuestion,
+  faExclamationTriangle,
+  faSpinner,
+} from '@fortawesome/free-solid-svg-icons';
 
 export interface ConfirmDialogConfig {
   title: string;
@@ -11,7 +17,7 @@ export interface ConfirmDialogConfig {
 
 @Component({
   selector: 'app-confirm-dialog',
-  imports: [CommonModule],
+  imports: [CommonModule, FaIconComponent],
   templateUrl: './confirm-dialog.html',
   styleUrl: './confirm-dialog.css',
 })
@@ -44,4 +50,8 @@ export class ConfirmDialog implements OnInit, OnDestroy {
       this.cancelled.emit();
     }
   }
+
+  protected readonly faExclamationTriangle = faExclamationTriangle;
+  protected readonly faCircleQuestion = faCircleQuestion;
+  protected readonly faSpinner = faSpinner;
 }

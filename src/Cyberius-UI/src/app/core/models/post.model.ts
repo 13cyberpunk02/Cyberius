@@ -6,7 +6,7 @@ export type BlockType =
   | 'Heading1' | 'Heading2' | 'Heading3'
   | 'Paragraph' | 'Code' | 'Image'
   | 'Quote' | 'Callout' | 'Divider'
-  | 'VideoEmbed';
+  | 'VideoEmbed' | 'Table';
 
 export type ReactionType = 'Like' | 'Heart' | 'Fire' | 'Clap' | 'Thinking';
 

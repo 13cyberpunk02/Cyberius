@@ -79,9 +79,7 @@
                     {{ post.category.name }}
                   </span>
                   <span class="flex items-center gap-1 text-xs text-slate-400 font-mono">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
+                    <fa-icon [icon]="faClock" />
                     {{ post.readTimeMinutes }} мин
                   </span>
                 </div>
@@ -113,9 +111,7 @@
                     class="flex items-center gap-1 text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors group/link"
                   >
                     Читать
-                    <svg class="w-4 h-4 group-hover/link:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-                    </svg>
+                    <fa-icon [icon]="faArrowRight" />
                   </a>
                 </div>
               </div>
@@ -131,9 +127,7 @@
           class="btn-secondary inline-flex items-center gap-2 px-8 py-3.5 rounded-xl font-semibold transition-all duration-300 hover:scale-105 active:scale-95"
         >
           Все статьи
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h10"/>
-          </svg>
+          <fa-icon [icon]="faBarsStaggered" />
         </a>
       </div>
     }

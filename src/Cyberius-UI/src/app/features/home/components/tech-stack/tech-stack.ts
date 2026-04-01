@@ -2,6 +2,8 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SafeHtml } from '@angular/platform-browser';
 import { SvgIconService } from '../../../../core/services/svgIcon.service';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { faCheck } from '@fortawesome/free-solid-svg-icons';
 
 interface TechItem {
   name: string;
@@ -16,7 +18,7 @@ interface TechItem {
 @Component({
   selector: 'app-tech-stack',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FaIconComponent],
   templateUrl: './tech-stack.html',
 })
 export class TechStack implements OnInit {
@@ -66,4 +68,6 @@ export class TechStack implements OnInit {
       });
     });
   }
+
+  protected readonly faCheck = faCheck;
 }

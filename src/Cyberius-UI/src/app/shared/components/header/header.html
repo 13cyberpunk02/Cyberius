@@ -35,6 +35,35 @@
       <!-- Actions -->
       <div class="flex items-center gap-3">
 
+        <div class="relative search-wrapper">
+          <button
+            (click)="toggleSearch($event)"
+            class="theme-btn w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95"
+            title="Поиск">
+            <fa-icon [icon]="faMagnifyingGlass" class="text-slate-400" />
+          </button>
+          @if (showSearch()) {
+            <div class="absolute right-0 top-12 w-72 glass-card rounded-xl p-2 shadow-lg animate-fadeInUp border border-white/20 z-50">
+              <form (ngSubmit)="submitSearch()" class="flex gap-2">
+                <input
+                  id="header-search"
+                  type="text"
+                  [ngModel]="searchQuery()"
+                  (ngModelChange)="searchQuery.set($event)"
+                  name="q"
+                  placeholder="Поиск статей..."
+                  class="email-input flex-1 px-3 py-2 rounded-lg text-sm"
+                  (click)="$event.stopPropagation()"
+                />
+                <button type="submit"
+                        class="btn-primary px-3 py-2 rounded-lg text-sm font-medium text-white">
+                  <fa-icon [icon]="faArrowRight" />
+                </button>
+              </form>
+            </div>
+          }
+        </div>
+
         <!-- Theme Toggle -->
         <button
           (click)="themeService.toggle()"

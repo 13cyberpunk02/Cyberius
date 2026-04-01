@@ -9,8 +9,7 @@ namespace Cyberius.Application.Features.Blog.Posts.Services;
 
 public sealed class PostService(IUnitOfWork uow, IStorageService storageService) : IPostService
 {
-        // ── Queries ────────────────────────────────────────────────────────────
- 
+    
     public async Task<Result<PostDetailResponse>> GetByIdAsync(
         Guid id, Guid? currentUserId, CancellationToken ct = default)
     {
@@ -54,6 +53,13 @@ public sealed class PostService(IUnitOfWork uow, IStorageService storageService)
         string tagSlug, int page, int pageSize, CancellationToken ct = default)
     {
         var (items, total) = await uow.Posts.GetByTagAsync(tagSlug, page, pageSize, ct);
+        return await ToPagedResultAsync(items, total, page, pageSize, ct);
+    }
+ 
+    public async Task<Result<PagedResponse<PostSummaryResponse>>> GetByAuthorAsync(
+        Guid authorId, int page, int pageSize, CancellationToken ct = default)
+    {
+        var (items, total) = await uow.Posts.GetByAuthorAsync(authorId, page, pageSize, ct);
         return await ToPagedResultAsync(items, total, page, pageSize, ct);
     }
  

@@ -1,0 +1,116 @@
+<div class="min-h-screen pt-24 pb-16">
+
+  @if (loading()) {
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-pulse">
+      <div class="flex items-center gap-5 mb-10">
+        <div class="w-20 h-20 rounded-full bg-white/10"></div>
+        <div class="space-y-2">
+          <div class="w-48 h-6 rounded bg-white/10"></div>
+          <div class="w-32 h-4 rounded bg-white/5"></div>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (!loading() && notFound()) {
+    <div class="max-w-7xl mx-auto px-4 text-center py-24">
+      <div class="text-5xl mb-4">👤</div>
+      <h1 class="text-2xl font-black heading-text mb-2">Пользователь не найден</h1>
+      <a routerLink="/posts" class="text-sky-400 hover:underline text-sm">К статьям</a>
+    </div>
+  }
+
+  @if (!loading() && profile(); as profile) {
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Author card -->
+      <div class="glass-card rounded-2xl p-8 mb-10">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+
+          <!-- Avatar -->
+          <div class="w-20 h-20 rounded-full overflow-hidden shrink-0">
+            @if (avatarUrl()) {
+              <img [src]="avatarUrl()!" [alt]="profile.firstName" class="w-full h-full object-cover"/>
+            } @else {
+              <div class="user-avatar-btn w-full h-full flex items-center justify-center text-3xl font-black text-white">
+                {{ profile.firstName[0] }}
+              </div>
+            }
+          </div>
+
+          <!-- Info -->
+          <div class="flex-1">
+            <h1 class="text-2xl font-black heading-text mb-1">
+              {{ profile.firstName }} {{ profile.lastName }}
+            </h1>
+            <p class="text-sky-400 font-mono text-sm mb-3">&#64;{{ profile.username }}</p>
+            <div class="flex flex-wrap gap-4 text-xs text-slate-400">
+              <span class="flex items-center gap-1.5">
+                <fa-icon [icon]="faCalendar" />
+                На сайте с {{ formatDate(profile.joinedDate) }}
+              </span>
+              <span class="flex items-center gap-1.5">
+                <fa-icon [icon]="faBlogger" />
+                {{ paged()?.totalCount ?? 0 }} статей
+              </span>
+            </div>
+          </div>
+
+          <!-- Roles -->
+          @if (profile.roles?.length) {
+            <div class="flex flex-wrap gap-2">
+              @for (role of profile.roles; track role) {
+                <span class="px-3 py-1 rounded-lg text-xs font-semibold font-mono"
+                      [class]="role === 'Admin'
+                    ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
+                    : 'bg-sky-500/15 text-sky-400 border border-sky-500/30'">
+                  {{ role }}
+                </span>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Posts -->
+      <div class="mb-6">
+        <h2 class="text-xl font-bold heading-text">Статьи автора</h2>
+      </div>
+
+      @if (posts.length === 0) {
+        <div class="text-center py-16 text-slate-500">
+          <div class="text-4xl mb-3">📭</div>
+          <p>У автора пока нет опубликованных статей</p>
+        </div>
+      } @else {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+          @for (post of posts; track post.id) {
+            <app-post-card [post]="post" />
+          }
+        </div>
+
+        <!-- Pagination -->
+        @if (totalPages > 1) {
+          <div class="flex items-center justify-center gap-2">
+            <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1"
+                    class="btn-secondary w-10 h-10 rounded-xl flex items-center justify-center disabled:opacity-40">
+              <fa-icon [icon]="faArrowRight" />
+            </button>
+            @for (page of pages; track page) {
+              <button (click)="goToPage(page)"
+                      class="w-10 h-10 rounded-xl text-sm font-semibold transition-all"
+                      [class.filter-active]="currentPage() === page"
+                      [class.filter-inactive]="currentPage() !== page">
+                {{ page }}
+              </button>
+            }
+            <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages"
+                    class="btn-secondary w-10 h-10 rounded-xl flex items-center justify-center disabled:opacity-40">
+              <fa-icon [icon]="faArrowLeft" />
+            </button>
+          </div>
+        }
+      }
+    </div>
+  }
+</div>

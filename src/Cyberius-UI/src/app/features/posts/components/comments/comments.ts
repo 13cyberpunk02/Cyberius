@@ -5,7 +5,7 @@ import { CommentService } from '../../../../core/services/comment.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { CommentResponse, PagedComments } from '../../../../core/models/comment.model';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faReply, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faComment, faReply, faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 const REACTION_EMOJI: Record<string, string> = {
   Like: '👍',
@@ -14,6 +14,9 @@ const REACTION_EMOJI: Record<string, string> = {
   Clap: '👏',
   Thinking: '🤔',
 };
+
+const DAYS = ['воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'];
+const DAYS_SHORT = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
 
 @Component({
   selector: 'app-comments',
@@ -34,9 +37,9 @@ export class Comments implements OnInit {
   // Новый комментарий
   newText = signal('');
 
-  // Ответ на комментарий
+  // Ответ — храним весь комментарий для цитаты
   replyToId = signal<string | null>(null);
-  replyToName = signal('');
+  replyToComment = signal<CommentResponse | null>(null);
   replyText = signal('');
 
   // Редактирование
@@ -55,19 +58,43 @@ export class Comments implements OnInit {
     return this.paged()?.totalCount ?? 0;
   }
 
+  private currentPage = 1;
+  hasMore = signal(false);
+  loadingMore = signal(false);
+
   ngOnInit(): void {
-    this.load();
+    this.load(1);
   }
 
-  private load(page = 1): void {
-    this.loading.set(true);
-    this.commentService.getByPost(this.postId(), page).subscribe({
+  private load(page: number): void {
+    if (page === 1) this.loading.set(true);
+    else this.loadingMore.set(true);
+
+    this.commentService.getByPost(this.postId(), page, 10).subscribe({
       next: (p) => {
-        this.paged.set(p);
+        if (page === 1) {
+          this.paged.set(p);
+        } else {
+          // Дописываем новые комментарии к существующим
+          this.paged.update((existing) =>
+            existing ? { ...p, items: [...existing.items, ...p.items] } : p,
+          );
+        }
+        this.currentPage = page;
+        this.hasMore.set(page < p.totalPages);
         this.loading.set(false);
+        this.loadingMore.set(false);
       },
-      error: () => this.loading.set(false),
+      error: () => {
+        this.loading.set(false);
+        this.loadingMore.set(false);
+      },
     });
+  }
+
+  loadMore(): void {
+    if (this.loadingMore() || !this.hasMore()) return;
+    this.load(this.currentPage + 1);
   }
 
   // ── Submit new comment ─────────────────────────────────────────
@@ -95,13 +122,14 @@ export class Comments implements OnInit {
 
   openReply(comment: CommentResponse): void {
     this.replyToId.set(comment.id);
-    this.replyToName.set(comment.author.fullName);
+    this.replyToComment.set(comment);
     this.replyText.set('');
     this.editingId.set(null);
   }
 
   cancelReply(): void {
     this.replyToId.set(null);
+    this.replyToComment.set(null);
     this.replyText.set('');
   }
 
@@ -136,6 +164,13 @@ export class Comments implements OnInit {
         },
         error: () => this.submitting.set(false),
       });
+  }
+
+  // Цитата — первые 120 символов текста родительского комментария
+  get quoteText(): string {
+    const c = this.replyToComment();
+    if (!c) return '';
+    return c.content.length > 120 ? c.content.slice(0, 120) + '...' : c.content;
   }
 
   // ── Edit ───────────────────────────────────────────────────────
@@ -210,7 +245,7 @@ export class Comments implements OnInit {
 
   // ── React ──────────────────────────────────────────────────────
 
-  react(commentId: string, parentId: string | null, type: string): void {
+  react(commentId: string, _parentId: string | null, type: string): void {
     if (!this.isAuthenticated()) return;
 
     this.commentService.react(commentId, type).subscribe({
@@ -252,8 +287,22 @@ export class Comments implements OnInit {
     return comment.author.id === user.id || roles.includes('Admin') || roles.includes('Manager');
   }
 
-  reactionTotal(comment: CommentResponse): number {
-    return Object.values(comment.reactions).reduce((a, b) => a + b, 0);
+  // Формат: "создано 14:32, четверг" / "изменено 14:32, чт"
+  formatCommentTime(comment: CommentResponse): string {
+    const date = new Date(comment.isEdited ? comment.updatedAt : comment.createdAt);
+    const prefix = comment.isEdited ? 'изменено' : 'создано';
+    const time = date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDay = Math.floor(diffMs / 86400000);
+
+    let dayStr: string;
+    if (diffDay === 0) dayStr = 'сегодня';
+    else if (diffDay === 1) dayStr = 'вчера';
+    else if (diffDay < 7) dayStr = DAYS[date.getDay()];
+    else dayStr = date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+
+    return `${prefix} ${time}, ${dayStr}`;
   }
 
   formatDate(dateStr: string): string {
@@ -300,4 +349,5 @@ export class Comments implements OnInit {
 
   protected readonly faSpinner = faSpinner;
   protected readonly faReply = faReply;
+  protected readonly faComment = faComment;
 }

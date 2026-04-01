@@ -37,6 +37,9 @@ public static class PostEndpoints
 
         group.MapGet("tag/{tagSlug}", GetByTag)
             .WithSummary("Get posts by tag");
+        
+        group.MapGet("author/{authorId:guid}", GetByAuthor)
+            .WithSummary("Get posts by author (public)");
 
         // ── Authorized ─────────────────────────────────────────────────────
         group.MapGet("drafts", GetDrafts)
@@ -162,6 +165,17 @@ public static class PostEndpoints
         CancellationToken ct = default)
     {
         var result = await postService.GetByTagAsync(tagSlug, page, pageSize, ct);
+        return result.ToHttpResponse();
+    }
+    
+    private static async Task<IResult> GetByAuthor(
+        [FromRoute] Guid authorId,
+        IPostService postService,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 9,
+        CancellationToken ct = default)
+    {
+        var result = await postService.GetByAuthorAsync(authorId, page, pageSize, ct);
         return result.ToHttpResponse();
     }
 

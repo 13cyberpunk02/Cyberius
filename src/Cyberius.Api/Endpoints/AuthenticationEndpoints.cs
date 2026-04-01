@@ -40,6 +40,9 @@ public static class AuthenticationEndpoints
         group.MapPost("delete-user/{userId:guid}", DisableUser)
             .WithSummary("Disable User");
         
+        group.MapGet("{userId:guid}", GetPublicProfile)
+            .WithSummary("Get public user profile");
+        
         return group;
     }
 
@@ -81,5 +84,9 @@ public static class AuthenticationEndpoints
     private static async Task<IResult> DisableUser(Guid userId, IAuthenticationService authenticationService,
         CancellationToken cancellationToken) =>
         await authenticationService.DisableUser(userId, cancellationToken).ToHttpResponseAsync();
-
+    
+    private static async Task<IResult> GetPublicProfile(
+        [FromRoute] Guid userId,
+        IAuthenticationService authService,
+        CancellationToken ct) => await authService.GetPublicProfileAsync(userId, ct).ToHttpResponseAsync();
 }

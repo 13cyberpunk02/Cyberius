@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import {
   BlockType,
   CreateContentBlockRequest,
@@ -108,6 +108,19 @@ export class PostEditor implements OnInit, OnDestroy {
   categories = signal<CategoryResponse[]>([]);
 
   readonly blockTypes = BLOCK_TYPES;
+  readonly liveReadTime = computed(() => {
+    const words = this.blocks()
+      .filter(
+        (b) =>
+          b.content &&
+          ['Paragraph', 'Heading1', 'Heading2', 'Heading3', 'Quote', 'Callout', 'Code'].includes(
+            b.type,
+          ),
+      )
+      .reduce((sum, b) => sum + b.content!.split(/\s+/).filter(Boolean).length, 0);
+    return Math.max(1, Math.ceil(words / 200));
+  });
+
   uploadingCover = signal(false);
 
   ngOnInit(): void {

@@ -69,7 +69,7 @@
   @if (!loading()) {
     @if (comments.length === 0) {
       <div class="text-center py-12 text-slate-500">
-        <div class="text-4xl mb-3">💬</div>
+        <div class="text-4xl mb-3"><fa-icon [icon]="faComment" /></div>
         <p>Будьте первым кто прокомментирует</p>
       </div>
     } @else {
@@ -95,10 +95,20 @@
             <!-- Reply form inline -->
             @if (replyToId() === comment.id) {
               <div class="ml-12 mt-3 glass-card rounded-2xl p-4 border border-sky-500/20 animate-fadeInUp">
-                <p class="text-xs text-slate-400 mb-2 font-medium">
-                  Ответ для
-                  <span class="text-sky-400">{{ replyToName() }}</span>
-                </p>
+                <!-- Quote block (как в Telegram) -->
+                @if (replyToComment(); as rc) {
+                  <div class="flex gap-2 mb-3">
+                    <div class="w-0.5 rounded-full bg-sky-400 shrink-0"></div>
+                    <div class="min-w-0">
+                      <p class="text-xs font-semibold text-sky-400 mb-0.5">
+                        &#64;{{ rc.author.username }}
+                      </p>
+                      <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                        {{ quoteText }}
+                      </p>
+                    </div>
+                  </div>
+                }
                 <textarea
                   [ngModel]="replyText()"
                   (ngModelChange)="replyText.set($event)"
@@ -128,6 +138,23 @@
           </div>
         }
       </div>
+      <!-- Load more -->
+      @if (hasMore()) {
+        <div class="text-center mt-6">
+          <button
+            (click)="loadMore()"
+            [disabled]="loadingMore()"
+            class="btn-secondary px-6 py-2.5 rounded-xl text-sm font-medium transition-all hover:scale-105 disabled:opacity-50 flex items-center gap-2 mx-auto"
+          >
+            @if (loadingMore()) {
+              <fa-icon [icon]="faSpinner" animation="spin-pulse" />
+              Загружаем...
+            } @else {
+              Загрузить ещё комментарии
+            }
+          </button>
+        </div>
+      }
     }
   }
 </section>
@@ -148,15 +175,12 @@
       </div>
 
       <div class="flex-1 min-w-0">
-        <!-- Author + date -->
+        <!-- Author + relative time -->
         <div class="flex items-center flex-wrap gap-x-2 gap-y-0.5 mb-1.5">
           <span class="text-sm font-semibold heading-text">{{ comment.author.fullName }}</span>
           <span class="text-xs font-mono text-slate-500">&#64;{{ comment.author.username }}</span>
           <span class="text-xs text-slate-600">·</span>
           <span class="text-xs text-slate-500">{{ formatDate(comment.createdAt) }}</span>
-          @if (comment.isEdited && !comment.isDeleted) {
-            <span class="text-xs text-slate-600 italic">· изменён</span>
-          }
         </div>
 
         <!-- Content or edit form -->
@@ -184,6 +208,13 @@
         } @else {
           <p class="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">
             {{ comment.content }}
+          </p>
+        }
+
+        <!-- Время создания/изменения — мелкий текст под контентом -->
+        @if (!comment.isDeleted && editingId() !== comment.id) {
+          <p class="text-[10px] text-slate-600 mt-1.5 font-mono">
+            {{ formatCommentTime(comment) }}
           </p>
         }
 

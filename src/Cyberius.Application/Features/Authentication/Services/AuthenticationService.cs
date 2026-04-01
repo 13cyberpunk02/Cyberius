@@ -154,4 +154,20 @@ public class AuthenticationService(IUnitOfWork uow, IJwtService jwtService) : IA
 
         return Result<string>.Success("Пользователь с данного момента не активен.");
     }
+
+    public async  Task<Result<PublicProfileResponse>> GetPublicProfileAsync(Guid userId, CancellationToken ct = default)
+    {
+        var user = await uow.Users.GetUserWithRolesByIdAsync(userId, ct);
+        if (user is null) return Errors.NotFound(nameof(User), userId.ToString());
+
+        return new PublicProfileResponse(
+            user.UserId,
+            user.UserName,
+            user.FirstName,
+            user.LastName,
+            user.AvatarObjectName,
+            user.JoinedDate.ToString("O"),
+            user.UserRoles.Select(x => x.Role.Name).ToList()
+        );
+    }
 }

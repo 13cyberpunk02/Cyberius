@@ -42,6 +42,16 @@ export class PostsService {
     return this.http.get<PagedResponse<PostSummary>>(`${this.base}/search`, { params: httpParams });
   }
 
+  getByAuthor(
+    authorId: string,
+    params: GetPostsParams = {},
+  ): Observable<PagedResponse<PostSummary>> {
+    const httpParams = this.buildPageParams(params);
+    return this.http.get<PagedResponse<PostSummary>>(`${this.base}/author/${authorId}`, {
+      params: httpParams,
+    });
+  }
+
   getByCategory(
     categoryId: string,
     params: GetPostsParams = {},

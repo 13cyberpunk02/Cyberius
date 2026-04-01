@@ -10,40 +10,41 @@ export const routes: Routes = [
   {
     path: 'posts',
     loadComponent: () =>
-      import('./features/posts/pages/post-list/post-list').then(
-        (m) => m.PostList,
-      ),
+      import('./features/posts/pages/post-list/post-list').then((m) => m.PostList),
   },
   {
     path: 'posts/create',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./features/posts/pages/post-editor/post-editor').then(
-        (m) => m.PostEditor,
-      ),
+      import('./features/posts/pages/post-editor/post-editor').then((m) => m.PostEditor),
+  },
+  {
+    path: 'posts/drafts',
+    canActivate: [authGuard],
+    loadComponent: () => import('./shared/components/drafts/drafts').then((m) => m.Drafts),
   },
   {
     path: 'posts/:slug/edit',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./features/posts/pages/post-editor/post-editor').then(
-        (m) => m.PostEditor,
-      ),
+      import('./features/posts/pages/post-editor/post-editor').then((m) => m.PostEditor),
   },
   {
     path: 'posts/:slug',
     loadComponent: () =>
-      import('./features/posts/pages/post-detail/post-detail').then(
-        (m) => m.PostDetail,
+      import('./features/posts/pages/post-detail/post-detail').then((m) => m.PostDetail),
+  },
+  {
+    path: 'users/:userId',
+    loadComponent: () =>
+      import('./shared/components/user-profile/user-profile').then(
+        (m) => m.UserProfileComponent,
       ),
   },
   {
     path: 'admin/categories',
     canActivate: [adminGuard],
-    loadComponent: () =>
-      import('./features/admin/category/category').then(
-        (m) => m.Category,
-      ),
+    loadComponent: () => import('./features/admin/category/category').then((m) => m.Category),
   },
   {
     path: 'profile',
@@ -52,7 +53,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    loadComponent: () =>
-      import('./shared/components/not-found/not-found').then((m) => m.NotFound)
+    loadComponent: () => import('./shared/components/not-found/not-found').then((m) => m.NotFound),
   },
 ];

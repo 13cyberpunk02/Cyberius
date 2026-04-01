@@ -15,7 +15,6 @@ import {
   faArrowRightToBracket,
   faCode,
   faEnvelope,
-  faExclamation,
   faExclamationTriangle,
   faEye,
   faEyeSlash,
@@ -25,6 +24,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FormErrors, LoginRequest } from '../../../core/models/auth.model';
 import { isValid, validateLogin } from '../../../core/validators/auth.validator';
+import { ToastService } from '../../../core/services/toast.service';
 
 type FormStatus = 'idle' | 'loading' | 'error';
 
@@ -36,6 +36,7 @@ type FormStatus = 'idle' | 'loading' | 'error';
 })
 export class LoginModal implements OnInit, OnDestroy {
   private auth = inject(AuthService);
+  private toast = inject(ToastService);
 
   closed = output<void>();
   success = output<void>();

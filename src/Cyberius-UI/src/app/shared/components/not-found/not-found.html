@@ -1,0 +1,42 @@
+<div class="min-h-screen flex items-center justify-center px-4">
+  <div class="text-center max-w-lg">
+
+    <div class="relative mb-8 select-none">
+      <p class="text-[10rem] font-black leading-none heading-text opacity-10 absolute inset-0 flex items-center justify-center blur-sm">
+        404
+      </p>
+      <p class="text-[10rem] font-black leading-none heading-text relative">
+        404
+      </p>
+    </div>
+
+    <h1 class="text-3xl font-black heading-text mb-3">Страница не найдена</h1>
+    <p class="text-slate-400 text-lg mb-10 leading-relaxed">
+      Похоже эта страница улетела в&nbsp;космос.<br>
+      Или её никогда не&nbsp;существовало.
+    </p>
+
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+      <a routerLink="/"
+         class="btn-primary px-7 py-3 rounded-xl font-semibold text-white transition-all hover:scale-105 active:scale-95">
+        На главную
+      </a>
+      <a routerLink="/posts"
+         class="btn-secondary px-7 py-3 rounded-xl font-semibold transition-all hover:scale-105 active:scale-95">
+        Все статьи
+      </a>
+    </div>
+
+    <!-- Code snippet easter egg -->
+    <div class="mt-14 glass-card rounded-xl px-6 py-4 text-left font-mono text-sm">
+      <span class="text-slate-500">// </span>
+      <span class="text-slate-400">Что пошло не так?</span><br>
+      <span class="text-rose-400">throw new</span>
+      <span class="text-sky-400"> NotFoundException</span>
+      <span class="text-slate-300">(</span>
+      <span class="text-amber-400">"Page not found"</span>
+      <span class="text-slate-300">);</span>
+    </div>
+
+  </div>
+</div>

@@ -18,6 +18,7 @@ import {
   faPenToSquare,
   faTrashCan,
 } from '@fortawesome/free-solid-svg-icons';
+import { SeoService } from '../../../../core/services/seo.service';
 
 const REACTION_EMOJI: Record<string, string> = {
   Like: '👍',
@@ -37,7 +38,14 @@ export class PostDetail implements OnInit {
   private postsService = inject(PostsService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private seo = inject(SeoService);
   readonly auth = inject(AuthService);
+
+  protected readonly faAngleLeft = faAngleLeft;
+  protected readonly faPenToSquare = faPenToSquare;
+  protected readonly faTrashCan = faTrashCan;
+  protected readonly faEye = faEye;
+  protected readonly faCommentDots = faCommentDots;
 
   post = signal<PostDetailModel | null>(null);
   loading = signal(true);
@@ -72,8 +80,18 @@ export class PostDetail implements OnInit {
       next: (post) => {
         this.post.set(post);
         this.loading.set(false);
-        // Трекаем просмотр после загрузки статьи
         this.trackView(post.id);
+        this.seo.setPage({
+          title: post.title,
+          description: post.excerpt ?? undefined,
+          image: post.coverImageUrl
+            ? (this.postsService.getImageUrl(post.coverImageUrl) ?? undefined)
+            : undefined,
+          url: `http://localhost:4200/posts/${post.slug}`,
+          type: 'article',
+          publishedAt: post.publishedAt ?? undefined,
+          author: post.author.fullName,
+        });
       },
       error: (err) => {
         this.loading.set(false);
@@ -143,10 +161,4 @@ export class PostDetail implements OnInit {
       year: 'numeric',
     }).format(new Date(dateStr));
   }
-
-  protected readonly faAngleLeft = faAngleLeft;
-  protected readonly faPenToSquare = faPenToSquare;
-  protected readonly faTrashCan = faTrashCan;
-  protected readonly faEye = faEye;
-  protected readonly faCommentDots = faCommentDots;
 }

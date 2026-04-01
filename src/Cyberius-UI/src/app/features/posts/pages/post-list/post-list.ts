@@ -16,6 +16,7 @@ import {
   faPlusCircle,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
+import { SeoService } from '../../../../core/services/seo.service';
 
 @Component({
   selector: 'app-post-list',
@@ -29,6 +30,13 @@ export class PostList implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   readonly auth = inject(AuthService);
+  private seo = inject(SeoService);
+
+  protected readonly faPlusCircle = faPlusCircle;
+  protected readonly faMagnifyingGlass = faMagnifyingGlass;
+  protected readonly faAngleLeft = faAngleLeft;
+  protected readonly faAngleRight = faAngleRight;
+  protected readonly faXmark = faXmark;
 
   paged = signal<PagedResponse<PostSummary> | null>(null);
   categories = signal<CategoryResponse[]>([]);
@@ -55,6 +63,11 @@ export class PostList implements OnInit {
   }
 
   ngOnInit(): void {
+    this.seo.setPage({
+      title: 'Все статьи',
+      description: 'Статьи о C#, .NET 10, Angular и архитектуре программного обеспечения',
+    });
+
     this.route.queryParams.subscribe((params) => {
       this.activeCategoryId.set(params['category'] ?? null);
       this.activeTag.set(params['tag'] ?? null);
@@ -116,10 +129,4 @@ export class PostList implements OnInit {
       queryParamsHandling: 'merge',
     });
   }
-
-  protected readonly faPlusCircle = faPlusCircle;
-  protected readonly faMagnifyingGlass = faMagnifyingGlass;
-  protected readonly faAngleLeft = faAngleLeft;
-  protected readonly faAngleRight = faAngleRight;
-  protected readonly faXmark = faXmark;
 }

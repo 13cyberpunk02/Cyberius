@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import {
   BlockType,
   CreateContentBlockRequest,
@@ -18,6 +18,7 @@ import { SafeUrlPipe } from '../../../../core/pipes/safe-url-pipe';
 import { FaIconComponent, IconDefinition } from '@fortawesome/angular-fontawesome';
 import {
   faArrowDown,
+  faArrowLeft,
   faArrowUp,
   faClipboardList,
   faCode,
@@ -30,15 +31,18 @@ import {
   faImage,
   faInfoCircle,
   faLightbulb,
+  faMinus,
   faPaperclip,
   faParagraph,
   faPlay,
+  faPlus,
   faQuoteLeft,
   faRocket,
   faSpinner,
   faTableList,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
+import { ToastService } from '../../../../core/services/toast.service';
 
 interface EditorBlock extends CreateContentBlockRequest {
   id: string; // локальный id для track-by
@@ -65,13 +69,26 @@ const BLOCK_TYPES: { type: BlockType; label: string; icon: IconDefinition }[] = 
   templateUrl: './post-editor.html',
   styleUrl: './post-editor.css',
 })
-export class PostEditor implements OnInit {
+export class PostEditor implements OnInit, OnDestroy {
   private postsService = inject(PostsService);
   private categoryService = inject(CategoryService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private http = inject(HttpClient);
   readonly auth = inject(AuthService);
+  private toast = inject(ToastService);
+
+  protected readonly faInfoCircle = faInfoCircle;
+  protected readonly faSpinner = faSpinner;
+  protected readonly faPaperclip = faPaperclip;
+  protected readonly faFloppyDisk = faFloppyDisk;
+  protected readonly faRocket = faRocket;
+  protected readonly faLightbulb = faLightbulb;
+  protected readonly faExclamationTriangle = faExclamationTriangle;
+  protected readonly faFireBurner = faFireBurner;
+  protected readonly faXmark = faXmark;
+  protected readonly faArrowDown = faArrowDown;
+  protected readonly faArrowUp = faArrowUp;
 
   // Mode
   isEdit = signal(false);
@@ -105,14 +122,17 @@ export class PostEditor implements OnInit {
         next: (post) => {
           this.fillFromPost(post);
           this.loading.set(false);
+          this.startAutosave();
         },
         error: () => {
           this.router.navigate(['/posts']);
         },
       });
     } else {
-      // Start with one empty paragraph
       this.addBlock('Paragraph');
+      this.autosaveKey = 'draft_new';
+      this.loadDraft();
+      this.startAutosave();
     }
   }
 
@@ -184,6 +204,62 @@ export class PostEditor implements OnInit {
 
   updateBlock(index: number, patch: Partial<EditorBlock>): void {
     this.blocks.update((list) => list.map((b, i) => (i === index ? { ...b, ...patch } : b)));
+  }
+
+  // ── Autosave ───────────────────────────────────────────────────
+  private autosaveKey = '';
+  private autosaveTimer: ReturnType<typeof setInterval> | null = null;
+
+  private startAutosave(): void {
+    this.autosaveKey = `draft_${this.editPostId() ?? 'new'}`;
+    this.autosaveTimer = setInterval(() => this.saveDraft(), 30_000);
+  }
+
+  private saveDraft(): void {
+    if (!this.title().trim() && this.blocks().length <= 1) return;
+    const draft = {
+      title: this.title(),
+      excerpt: this.excerpt(),
+      categoryId: this.categoryId(),
+      tags: this.tags(),
+      coverImageUrl: this.coverImageUrl(),
+      blocks: this.blocks(),
+      savedAt: new Date().toISOString(),
+    };
+    localStorage.setItem(this.autosaveKey, JSON.stringify(draft));
+  }
+
+  private loadDraft(): void {
+    const raw = localStorage.getItem(this.autosaveKey);
+    if (!raw) return;
+    try {
+      const draft = JSON.parse(raw);
+      const savedAt = new Date(draft.savedAt);
+      const mins = Math.floor((Date.now() - savedAt.getTime()) / 60000);
+      // Предлагаем восстановить если черновик свежее 24 часов
+      if (mins < 1440) {
+        this.toast.info(
+          `Найден несохранённый черновик (${mins} мин. назад). Восстановлен автоматически.`,
+          5000,
+        );
+        this.title.set(draft.title ?? '');
+        this.excerpt.set(draft.excerpt ?? '');
+        this.categoryId.set(draft.categoryId ?? '');
+        this.tags.set(draft.tags ?? '');
+        this.coverImageUrl.set(draft.coverImageUrl ?? '');
+        if (draft.blocks?.length) this.blocks.set(draft.blocks);
+      }
+    } catch {
+      /* ignore corrupt data */
+    }
+  }
+
+  clearDraft(): void {
+    if (this.autosaveKey) localStorage.removeItem(this.autosaveKey);
+  }
+
+  ngOnDestroy(): void {
+    if (this.autosaveTimer) clearInterval(this.autosaveTimer);
   }
 
   // ── Cover image upload ─────────────────────────────────────────
@@ -368,15 +444,7 @@ export class PostEditor implements OnInit {
     });
   }
 
-  protected readonly faInfoCircle = faInfoCircle;
-  protected readonly faSpinner = faSpinner;
-  protected readonly faPaperclip = faPaperclip;
-  protected readonly faFloppyDisk = faFloppyDisk;
-  protected readonly faRocket = faRocket;
-  protected readonly faLightbulb = faLightbulb;
-  protected readonly faExclamationTriangle = faExclamationTriangle;
-  protected readonly faFireBurner = faFireBurner;
-  protected readonly faXmark = faXmark;
-  protected readonly faArrowDown = faArrowDown;
-  protected readonly faArrowUp = faArrowUp;
+  protected readonly faArrowLeft = faArrowLeft;
+  protected readonly faPlus = faPlus;
+  protected readonly faMinus = faMinus;
 }

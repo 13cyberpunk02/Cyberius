@@ -22,6 +22,7 @@ import {
   faSpinner,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
+import { ToastService } from '../../../core/services/toast.service';
 
 interface ChangePasswordForm {
   oldPassword: string;
@@ -53,6 +54,7 @@ interface FieldErrors {
 export class ChangePasswordModal implements OnInit, OnDestroy {
   private http = inject(HttpClient);
   private auth = inject(AuthService);
+  private toast = inject(ToastService);
 
   closed = output<void>();
 
@@ -168,15 +170,17 @@ export class ChangePasswordModal implements OnInit, OnDestroy {
     this.http.put(`${this.auth.API}/users/${userId}/change-password`, body).subscribe({
       next: () => {
         this.status.set('success');
+        this.toast.success('Пароль успешно изменён');
         setTimeout(() => this.closed.emit(), 2000);
       },
       error: (err) => {
         this.status.set('error');
-        this.serverError.set(
+        const msg =
           err?.status === 400
             ? 'Неверный текущий пароль'
-            : (err?.error?.message ?? err?.error?.title ?? 'Произошла ошибка, попробуйте ещё раз'),
-        );
+            : (err?.error?.message ?? err?.error?.title ?? 'Произошла ошибка, попробуйте ещё раз');
+        this.serverError.set(msg);
+        this.toast.error(msg);
       },
     });
   }

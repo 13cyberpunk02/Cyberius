@@ -23,6 +23,7 @@ import {
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { Router } from '@angular/router';
 import { ConfirmDialog, ConfirmDialogConfig } from '../../shared/components/confirm-dialog/confirm-dialog';
+import { ToastService } from '../../core/services/toast.service';
 
 interface UpdateProfileForm {
   firstName: string;
@@ -45,6 +46,7 @@ export class Profile implements OnInit {
   private auth = inject(AuthService);
   private router = inject(Router);
   private http = inject(HttpClient);
+  private toast = inject(ToastService);
 
   @ViewChild('avatarInput') avatarInput!: ElementRef<HTMLInputElement>;
 
@@ -65,7 +67,6 @@ export class Profile implements OnInit {
 
   profile = signal<UserProfile | null>(null);
   saveStatus = signal<SaveStatus>('idle');
-  errorMsg = signal('');
   activeTab = signal<'info' | 'security'>('info');
   avatarPreview = signal<string | null>(null);
   avatarFile = signal<File | null>(null);
@@ -141,15 +142,14 @@ export class Profile implements OnInit {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      this.errorMsg.set('Выберите изображение (jpg, png, webp)');
+      this.toast.error('Выберите изображение (jpg, png, webp)');
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      this.errorMsg.set('Размер файла не должен превышать 5 МБ');
+      this.toast.error('Размер файла не должен превышать 5 МБ');
       return;
     }
 
-    this.errorMsg.set('');
     this.avatarFile.set(file);
     const reader = new FileReader();
     reader.onload = (e) => this.avatarPreview.set(e.target?.result as string);
@@ -168,7 +168,6 @@ export class Profile implements OnInit {
     if (!userId) return;
 
     this.saveStatus.set('saving');
-    this.errorMsg.set('');
 
     const formData = new FormData();
     formData.append('firstName', this.form.firstName);
@@ -183,12 +182,12 @@ export class Profile implements OnInit {
       next: () => {
         this.saveStatus.set('success');
         this.clearAvatar();
+        this.toast.success('Профиль обновлён');
         this.auth.fetchMe().subscribe({ next: (p) => this.profile.set(p) });
-        setTimeout(() => this.saveStatus.set('idle'), 3000);
       },
       error: (err) => {
-        this.saveStatus.set('error');
-        this.errorMsg.set(
+        this.saveStatus.set('idle');
+        this.toast.error(
           err?.error?.message ?? err?.error?.title ?? 'Не удалось сохранить изменения',
         );
       },

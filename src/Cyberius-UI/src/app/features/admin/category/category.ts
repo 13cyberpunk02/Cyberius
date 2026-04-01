@@ -17,6 +17,7 @@ import {
   faSpinner,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
+import { ToastService } from '../../../core/services/toast.service';
 
 interface CategoryForm {
   name: string;
@@ -50,6 +51,7 @@ const COLOR_PALETTE = [
 })
 export class Category implements OnInit {
   private categoryService = inject(CategoryService);
+  private toast = inject(ToastService);
 
   categories = signal<CategoryResponse[]>([]);
   loading = signal(true);
@@ -201,12 +203,15 @@ export class Category implements OnInit {
     op$.subscribe({
       next: () => {
         this.saving.set(false);
+        this.toast.success(id ? 'Категория обновлена' : 'Категория создана');
         this.closeForm();
         this.loadCategories();
       },
       error: (err) => {
         this.saving.set(false);
-        this.errorMsg.set(err?.error?.message ?? 'Ошибка при сохранении');
+        const msg = err?.error?.message ?? 'Ошибка при сохранении';
+        this.errorMsg.set(msg);
+        this.toast.error(msg);
       },
     });
   }
@@ -226,12 +231,15 @@ export class Category implements OnInit {
         this.deleting.set(false);
         this.showDelete.set(false);
         this.deletingId.set(null);
+        this.toast.success('Категория удалена');
         this.loadCategories();
       },
       error: (err) => {
         this.deleting.set(false);
         this.showDelete.set(false);
-        this.errorMsg.set(err?.error?.message ?? 'Нельзя удалить — в категории есть статьи');
+        const msg = err?.error?.message ?? 'Нельзя удалить — в категории есть статьи';
+        this.errorMsg.set(msg);
+        this.toast.error(msg);
       },
     });
   }

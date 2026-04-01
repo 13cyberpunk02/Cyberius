@@ -10,11 +10,14 @@
 
       <!-- Header -->
       <div class="flex items-center justify-between mb-8">
-        <h1 class="text-3xl font-black heading-text">
-          {{ isEdit() ? 'Редактировать статью' : 'Новая статья' }}
-        </h1>
+        <div>
+          <h1 class="text-3xl font-black heading-text">
+            {{ isEdit() ? 'Редактировать статью' : 'Новая статья' }}
+          </h1>
+          <p class="text-xs text-slate-500 mt-1">Автосохранение каждые 30 сек</p>
+        </div>
         <a routerLink="/posts" class="btn-secondary px-4 py-2 rounded-xl text-sm transition-all">
-          ← Отмена
+          <fa-icon [icon]="faArrowLeft" /> Отмена
         </a>
       </div>
 
@@ -252,16 +255,16 @@
                     <div class="flex items-center gap-2 flex-wrap">
                       <button type="button" (click)="tableAddColumn(i)"
                               class="px-2.5 py-1 rounded-lg text-xs glass-card text-slate-300 hover:text-sky-400 border border-white/10 transition-all">
-                        + Столбец
+                        <fa-icon [icon]="faPlus" /> Столбец
                       </button>
                       <button type="button" (click)="tableRemoveColumn(i)"
                               [disabled]="table.headers.length <= 1"
                               class="px-2.5 py-1 rounded-lg text-xs glass-card text-slate-300 hover:text-rose-400 border border-white/10 transition-all disabled:opacity-40">
-                        − Столбец
+                        <fa-icon [icon]="faMinus" /> Столбец
                       </button>
                       <button type="button" (click)="tableAddRow(i)"
                               class="px-2.5 py-1 rounded-lg text-xs glass-card text-slate-300 hover:text-sky-400 border border-white/10 transition-all">
-                        + Строка
+                        <fa-icon [icon]="faPlus" /> Строка
                       </button>
                     </div>
                     <div class="overflow-x-auto rounded-xl border border-white/10">

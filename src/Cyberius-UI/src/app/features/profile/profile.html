@@ -173,22 +173,6 @@
                      class="email-input w-full px-4 py-3 rounded-xl text-sm opacity-50 cursor-not-allowed"/>
             </div>
 
-            <!-- Error -->
-            @if (saveStatus() === 'error') {
-              <div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-sm animate-fadeInUp">
-                <fa-icon [icon]="faExclamationTriangle" />
-                {{ errorMsg() }}
-              </div>
-            }
-
-            <!-- Success -->
-            @if (saveStatus() === 'success') {
-              <div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm animate-fadeInUp">
-                <fa-icon [icon]="faThumbsUp" class="shrink-0"/>
-                Профиль успешно обновлён
-              </div>
-            }
-
             <!-- Submit -->
             <div class="flex justify-end">
               <button type="submit"

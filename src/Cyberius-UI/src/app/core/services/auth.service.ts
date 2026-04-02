@@ -115,13 +115,14 @@ export class AuthService {
   refresh(): Observable<AuthResponse> {
     if (this.refreshInProgress$) return this.refreshInProgress$;
 
-    const { accessToken, refreshToken } = this.state();
+    const refreshToken = this.state().refreshToken;
     if (!refreshToken) return throwError(() => new Error('No refresh token'));
 
-    const body: RefreshTokenRequest = {
-      accessToken: accessToken ?? '',
-      refreshToken: refreshToken,
-    };
+    // accessToken в state() мог быть обнулён если истёк при загрузке страницы,
+    // но в localStorage он ещё есть (истёкший) — сервер его принимает для валидации пары
+    const accessToken = this.state().accessToken ?? localStorage.getItem('blog_access_token') ?? '';
+
+    const body: RefreshTokenRequest = { accessToken, refreshToken };
 
     this.refreshInProgress$ = this.http
       .post<AuthResponse>(`${this.API}/auth/refresh-token`, body)

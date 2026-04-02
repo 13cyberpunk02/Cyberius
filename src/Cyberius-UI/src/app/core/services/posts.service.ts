@@ -104,6 +104,11 @@ export class PostsService {
     return this.http.post<void>(`${this.base}/${id}/view`, {});
   }
 
+  // Похожие статьи
+  getRelated(id: string, count = 3): Observable<PostSummary[]> {
+    return this.http.get<PostSummary[]>(`${this.base}/${id}/related?count=${count}`);
+  }
+
   // ── Helpers ────────────────────────────────────────────────────
 
   private buildPageParams(params: GetPostsParams): HttpParams {

@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, HostListener, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { BlockRenderer } from '../../components/block-renderer/block-renderer';
@@ -8,17 +8,20 @@ import {
 } from '../../../../shared/components/confirm-dialog/confirm-dialog';
 import { PostsService } from '../../../../core/services/posts.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import { PostDetailModel, ReactionType } from '../../../../core/models/post.model';
+import { PostDetailModel, PostSummary, ReactionType } from '../../../../core/models/post.model';
 import { Comments } from '../../components/comments/comments';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import {
   faAngleLeft,
-  faCommentDots,
+  faAnglesUp,
+  faCommentDots, faCopy,
   faEye,
   faPenToSquare,
   faTrashCan,
 } from '@fortawesome/free-solid-svg-icons';
 import { SeoService } from '../../../../core/services/seo.service';
+import { PostCard } from '../../components/post-card/post-card';
+import { ToastService } from '../../../../core/services/toast.service';
 
 const REACTION_EMOJI: Record<string, string> = {
   Like: '👍',
@@ -28,9 +31,23 @@ const REACTION_EMOJI: Record<string, string> = {
   Thinking: '🤔',
 };
 
+export interface TocItem {
+  id: string;
+  text: string;
+  level: 2 | 3;
+}
+
 @Component({
   selector: 'app-post-detail',
-  imports: [CommonModule, RouterModule, BlockRenderer, ConfirmDialog, Comments, FaIconComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    BlockRenderer,
+    ConfirmDialog,
+    Comments,
+    PostCard,
+    FaIconComponent,
+  ],
   templateUrl: './post-detail.html',
   styleUrl: './post-detail.css',
 })
@@ -39,6 +56,7 @@ export class PostDetail implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private seo = inject(SeoService);
+  private toast = inject(ToastService);
   readonly auth = inject(AuthService);
 
   protected readonly faAngleLeft = faAngleLeft;
@@ -52,6 +70,9 @@ export class PostDetail implements OnInit {
   notFound = signal(false);
   showDelete = signal(false);
   deleting = signal(false);
+  showScrollTop = signal(false);
+  related = signal<PostSummary[]>([]);
+  toc = signal<TocItem[]>([]);
 
   readonly reactions = Object.entries(REACTION_EMOJI) as [ReactionType, string][];
 
@@ -74,6 +95,15 @@ export class PostDetail implements OnInit {
     danger: true,
   };
 
+  @HostListener('window:scroll')
+  onScroll(): void {
+    this.showScrollTop.set(window.scrollY > 400);
+  }
+
+  scrollToTop(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   ngOnInit(): void {
     const slug = this.route.snapshot.paramMap.get('slug')!;
     this.postsService.getBySlug(slug).subscribe({
@@ -81,6 +111,8 @@ export class PostDetail implements OnInit {
         this.post.set(post);
         this.loading.set(false);
         this.trackView(post.id);
+        this.buildToc(post);
+        this.loadRelated(post.id);
         this.seo.setPage({
           title: post.title,
           description: post.excerpt ?? undefined,
@@ -105,6 +137,55 @@ export class PostDetail implements OnInit {
     setTimeout(() => {
       this.postsService.trackView(postId).subscribe({ error: () => {} });
     }, 3000);
+  }
+
+  // ── Table of Contents ──────────────────────────────────────────
+  private buildToc(post: PostDetailModel): void {
+    const items: TocItem[] = post.blocks
+      .filter((b) => {
+        const t = String(b.type);
+        return t === 'Heading2' || t === '2' || t === 'Heading3' || t === '3';
+      })
+      .sort((a, b) => a.order - b.order)
+      .map((b, i) => {
+        const t = String(b.type);
+        const text = b.content ?? '';
+        return {
+          id: this.slugify(text) || `heading-${i}`,
+          text,
+          level: t === 'Heading2' || t === '2' ? (2 as const) : (3 as const),
+        };
+      })
+      .filter((item) => item.text.length > 0); // пропускаем пустые заголовки
+    this.toc.set(items);
+  }
+
+  scrollToHeading(id: string): void {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  private slugify(text: string): string {
+    return text
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w-]/g, '')
+      .replace(/-+/g, '-');
+  }
+
+  // ── Copy link ──────────────────────────────────────────────────
+  copyLink(): void {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      this.toast.success('Ссылка скопирована');
+    });
+  }
+
+  // ── Related posts ──────────────────────────────────────────────
+  private loadRelated(postId: string): void {
+    this.postsService.getRelated(postId, 3).subscribe({
+      next: (posts) => this.related.set(posts),
+      error: () => {},
+    });
   }
 
   react(type: ReactionType): void {
@@ -161,4 +242,7 @@ export class PostDetail implements OnInit {
       year: 'numeric',
     }).format(new Date(dateStr));
   }
+
+  protected readonly faAnglesUp = faAnglesUp;
+  protected readonly faCopy = faCopy;
 }

@@ -9,8 +9,7 @@ namespace Cyberius.Application.Features.Blog.Posts.Services;
 
 public sealed class PostService(IUnitOfWork uow, IStorageService storageService) : IPostService
 {
-    
-    public async Task<Result<PostDetailResponse>> GetByIdAsync(
+        public async Task<Result<PostDetailResponse>> GetByIdAsync(
         Guid id, Guid? currentUserId, CancellationToken ct = default)
     {
         var post = await uow.Posts.GetFullAsync(id, ct);
@@ -54,6 +53,23 @@ public sealed class PostService(IUnitOfWork uow, IStorageService storageService)
     {
         var (items, total) = await uow.Posts.GetByTagAsync(tagSlug, page, pageSize, ct);
         return await ToPagedResultAsync(items, total, page, pageSize, ct);
+    }
+ 
+    public async Task<Result<IReadOnlyList<PostSummaryResponse>>> GetRelatedAsync(
+        Guid postId, int count, CancellationToken ct = default)
+    {
+        var posts = await uow.Posts.GetRelatedAsync(postId, count, ct);
+        var postIds = posts.Select(p => p.Id).ToList();
+        var viewCounts    = await uow.PostViews.GetCountsByPostsAsync(postIds, ct);
+        var commentCounts = await uow.Comments.GetCountsByPostsAsync(postIds, ct);
+ 
+        var result = posts.Select(p => MapToSummary(
+            p,
+            viewCounts.GetValueOrDefault(p.Id, 0),
+            commentCounts.GetValueOrDefault(p.Id, 0)
+        )).ToList();
+ 
+        return Result<IReadOnlyList<PostSummaryResponse>>.Success(result);
     }
  
     public async Task<Result<PagedResponse<PostSummaryResponse>>> GetByAuthorAsync(

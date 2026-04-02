@@ -142,15 +142,28 @@
               @switch (block.type) {
 
                 @case ('Heading2') {
-                  <input type="text" [ngModel]="block.content" (ngModelChange)="updateBlock(i, {content: $event})"
-                         placeholder="Заголовок раздела..."
-                         class="email-input w-full px-3 py-2 rounded-lg text-xl font-bold"/>
+                  <div class="space-y-1">
+                    <input type="text" [ngModel]="block.content" (ngModelChange)="updateBlock(i, {content: $event})"
+                           placeholder="Заголовок раздела..."
+                           class="email-input w-full px-3 py-2 rounded-lg text-xl font-bold" maxlength="120" />
+                    <p class="text-right text-[10px] font-mono"
+                       [class]="charLimitClass(charCount(block.content), 120)">
+                      {{ charCount(block.content) }} / 120
+                    </p>
+                  </div>
+
                 }
 
                 @case ('Heading3') {
-                  <input type="text" [ngModel]="block.content" (ngModelChange)="updateBlock(i, {content: $event})"
-                         placeholder="Подзаголовок..."
-                         class="email-input w-full px-3 py-2 rounded-lg text-lg font-semibold"/>
+                  <div class="space-y-1">
+                    <input type="text" [ngModel]="block.content" (ngModelChange)="updateBlock(i, {content: $event})"
+                           placeholder="Подзаголовок..."
+                           class="email-input w-full px-3 py-2 rounded-lg text-lg font-semibold" maxlength="120"/>
+                    <p class="text-right text-[10px] font-mono"
+                       [class]="charLimitClass(charCount(block.content), 120)">
+                      {{ charCount(block.content) }} / 120
+                    </p>
+                  </div>
                 }
 
                 @case ('Paragraph') {

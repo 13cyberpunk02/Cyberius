@@ -90,7 +90,7 @@
                         @if (getAvatarUrl(comment.author.avatarUrl); as url) {
                           <img [src]="url" class="w-full h-full object-cover" [alt]="comment.author.fullName"/>
                         } @else {
-                          {{ comment.author.fullName[0] ?? '?' }}
+                          {{ comment.author.fullName[0]}}
                         }
                       </div>
                     </a>
@@ -147,7 +147,7 @@
                                 ? 'bg-sky-500/20 border-sky-400/50 text-sky-300 scale-105'
                                 : 'bg-white/5 border-white/10 text-slate-400 hover:border-sky-400/30 hover:text-slate-300 disabled:cursor-default'">
                                 <span>{{ reaction[1] }}</span>
-                                @if ((comment.reactions[reaction[0]] ?? 0) > 0) {
+                                @if ((comment.reactions[reaction[0]]) > 0) {
                                   <span class="font-mono">{{ comment.reactions[reaction[0]] }}</span>
                                 }
                               </button>
@@ -185,7 +185,7 @@
                             @if (getAvatarUrl(reply.author.avatarUrl); as url) {
                               <img [src]="url" class="w-full h-full object-cover" [alt]="reply.author.fullName"/>
                             } @else {
-                              {{ reply.author.fullName[0] ?? '?' }}
+                              {{ reply.author.fullName[0] }}
                             }
                           </div>
                         </a>
@@ -229,7 +229,7 @@
                                     ? 'bg-sky-500/20 border-sky-400/50 text-sky-300 scale-105'
                                     : 'bg-white/5 border-white/10 text-slate-400 hover:border-sky-400/30 hover:text-slate-300 disabled:cursor-default'">
                                     <span>{{ reaction[1] }}</span>
-                                    @if ((reply.reactions[reaction[0]] ?? 0) > 0) {
+                                    @if ((reply.reactions[reaction[0]]) > 0) {
                                       <span class="font-mono">{{ reply.reactions[reaction[0]] }}</span>
                                     }
                                   </button>

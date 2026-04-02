@@ -8,11 +8,11 @@
       }
 
       @case ('Heading2') {
-        <h2 class="text-3xl font-bold heading-text leading-tight pt-4">{{ block.content }}</h2>
+        <h2 [id]="slugify(block.content)" class="text-3xl font-bold heading-text leading-tight pt-4">{{ block.content }}</h2>
       }
 
       @case ('Heading3') {
-        <h3 class="text-2xl font-bold heading-text leading-snug pt-2">{{ block.content }}</h3>
+        <h3 [id]="slugify(block.content)" class="text-2xl font-bold heading-text leading-snug pt-2">{{ block.content }}</h3>
       }
 
       @case ('Paragraph') {

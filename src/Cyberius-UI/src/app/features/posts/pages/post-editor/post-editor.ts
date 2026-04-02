@@ -1,4 +1,12 @@
-import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  HostListener,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+} from '@angular/core';
 import {
   BlockType,
   CreateContentBlockRequest,
@@ -277,6 +285,32 @@ export class PostEditor implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.autosaveTimer) clearInterval(this.autosaveTimer);
+  }
+
+  // ── Keyboard shortcuts ─────────────────────────────────────────
+  @HostListener('document:keydown', ['$event'])
+  onKeydown(e: KeyboardEvent): void {
+    if (!e.ctrlKey && !e.metaKey) return;
+    if (e.key === 's') {
+      e.preventDefault();
+      if (this.saveStatus() === 'idle') this.save(false);
+    }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (this.saveStatus() === 'idle') this.save(true);
+    }
+  }
+
+  // ── Char count helpers ─────────────────────────────────────────
+  charCount(content: string | null): number {
+    return content?.length ?? 0;
+  }
+
+  charLimitClass(count: number, limit: number): string {
+    const ratio = count / limit;
+    if (ratio > 0.9) return 'text-rose-400';
+    if (ratio > 0.7) return 'text-amber-400';
+    return 'text-slate-600';
   }
 
   onCoverFileSelected(event: Event): void {

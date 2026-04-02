@@ -61,6 +61,15 @@ export class BlockRenderer {
     }
   }
 
+  slugify(text: string | null): string {
+    if (!text) return '';
+    return text
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w-]/g, '')
+      .replace(/-+/g, '-');
+  }
+
   copyCode(blockId: string, content: string): void {
     navigator.clipboard.writeText(content).then(() => {
       this.copiedId.set(blockId);

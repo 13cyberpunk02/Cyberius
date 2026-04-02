@@ -20,6 +20,9 @@ public interface IPostService
     Task<Result<PagedResponse<PostSummaryResponse>>> SearchAsync(string query, int page, int pageSize,
         CancellationToken ct = default);
 
+    Task<Result<IReadOnlyList<PostSummaryResponse>>> GetRelatedAsync(
+        Guid postId, int count, CancellationToken ct = default);
+
     Task<Result<PagedResponse<PostSummaryResponse>>> GetByAuthorAsync(
         Guid authorId, int page, int pageSize, CancellationToken ct = default);
     

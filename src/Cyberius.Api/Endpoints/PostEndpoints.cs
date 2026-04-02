@@ -38,6 +38,9 @@ public static class PostEndpoints
         group.MapGet("tag/{tagSlug}", GetByTag)
             .WithSummary("Get posts by tag");
         
+        group.MapGet("{id:guid}/related", GetRelated)
+            .WithSummary("Get related posts");
+        
         group.MapGet("author/{authorId:guid}", GetByAuthor)
             .WithSummary("Get posts by author (public)");
 
@@ -245,6 +248,16 @@ public static class PostEndpoints
         return result.ToHttpResponse();
     }
 
+    private static async Task<IResult> GetRelated(
+        [FromRoute] Guid id,
+        IPostService postService,
+        [FromQuery] int count = 3,
+        CancellationToken ct = default)
+    {
+        var result = await postService.GetRelatedAsync(id, count, ct);
+        return result.ToHttpResponse();
+    }
+    
     private static async Task<IResult> React(
         [FromRoute] Guid id,
         [FromRoute] string type,

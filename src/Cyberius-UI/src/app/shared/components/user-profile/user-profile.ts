@@ -58,9 +58,10 @@ export class UserProfileComponent implements OnInit {
     this.http.get<UserProfile>(`${this.auth.API}/auth/${userId}`).subscribe({
       next: (profile) => {
         this.profile.set(profile);
+        const fullName = `${profile.firstName} ${profile.lastName}`.trim();
         this.seo.setPage({
-          title: `${profile.firstName} ${profile.lastName}`,
-          description: `Статьи автора ${profile.firstName} ${profile.lastName} на Cyberius`,
+          title: fullName,
+          description: `Статьи автора ${fullName} на Cyberius`,
         });
         this.loadPosts(userId);
       },

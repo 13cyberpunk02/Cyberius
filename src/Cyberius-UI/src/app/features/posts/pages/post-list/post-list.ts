@@ -13,6 +13,7 @@ import {
   faAngleLeft,
   faAngleRight,
   faMagnifyingGlass,
+  faPenSquare,
   faPlusCircle,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
@@ -129,4 +130,6 @@ export class PostList implements OnInit {
       queryParamsHandling: 'merge',
     });
   }
+
+  protected readonly faPenSquare = faPenSquare;
 }

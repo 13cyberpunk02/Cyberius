@@ -11,6 +11,7 @@ import {
   UserProfile,
   AuthState,
 } from '../models/auth.model';
+import { ToastService } from './toast.service';
 
 const ACCESS_TOKEN_KEY = 'blog_access_token';
 const REFRESH_TOKEN_KEY = 'blog_refresh_token';
@@ -23,11 +24,11 @@ const EXPIRY_BUFFER_MS = 30_000;
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
+  private toast = inject(ToastService);
 
   readonly API = 'http://localhost:5273/api';
   readonly FILES_BASE = 'http://localhost:5273/api/files/';
 
-  // Полный URL аватара текущего пользователя
   readonly avatarUrl = computed(() => {
     const path = this.state().profile?.avatarUrl;
     if (!path) return null;
@@ -37,30 +38,26 @@ export class AuthService {
 
   // ── State ──────────────────────────────────────────────────────
   private state = signal<AuthState>(this.loadFromStorage());
-  private refreshInProgress$: Observable<AuthResponse> | null = null;
+  refreshInProgress$: Observable<AuthResponse> | null = null;
 
-  // Публичные сигналы
   readonly user = computed(() => this.state().user);
   readonly profile = computed(() => this.state().profile);
   readonly isAuthenticated = computed(() => this.state().isAuthenticated);
   readonly accessToken = computed(() => this.state().accessToken);
-  readonly refreshToken = computed(() => this.state().refreshToken);
 
   readonly initials = computed(() => {
     const p = this.state().profile;
-    if (p) {
-      return (p.firstName[0] + (p.lastName[0] ?? '')).toUpperCase();
-    }
+    if (p) return ((p.firstName?.[0] ?? '') + (p.lastName?.[0] ?? '')).toUpperCase();
     const u = this.state().user;
-    if (!u) return '';
+    if (!u) return '?';
     return u.userName
       ? u.userName
           .split(' ')
-          .map((w) => w[0])
+          .map((w: string) => w[0])
           .slice(0, 2)
           .join('')
           .toUpperCase()
-      : u.email[0].toUpperCase();
+      : (u.email?.[0] ?? '?').toUpperCase();
   });
 
   readonly displayName = computed(() => {
@@ -119,9 +116,12 @@ export class AuthService {
     if (this.refreshInProgress$) return this.refreshInProgress$;
 
     const { accessToken, refreshToken } = this.state();
-    if (!accessToken || !refreshToken) return throwError(() => new Error('No tokens'));
+    if (!refreshToken) return throwError(() => new Error('No refresh token'));
 
-    const body: RefreshTokenRequest = { accessToken, refreshToken };
+    const body: RefreshTokenRequest = {
+      accessToken: accessToken ?? '',
+      refreshToken: refreshToken,
+    };
 
     this.refreshInProgress$ = this.http
       .post<AuthResponse>(`${this.API}/auth/refresh-token`, body)
@@ -132,7 +132,12 @@ export class AuthService {
         }),
         catchError((err) => {
           this.refreshInProgress$ = null;
-          this.clearState();
+          // Только при явном отказе сервера (401/403) — сессия точно истекла
+          // При сетевых ошибках (status 0, 503) — НЕ разлогиниваем
+          if (err?.status === 401 || err?.status === 403) {
+            this.clearState();
+            this.toast.info('Сессия истекла — войдите снова');
+          }
           return throwError(() => err);
         }),
         shareReplay(1),
@@ -165,7 +170,7 @@ export class AuthService {
     this.state.update((s) => ({ ...s, user, accessToken, refreshToken, isAuthenticated: true }));
   }
 
-  private clearState(): void {
+  clearState(): void {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
@@ -186,36 +191,36 @@ export class AuthService {
       const userRaw = localStorage.getItem(USER_KEY);
       const profileRaw = localStorage.getItem(PROFILE_KEY);
 
-      if (!accessToken || !refreshToken || !userRaw) {
-        return {
-          user: null,
-          profile: null,
-          accessToken: null,
-          refreshToken: null,
-          isAuthenticated: false,
-        };
-      }
+      // Без refresh token — точно не авторизован
+      if (!refreshToken || !userRaw) return this.emptyState();
 
-      const accessExpired = this.isTokenExpired(accessToken);
       const user = JSON.parse(userRaw) as User;
       const profile = profileRaw ? (JSON.parse(profileRaw) as UserProfile) : null;
+
+      // Access token мог истечь — это нормально.
+      // isAuthenticated остаётся true, interceptor обновит через refresh
+      const accessExpired = accessToken ? this.isTokenExpired(accessToken) : true;
 
       return {
         user,
         profile,
         accessToken: accessExpired ? null : accessToken,
         refreshToken,
-        isAuthenticated: true,
+        isAuthenticated: true, // держим true, пока есть refresh token
       };
     } catch {
-      return {
-        user: null,
-        profile: null,
-        accessToken: null,
-        refreshToken: null,
-        isAuthenticated: false,
-      };
+      return this.emptyState();
     }
+  }
+
+  private emptyState(): AuthState {
+    return {
+      user: null,
+      profile: null,
+      accessToken: null,
+      refreshToken: null,
+      isAuthenticated: false,
+    };
   }
 
   private decodePayload(token: string): Record<string, unknown> {

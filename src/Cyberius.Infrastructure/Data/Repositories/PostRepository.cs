@@ -114,6 +114,7 @@ public class PostRepository(AppDbContext db)
     {
         var query = _db.Posts
             .Where(p => p.AuthorId == authorId && p.Status == PostStatus.Published)
+            .Include(p => p.Author)
             .Include(p => p.Category)
             .Include(p => p.PostTags).ThenInclude(pt => pt.Tag)
             .Include(p => p.Reactions)
@@ -187,8 +188,10 @@ public class PostRepository(AppDbContext db)
         Guid authorId, CancellationToken ct = default) =>
         await _db.Posts
             .Where(p => p.AuthorId == authorId && p.Status == PostStatus.Draft)
+            .Include(p => p.Author)
             .Include(p => p.Category)
             .Include(p => p.PostTags).ThenInclude(pt => pt.Tag)
+            .Include(p => p.Reactions)
             .OrderByDescending(p => p.UpdatedAt)
             .AsNoTracking()
             .ToListAsync(ct);

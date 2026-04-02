@@ -75,8 +75,8 @@ export class PostEditor implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private http = inject(HttpClient);
-  readonly auth = inject(AuthService);
   private toast = inject(ToastService);
+  readonly auth = inject(AuthService);
 
   protected readonly faInfoCircle = faInfoCircle;
   protected readonly faSpinner = faSpinner;
@@ -89,6 +89,9 @@ export class PostEditor implements OnInit, OnDestroy {
   protected readonly faXmark = faXmark;
   protected readonly faArrowDown = faArrowDown;
   protected readonly faArrowUp = faArrowUp;
+  protected readonly faArrowLeft = faArrowLeft;
+  protected readonly faPlus = faPlus;
+  protected readonly faMinus = faMinus;
 
   // Mode
   isEdit = signal(false);
@@ -107,7 +110,7 @@ export class PostEditor implements OnInit, OnDestroy {
   blocks = signal<EditorBlock[]>([]);
   categories = signal<CategoryResponse[]>([]);
 
-  readonly blockTypes = BLOCK_TYPES;
+  // Время чтения считается в реальном времени по блокам
   readonly liveReadTime = computed(() => {
     const words = this.blocks()
       .filter(
@@ -121,6 +124,7 @@ export class PostEditor implements OnInit, OnDestroy {
     return Math.max(1, Math.ceil(words / 200));
   });
 
+  readonly blockTypes = BLOCK_TYPES;
   uploadingCover = signal(false);
 
   ngOnInit(): void {
@@ -275,8 +279,6 @@ export class PostEditor implements OnInit, OnDestroy {
     if (this.autosaveTimer) clearInterval(this.autosaveTimer);
   }
 
-  // ── Cover image upload ─────────────────────────────────────────
-
   onCoverFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -418,19 +420,17 @@ export class PostEditor implements OnInit, OnDestroy {
 
   save(andPublish = false): void {
     if (!this.title().trim()) {
-      this.errorMsg.set('Введите заголовок');
+      this.toast.error('Введите заголовок');
       return;
     }
     if (!this.categoryId()) {
-      this.errorMsg.set('Выберите категорию');
+      this.toast.error('Выберите категорию');
       return;
     }
 
     this.saveStatus.set(andPublish ? 'publishing' : 'saving');
-    this.errorMsg.set('');
 
     const req = this.buildRequest();
-
     const op$ =
       this.isEdit() && this.editPostId()
         ? this.postsService.update(this.editPostId()!, req as UpdatePostRequest)
@@ -440,11 +440,17 @@ export class PostEditor implements OnInit, OnDestroy {
       next: (post) => {
         if (andPublish) {
           this.postsService.publish(post.id).subscribe({
-            next: () => this.router.navigate(['/posts', post.slug]),
+            next: () => {
+              this.toast.success('Статья опубликована!');
+              this.clearDraft();
+              this.router.navigate(['/posts', post.slug]);
+            },
             error: () => this.router.navigate(['/posts', post.slug]),
           });
         } else {
           this.saveStatus.set('idle');
+          this.toast.success('Черновик сохранён');
+          this.clearDraft();
           if (!this.isEdit()) {
             this.router.navigate(['/posts', post.slug, 'edit']);
           }
@@ -452,12 +458,8 @@ export class PostEditor implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.saveStatus.set('error');
-        this.errorMsg.set(err?.error?.message ?? 'Не удалось сохранить статью');
+        this.toast.error(err?.error?.message ?? 'Не удалось сохранить статью');
       },
     });
   }
-
-  protected readonly faArrowLeft = faArrowLeft;
-  protected readonly faPlus = faPlus;
-  protected readonly faMinus = faMinus;
 }

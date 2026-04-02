@@ -12,7 +12,7 @@
       <!-- Logo -->
       <a href="/" class="flex items-center gap-3 group">
         <div class="logo-icon w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-lg select-none">
-          <span class="relative z-10"><fa-icon [icon]="faCode" /> </span>
+          <span class="relative z-10"><fa-icon [icon]="faCode" /></span>
         </div>
         <div class="leading-tight">
           <span class="block text-sm font-bold tracking-wide text-sky-400 group-hover:text-sky-300 transition-colors">Cyberius</span>
@@ -91,6 +91,15 @@
 
         <!-- ── Авторизован → аватар с меню ── -->
         @if (authService.isAuthenticated()) {
+          <!-- Быстрая ссылка на черновики -->
+          <a
+            routerLink="/posts/drafts"
+            class="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium btn-secondary transition-all hover:scale-105"
+            title="Мои черновики"
+          >
+            <fa-icon [icon]="faPenToSquare" />
+            Черновики
+          </a>
           <div class="relative user-menu-wrapper">
             <!-- Avatar button -->
             <button
@@ -132,6 +141,10 @@
                   <a routerLink="/profile" (click)="closeUserMenu()" class="user-menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200">
                     <fa-icon [icon]="faUser" class="text-slate-400" />
                     Профиль
+                  </a>
+                  <a routerLink="/posts/drafts" (click)="closeUserMenu()" class="user-menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200">
+                    <fa-icon [icon]="faPenToSquare" class="text-slate-400" />
+                    Мои черновики
                   </a>
                   <a routerLink="/saved" (click)="closeUserMenu()" class="user-menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200">
                     <fa-icon [icon]="faBookmark" class="text-slate-400" />

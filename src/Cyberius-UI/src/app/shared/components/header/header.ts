@@ -14,6 +14,7 @@ import {
   faCode,
   faMagnifyingGlass,
   faMoon,
+  faPenToSquare,
   faSun,
   faTag,
   faUser,
@@ -127,4 +128,6 @@ export class Header {
     this.authService.logout();
     this.showUserMenu.set(false);
   }
+
+  protected readonly faPenToSquare = faPenToSquare;
 }

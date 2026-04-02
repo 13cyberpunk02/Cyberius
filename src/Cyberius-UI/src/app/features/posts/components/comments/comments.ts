@@ -5,7 +5,14 @@ import { CommentService } from '../../../../core/services/comment.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { CommentResponse, PagedComments } from '../../../../core/models/comment.model';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faComment, faReply, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import {
+  faComment,
+  faCommentDots,
+  faReply,
+  faSpinner,
+  faTrashCan,
+} from '@fortawesome/free-solid-svg-icons';
+import { RouterLink } from '@angular/router';
 
 const REACTION_EMOJI: Record<string, string> = {
   Like: '👍',
@@ -20,7 +27,7 @@ const DAYS_SHORT = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
 
 @Component({
   selector: 'app-comments',
-  imports: [FormsModule, CommonModule, FaIconComponent],
+  imports: [FormsModule, CommonModule, FaIconComponent, RouterLink],
   templateUrl: './comments.html',
   styleUrl: './comments.css',
 })
@@ -349,5 +356,6 @@ export class Comments implements OnInit {
 
   protected readonly faSpinner = faSpinner;
   protected readonly faReply = faReply;
-  protected readonly faComment = faComment;
+  protected readonly faTrashCan = faTrashCan;
+  protected readonly faCommentDots = faCommentDots;
 }

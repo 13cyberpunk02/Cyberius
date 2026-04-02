@@ -8,13 +8,22 @@
         <p class="text-slate-400 text-sm">{{ totalCount }} публикаций</p>
       </div>
       @if (auth.isAuthenticated()) {
-        <a
-          routerLink="/posts/create"
-          class="btn-primary flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:scale-105"
-        >
-          <fa-icon [icon]="faPlusCircle" />
-          Написать статью
-        </a>
+        <div class="flex items-center gap-2">
+          <a
+            routerLink="/posts/drafts"
+            class="btn-secondary flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:scale-105"
+          >
+            <fa-icon [icon]="faPenSquare" />
+            Черновики
+          </a>
+          <a
+            routerLink="/posts/create"
+            class="btn-primary flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:scale-105"
+          >
+            <fa-icon [icon]="faPlusCircle" />
+            Написать статью
+          </a>
+        </div>
       }
     </div>
 

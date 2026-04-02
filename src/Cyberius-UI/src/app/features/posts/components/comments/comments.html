@@ -12,14 +12,14 @@
   @if (isAuthenticated()) {
     <div class="glass-card rounded-2xl p-5 mb-8">
       <div class="flex items-start gap-3">
-        <!-- Author avatar -->
-        <div class="user-avatar-btn w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0 overflow-hidden">
+        <a [routerLink]="['/users', auth.user()?.id]"
+           class="w-9 h-9 rounded-full shrink-0 overflow-hidden user-avatar-btn flex items-center justify-center text-sm font-bold text-white">
           @if (getAvatarUrl(auth.profile()?.avatarUrl ?? null); as url) {
             <img [src]="url" class="w-full h-full object-cover" alt="avatar"/>
           } @else {
             {{ auth.initials() }}
           }
-        </div>
+        </a>
         <div class="flex-1">
           <textarea
             [ngModel]="newText()"
@@ -69,83 +69,222 @@
   @if (!loading()) {
     @if (comments.length === 0) {
       <div class="text-center py-12 text-slate-500">
-        <div class="text-4xl mb-3"><fa-icon [icon]="faComment" /></div>
+        <div class="text-4xl mb-3"><fa-icon [icon]="faCommentDots" /></div>
         <p>Будьте первым кто прокомментирует</p>
       </div>
     } @else {
       <div class="space-y-5">
         @for (comment of comments; track comment.id) {
-          <div>
-            <!-- Root comment -->
-            <ng-container
-              *ngTemplateOutlet="commentTpl; context: { comment: comment, parentId: null, depth: 0 }"
-            />
+          <!-- Скрываем удалённые комментарии без ответов -->
+          @if (!comment.isDeleted || (comment.replies?.length ?? 0) > 0) {
+            <div>
+              <div class="group glass-card rounded-2xl p-4 transition-colors hover:border-white/20"
+                   [class.opacity-60]="comment.isDeleted">
+                <div class="flex items-start gap-3">
 
-            <!-- Replies -->
-            @if (comment.replies?.length) {
-              <div class="ml-12 mt-3 space-y-3 border-l-2 border-white/10 pl-5">
-                @for (reply of comment.replies; track reply.id) {
-                  <ng-container
-                    *ngTemplateOutlet="commentTpl; context: { comment: reply, parentId: comment.id, depth: 1 }"
-                  />
-                }
-              </div>
-            }
-
-            <!-- Reply form inline -->
-            @if (replyToId() === comment.id) {
-              <div class="ml-12 mt-3 glass-card rounded-2xl p-4 border border-sky-500/20 animate-fadeInUp">
-                <!-- Quote block (как в Telegram) -->
-                @if (replyToComment(); as rc) {
-                  <div class="flex gap-2 mb-3">
-                    <div class="w-0.5 rounded-full bg-sky-400 shrink-0"></div>
-                    <div class="min-w-0">
-                      <p class="text-xs font-semibold text-sky-400 mb-0.5">
-                        &#64;{{ rc.author.username }}
-                      </p>
-                      <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed">
-                        {{ quoteText }}
-                      </p>
+                  <!-- Avatar (кликабельный) — скрываем для удалённых -->
+                  @if (!comment.isDeleted) {
+                    <a [routerLink]="['/users', comment.author.id]"
+                       class="shrink-0 hover:opacity-80 transition-opacity">
+                      <div class="user-avatar-btn w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white overflow-hidden">
+                        @if (getAvatarUrl(comment.author.avatarUrl); as url) {
+                          <img [src]="url" class="w-full h-full object-cover" [alt]="comment.author.fullName"/>
+                        } @else {
+                          {{ comment.author.fullName[0] ?? '?' }}
+                        }
+                      </div>
+                    </a>
+                  } @else {
+                    <div class="w-9 h-9 rounded-full shrink-0 bg-white/5 flex items-center justify-center text-slate-600">
+                      <fa-icon [icon]="faTrashCan" />
                     </div>
-                  </div>
-                }
-                <textarea
-                  [ngModel]="replyText()"
-                  (ngModelChange)="replyText.set($event)"
-                  placeholder="Написать ответ..."
-                  rows="2"
-                  class="email-input w-full px-3 py-2.5 rounded-xl text-sm resize-none mb-2"
-                  autofocus
-                ></textarea>
-                <div class="flex justify-end gap-2">
-                  <button (click)="cancelReply()"
-                          class="btn-secondary px-4 py-1.5 rounded-lg text-xs font-medium">
-                    Отмена
-                  </button>
-                  <button
-                    (click)="submitReply()"
-                    [disabled]="!replyText().trim() || submitting()"
-                    class="btn-primary px-4 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-50 flex items-center gap-1.5"
-                  >
-                    @if (submitting()) {
-                      <fa-icon [icon]="faSpinner" animation="spin-pulse" />
+                  }
+
+                  <div class="flex-1 min-w-0">
+                    @if (comment.isDeleted) {
+                      <!-- Минималистичная заглушка только если есть ответы -->
+                      <p class="text-xs text-slate-600 italic">Комментарий удалён</p>
+                    } @else {
+                      <!-- Author row -->
+                      <div class="flex items-center flex-wrap gap-x-2 gap-y-0.5 mb-1.5">
+                        <a [routerLink]="['/users', comment.author.id]"
+                           class="text-sm font-semibold heading-text hover:text-sky-400 transition-colors">
+                          {{ comment.author.fullName }}
+                        </a>
+                        <span class="text-xs font-mono text-slate-500">&#64;{{ comment.author.username }}</span>
+                        <span class="text-xs text-slate-600">·</span>
+                        <span class="text-xs text-slate-500">{{ formatDate(comment.createdAt) }}</span>
+                      </div>
+
+                      <!-- Edit form or content -->
+                      @if (editingId() === comment.id) {
+                        <div class="space-y-2">
+                        <textarea [ngModel]="editText()" (ngModelChange)="editText.set($event)"
+                                  rows="3" class="email-input w-full px-3 py-2.5 rounded-xl text-sm resize-none"></textarea>
+                          <div class="flex gap-2 justify-end">
+                            <button (click)="cancelEdit()" class="btn-secondary px-3 py-1.5 rounded-lg text-xs font-medium">Отмена</button>
+                            <button (click)="submitEdit(comment.id, null)" [disabled]="!editText().trim() || submitting()"
+                                    class="btn-primary px-3 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-50">Сохранить</button>
+                          </div>
+                        </div>
+                      } @else {
+                        <p class="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">{{ comment.content }}</p>
+                      }
+
+                      <!-- Time -->
+                      @if (editingId() !== comment.id) {
+                        <p class="text-[10px] text-slate-600 mt-1.5 font-mono">{{ formatCommentTime(comment) }}</p>
+                      }
+
+                      <!-- Actions -->
+                      @if (editingId() !== comment.id) {
+                        <div class="flex items-center flex-wrap gap-3 mt-2.5">
+                          <div class="flex items-center gap-1.5">
+                            @for (reaction of reactions; track reaction[0]) {
+                              <button (click)="react(comment.id, null, reaction[0])" [disabled]="!isAuthenticated()"
+                                      class="flex items-center gap-1 px-2 py-1 rounded-lg text-xs transition-all duration-200 border"
+                                      [class]="comment.myReaction === reaction[0]
+                                ? 'bg-sky-500/20 border-sky-400/50 text-sky-300 scale-105'
+                                : 'bg-white/5 border-white/10 text-slate-400 hover:border-sky-400/30 hover:text-slate-300 disabled:cursor-default'">
+                                <span>{{ reaction[1] }}</span>
+                                @if ((comment.reactions[reaction[0]] ?? 0) > 0) {
+                                  <span class="font-mono">{{ comment.reactions[reaction[0]] }}</span>
+                                }
+                              </button>
+                            }
+                          </div>
+                          @if (isAuthenticated()) {
+                            <button (click)="openReply(comment)"
+                                    class="flex items-center gap-1 text-xs text-slate-400 hover:text-sky-400 transition-colors">
+                              <fa-icon [icon]="faReply" />
+                              Ответить
+                            </button>
+                          }
+                          @if (canModify(comment)) {
+                            <button (click)="openEdit(comment)" class="text-xs text-slate-400 hover:text-sky-400 transition-colors">Изменить</button>
+                            <button (click)="deleteComment(comment.id, null)" class="text-xs text-slate-400 hover:text-rose-400 transition-colors">Удалить</button>
+                          }
+                        </div>
+                      }
                     }
-                    Ответить
-                  </button>
+                  </div>
                 </div>
               </div>
-            }
-          </div>
+
+              <!-- Replies -->
+              @if (comment.replies?.length) {
+                <div class="ml-12 mt-3 space-y-3 border-l-2 border-white/10 pl-5">
+                  @for (reply of comment.replies; track reply.id) {
+                    <div class="group glass-card rounded-2xl p-4 transition-colors hover:border-white/20"
+                         [class.opacity-60]="reply.isDeleted">
+                      <div class="flex items-start gap-3">
+
+                        <a [routerLink]="['/users', reply.author.id]"
+                           class="shrink-0 hover:opacity-80 transition-opacity">
+                          <div class="user-avatar-btn w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white overflow-hidden">
+                            @if (getAvatarUrl(reply.author.avatarUrl); as url) {
+                              <img [src]="url" class="w-full h-full object-cover" [alt]="reply.author.fullName"/>
+                            } @else {
+                              {{ reply.author.fullName[0] ?? '?' }}
+                            }
+                          </div>
+                        </a>
+
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center flex-wrap gap-x-2 gap-y-0.5 mb-1.5">
+                            <a [routerLink]="['/users', reply.author.id]"
+                               class="text-sm font-semibold heading-text hover:text-sky-400 transition-colors">
+                              {{ reply.author.fullName }}
+                            </a>
+                            <span class="text-xs font-mono text-slate-500">&#64;{{ reply.author.username }}</span>
+                            <span class="text-xs text-slate-600">·</span>
+                            <span class="text-xs text-slate-500">{{ formatDate(reply.createdAt) }}</span>
+                          </div>
+
+                          @if (editingId() === reply.id) {
+                            <div class="space-y-2">
+                            <textarea [ngModel]="editText()" (ngModelChange)="editText.set($event)"
+                                      rows="2" class="email-input w-full px-3 py-2 rounded-xl text-sm resize-none"></textarea>
+                              <div class="flex gap-2 justify-end">
+                                <button (click)="cancelEdit()" class="btn-secondary px-3 py-1.5 rounded-lg text-xs">Отмена</button>
+                                <button (click)="submitEdit(reply.id, comment.id)" [disabled]="!editText().trim()"
+                                        class="btn-primary px-3 py-1.5 rounded-lg text-xs text-white disabled:opacity-50">Сохранить</button>
+                              </div>
+                            </div>
+                          } @else {
+                            <p class="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">{{ reply.content }}</p>
+                          }
+
+                          @if (!reply.isDeleted && editingId() !== reply.id) {
+                            <p class="text-[10px] text-slate-600 mt-1.5 font-mono">{{ formatCommentTime(reply) }}</p>
+                          }
+
+                          @if (!reply.isDeleted && editingId() !== reply.id) {
+                            <div class="flex items-center flex-wrap gap-3 mt-2.5">
+                              <div class="flex items-center gap-1.5">
+                                @for (reaction of reactions; track reaction[0]) {
+                                  <button (click)="react(reply.id, comment.id, reaction[0])" [disabled]="!isAuthenticated()"
+                                          class="flex items-center gap-1 px-2 py-1 rounded-lg text-xs transition-all duration-200 border"
+                                          [class]="reply.myReaction === reaction[0]
+                                    ? 'bg-sky-500/20 border-sky-400/50 text-sky-300 scale-105'
+                                    : 'bg-white/5 border-white/10 text-slate-400 hover:border-sky-400/30 hover:text-slate-300 disabled:cursor-default'">
+                                    <span>{{ reaction[1] }}</span>
+                                    @if ((reply.reactions[reaction[0]] ?? 0) > 0) {
+                                      <span class="font-mono">{{ reply.reactions[reaction[0]] }}</span>
+                                    }
+                                  </button>
+                                }
+                              </div>
+                              @if (canModify(reply)) {
+                                <button (click)="openEdit(reply)" class="text-xs text-slate-400 hover:text-sky-400 transition-colors">Изменить</button>
+                                <button (click)="deleteComment(reply.id, comment.id)" class="text-xs text-slate-400 hover:text-rose-400 transition-colors">Удалить</button>
+                              }
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+
+              <!-- Reply form -->
+              @if (replyToId() === comment.id) {
+                <div class="ml-12 mt-3 glass-card rounded-2xl p-4 border border-sky-500/20 animate-fadeInUp">
+                  @if (replyToComment(); as rc) {
+                    <div class="flex gap-2 mb-3">
+                      <div class="w-0.5 rounded-full bg-sky-400 shrink-0"></div>
+                      <div class="min-w-0">
+                        <p class="text-xs font-semibold text-sky-400 mb-0.5">&#64;{{ rc.author.username }}</p>
+                        <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed">{{ quoteText }}</p>
+                      </div>
+                    </div>
+                  }
+                  <textarea [ngModel]="replyText()" (ngModelChange)="replyText.set($event)"
+                            placeholder="Написать ответ..." rows="2"
+                            class="email-input w-full px-3 py-2.5 rounded-xl text-sm resize-none mb-2" autofocus></textarea>
+                  <div class="flex justify-end gap-2">
+                    <button (click)="cancelReply()" class="btn-secondary px-4 py-1.5 rounded-lg text-xs font-medium">Отмена</button>
+                    <button (click)="submitReply()" [disabled]="!replyText().trim() || submitting()"
+                            class="btn-primary px-4 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-50 flex items-center gap-1.5">
+                      @if (submitting()) {
+                        <fa-icon [icon]="faSpinner" animation="spin-pulse" />
+                      }
+                      Ответить
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          } <!-- конец @if (!comment.isDeleted || replies exist) -->
         }
       </div>
+
       <!-- Load more -->
       @if (hasMore()) {
         <div class="text-center mt-6">
-          <button
-            (click)="loadMore()"
-            [disabled]="loadingMore()"
-            class="btn-secondary px-6 py-2.5 rounded-xl text-sm font-medium transition-all hover:scale-105 disabled:opacity-50 flex items-center gap-2 mx-auto"
-          >
+          <button (click)="loadMore()" [disabled]="loadingMore()"
+                  class="btn-secondary px-6 py-2.5 rounded-xl text-sm font-medium transition-all hover:scale-105 disabled:opacity-50 flex items-center gap-2 mx-auto">
             @if (loadingMore()) {
               <fa-icon [icon]="faSpinner" animation="spin-pulse" />
               Загружаем...
@@ -158,118 +297,3 @@
     }
   }
 </section>
-
-<!-- Comment template -->
-<ng-template #commentTpl let-comment="comment" let-parentId="parentId" let-depth="depth">
-  <div class="group glass-card rounded-2xl p-4 transition-colors hover:border-white/20"
-       [class.opacity-60]="comment.isDeleted">
-
-    <div class="flex items-start gap-3">
-      <!-- Avatar -->
-      <div class="user-avatar-btn w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0 overflow-hidden">
-        @if (getAvatarUrl(comment.author.avatarUrl); as url) {
-          <img [src]="url" class="w-full h-full object-cover" [alt]="comment.author.fullName"/>
-        } @else {
-          {{ comment.author.fullName[0] ?? '?' }}
-        }
-      </div>
-
-      <div class="flex-1 min-w-0">
-        <!-- Author + relative time -->
-        <div class="flex items-center flex-wrap gap-x-2 gap-y-0.5 mb-1.5">
-          <span class="text-sm font-semibold heading-text">{{ comment.author.fullName }}</span>
-          <span class="text-xs font-mono text-slate-500">&#64;{{ comment.author.username }}</span>
-          <span class="text-xs text-slate-600">·</span>
-          <span class="text-xs text-slate-500">{{ formatDate(comment.createdAt) }}</span>
-        </div>
-
-        <!-- Content or edit form -->
-        @if (editingId() === comment.id) {
-          <div class="space-y-2">
-            <textarea
-              [ngModel]="editText()"
-              (ngModelChange)="editText.set($event)"
-              rows="3"
-              class="email-input w-full px-3 py-2.5 rounded-xl text-sm resize-none"
-            ></textarea>
-            <div class="flex gap-2 justify-end">
-              <button (click)="cancelEdit()"
-                      class="btn-secondary px-3 py-1.5 rounded-lg text-xs font-medium">
-                Отмена
-              </button>
-              <button
-                (click)="submitEdit(comment.id, parentId)"
-                [disabled]="!editText().trim() || submitting()"
-                class="btn-primary px-3 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-50">
-                Сохранить
-              </button>
-            </div>
-          </div>
-        } @else {
-          <p class="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">
-            {{ comment.content }}
-          </p>
-        }
-
-        <!-- Время создания/изменения — мелкий текст под контентом -->
-        @if (!comment.isDeleted && editingId() !== comment.id) {
-          <p class="text-[10px] text-slate-600 mt-1.5 font-mono">
-            {{ formatCommentTime(comment) }}
-          </p>
-        }
-
-        <!-- Actions row -->
-        @if (!comment.isDeleted && editingId() !== comment.id) {
-          <div class="flex items-center flex-wrap gap-3 mt-3">
-
-            <!-- Reactions -->
-            <div class="flex items-center gap-1.5">
-              @for (reaction of reactions; track reaction[0]) {
-                <button
-                  (click)="react(comment.id, parentId, reaction[0])"
-                  [disabled]="!isAuthenticated()"
-                  class="flex items-center gap-1 px-2 py-1 rounded-lg text-xs transition-all duration-200 border"
-                  [class]="comment.myReaction === reaction[0]
-                    ? 'bg-sky-500/20 border-sky-400/50 text-sky-300 scale-105'
-                    : 'bg-white/5 border-white/10 text-slate-400 hover:border-sky-400/30 hover:text-slate-300 disabled:cursor-default'"
-                >
-                  <span>{{ reaction[1] }}</span>
-                  @if ((comment.reactions[reaction[0]] ?? 0) > 0) {
-                    <span class="font-mono">{{ comment.reactions[reaction[0]] }}</span>
-                  }
-                </button>
-              }
-            </div>
-
-            <!-- Reply (только для корневых комментариев) -->
-            @if (depth === 0 && isAuthenticated()) {
-              <button
-                (click)="openReply(comment)"
-                class="flex items-center gap-1 text-xs text-slate-400 hover:text-sky-400 transition-colors"
-              >
-                <fa-icon [icon]="faReply" />
-                Ответить
-              </button>
-            }
-
-            <!-- Edit / Delete (только автор или Admin/Manager) -->
-            @if (canModify(comment)) {
-              <button
-                (click)="openEdit(comment)"
-                class="text-xs text-slate-400 hover:text-sky-400 transition-colors"
-              >
-                Изменить
-              </button>
-              <button
-                (click)="deleteComment(comment.id, parentId)"
-                class="text-xs text-slate-400 hover:text-rose-400 transition-colors"
-              >
-                Удалить
-              </button>
-            }
-          </div>
-        }
-      </div>
-    </div>
-  </div>
-</ng-template>

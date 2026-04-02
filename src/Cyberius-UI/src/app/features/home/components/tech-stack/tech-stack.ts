@@ -53,7 +53,7 @@ export class TechStack implements OnInit {
       name: 'EF Core',
       version: '10.0',
       description: 'ORM нового поколения с поддержкой сложных запросов',
-      iconFile: 'efcore',
+      iconFile: 'ef-core',
       outlineColor: '#10b981',
       features: ['Complex Types', 'JSON Columns', 'Raw SQL', 'Compiled Models'],
     },

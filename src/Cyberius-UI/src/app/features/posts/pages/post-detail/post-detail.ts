@@ -105,30 +105,42 @@ export class PostDetail implements OnInit {
   }
 
   ngOnInit(): void {
-    const slug = this.route.snapshot.paramMap.get('slug')!;
-    this.postsService.getBySlug(slug).subscribe({
-      next: (post) => {
-        this.post.set(post);
-        this.loading.set(false);
-        this.trackView(post.id);
-        this.buildToc(post);
-        this.loadRelated(post.id);
-        this.seo.setPage({
-          title: post.title,
-          description: post.excerpt ?? undefined,
-          image: post.coverImageUrl
-            ? (this.postsService.getImageUrl(post.coverImageUrl) ?? undefined)
-            : undefined,
-          url: `http://localhost:4200/posts/${post.slug}`,
-          type: 'article',
-          publishedAt: post.publishedAt ?? undefined,
-          author: post.author.fullName,
-        });
-      },
-      error: (err) => {
-        this.loading.set(false);
-        if (err.status === 404) this.notFound.set(true);
-      },
+    // Подписываемся на изменения параметров — важно для навигации между статьями
+    this.route.paramMap.subscribe(params => {
+      const slug = params.get('slug')!;
+
+      // Сбрасываем состояние при смене статьи
+      this.post.set(null);
+      this.loading.set(true);
+      this.notFound.set(false);
+      this.related.set([]);
+      this.toc.set([]);
+
+      this.postsService.getBySlug(slug).subscribe({
+        next: post => {
+          this.post.set(post);
+          this.loading.set(false);
+          this.trackView(post.id);
+          this.buildToc(post);
+          this.loadRelated(post.id);
+
+          this.seo.setPage({
+            title:       post.title,
+            description: post.excerpt ?? undefined,
+            image:       post.coverImageUrl
+              ? this.postsService.getImageUrl(post.coverImageUrl) ?? undefined
+              : undefined,
+            url:         `http://localhost:4200/posts/${post.slug}`,
+            type:        'article',
+            publishedAt: post.publishedAt ?? undefined,
+            author:      post.author.fullName,
+          });
+        },
+        error: err => {
+          this.loading.set(false);
+          if (err.status === 404) this.notFound.set(true);
+        },
+      });
     });
   }
 

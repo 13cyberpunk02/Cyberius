@@ -64,21 +64,23 @@
     }
 
     <!-- Footer: author + date + stats -->
-    <div class="flex items-center justify-between pt-4 border-t border-white/10 mt-auto">
-      <div class="flex items-center gap-2">
-        <div class="w-7 h-7 rounded-full overflow-hidden shrink-0">
+    <div class="flex flex-col gap-2 pt-4 border-t border-white/10 mt-auto">
+
+      <!-- Author -->
+      <a [routerLink]="['/users', post().author.id]"
+         class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+        <div class="w-6 h-6 rounded-full overflow-hidden shrink-0">
           @if (authorAvatarUrl()) {
             <img [src]="authorAvatarUrl()!" [alt]="post().author.fullName" class="w-full h-full object-cover"/>
           } @else {
             <div class="user-avatar-btn w-full h-full flex items-center justify-center text-xs font-bold text-white">
-              {{ post().author.fullName[0]}}
+              {{ post().author.fullName[0] ?? '?' }}
             </div>
           }
         </div>
-        <span class="text-xs text-slate-400 truncate max-w-25">
-          {{ post().author.fullName }}
-        </span>
-      </div>
+        <span class="text-xs text-slate-400 truncate">{{ post().author.fullName }}</span>
+      </a>
+
       <div class="flex items-center gap-3 text-xs text-slate-500">
         <!-- Views -->
         <span class="flex items-center gap-1">

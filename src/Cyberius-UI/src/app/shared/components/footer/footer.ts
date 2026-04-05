@@ -26,7 +26,7 @@ export class Footer {
       { label: 'GitHub', href: 'https://github.com' },
       { label: 'Документация .NET', href: 'https://learn.microsoft.com/dotnet' },
       { label: 'Документация Angular', href: 'https://angular.dev' },
-      { label: 'RSS Feed', href: '/feed.xml' },
+      { label: 'RSS Feed', href: 'http://localhost:5273/feed.xml' },
     ],
   };
   protected readonly faCode = faCode;

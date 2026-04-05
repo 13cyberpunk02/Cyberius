@@ -133,16 +133,23 @@ public class PostRepository(AppDbContext db)
     public async Task<(IReadOnlyList<Post> Items, int TotalCount)> SearchAsync(
         string query, int page, int pageSize, CancellationToken ct = default)
     {
-        var q = query.ToLower();
+        var q = query.Trim();
+ 
         var dbQuery = _db.Posts
             .Where(p => p.Status == PostStatus.Published
-                     && (p.Title.ToLower().Contains(q)
-                      || (p.Excerpt != null && p.Excerpt.ToLower().Contains(q))))
+                     && (EF.Functions.ToTsVector("russian", p.Title + " " + (p.Excerpt ?? "") + " " + (p.Excerpt ?? ""))
+                             .Matches(EF.Functions.PlainToTsQuery("russian", q))
+                         || p.Title.ToLower().Contains(q.ToLower())
+                         || (p.Excerpt != null && p.Excerpt.ToLower().Contains(q.ToLower()))
+                         || p.PostTags.Any(pt => pt.Tag.Name.ToLower().Contains(q.ToLower()))))
             .Include(p => p.Author)
             .Include(p => p.Category)
             .Include(p => p.PostTags).ThenInclude(pt => pt.Tag)
             .Include(p => p.Reactions)
-            .OrderByDescending(p => p.PublishedAt);
+            .OrderByDescending(p =>
+                EF.Functions.ToTsVector("russian", p.Title + " " + (p.Excerpt ?? ""))
+                    .Rank(EF.Functions.PlainToTsQuery("russian", q)))
+            .ThenByDescending(p => p.PublishedAt);
  
         var total = await dbQuery.CountAsync(ct);
         var items = await dbQuery

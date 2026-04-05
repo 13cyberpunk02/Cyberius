@@ -1,5 +1,15 @@
 <div class="min-h-screen pt-24 pb-16">
 
+  <!-- Прогресс чтения — фиксированная полоска вверху -->
+  @if (post() && !loading()) {
+    <div class="fixed top-0 left-0 right-0 h-0.5 z-60 bg-white/5">
+      <div
+        class="h-full bg-linear-to-r from-sky-500 to-indigo-500 transition-all duration-150"
+        [style.width]="readingProgress() + '%'"
+      ></div>
+    </div>
+  }
+
   @if (loading()) {
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 animate-pulse">
       <div class="h-10 w-3/4 rounded-xl bg-white/10 mb-4"></div>
@@ -54,18 +64,32 @@
           <span>{{ formatDate(post.publishedAt) }}</span>
         </div>
 
-        <!-- Title + Copy link -->
+        <!-- Title + actions -->
         <div class="flex items-start gap-3 mb-6">
           <h1 class="text-4xl sm:text-5xl font-black heading-text leading-tight flex-1">
             {{ post.title }}
           </h1>
-          <button
-            (click)="copyLink()"
-            class="shrink-0 mt-2 btn-secondary w-9 h-9 rounded-xl cursor-pointer flex items-center justify-center transition-all hover:scale-110"
-            title="Скопировать ссылку"
-          >
-            <fa-icon [icon]="faCopy" />
-          </button>
+          <div class="flex gap-2 shrink-0 mt-2">
+            <!-- Bookmark -->
+            <button
+              (click)="toggleBookmark()"
+              class="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:scale-110"
+              [class]="bookmarks.isBookmarked(post.id)
+                  ? 'btn-primary text-white'
+                  : 'btn-secondary'"
+              title="Сохранить статью"
+            >
+              <fa-icon [icon]="faBookmark" />
+            </button>
+            <!-- Copy link -->
+            <button
+              (click)="copyLink()"
+              class="btn-secondary w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:scale-110"
+              title="Скопировать ссылку"
+            >
+             <fa-icon [icon]="faCopy" />
+            </button>
+          </div>
         </div>
 
         <!-- Author + actions -->
@@ -152,6 +176,21 @@
           }
         </div>
 
+        <!-- Share -->
+        <div class="mt-6 flex items-center gap-3 flex-wrap">
+          <span class="text-sm text-slate-400 font-medium">Поделиться:</span>
+          <button (click)="shareTo('telegram')"
+                  class="flex items-center gap-2 px-4 py-2 rounded-xl cursor-pointer glass-card text-sm text-slate-300 border border-white/10 hover:border-sky-400/30 hover:text-sky-400 transition-all">
+            <fa-icon [icon]="faTelegram" />
+            Telegram
+          </button>
+          <button (click)="shareTo('X')"
+                  class="flex items-center gap-2 px-4 py-2 rounded-xl cursor-pointer glass-card text-sm text-slate-300 border border-white/10 hover:border-slate-400/40 hover:text-white transition-all">
+            <fa-icon [icon]="faXTwitter" />
+            X / Twitter
+          </button>
+        </div>
+
         <!-- Stats -->
         <div class="flex items-center gap-4 mt-8 text-sm text-slate-500">
             <span class="flex items-center gap-1.5">
@@ -159,7 +198,7 @@
               {{ post.viewCount }} просмотров
             </span>
           <span class="flex items-center gap-1.5">
-               <fa-icon [icon]="faCommentDots" />
+              <fa-icon [icon]="faCommentDots" />
             {{ post.commentCount }} комментариев
             </span>
         </div>

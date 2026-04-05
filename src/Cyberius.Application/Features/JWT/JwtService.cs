@@ -18,7 +18,7 @@ public class JwtService(IOptionsMonitor<JwtOptions> jwtOptions) : IJwtService
     {
         List<Claim> claims =
         [
-            new (JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
+            new (ClaimTypes.NameIdentifier, user.UserId.ToString()),
             new (JwtRegisteredClaimNames.Email, user.Email),
             new (JwtRegisteredClaimNames.Name, user.UserName),
             new(JwtRegisteredClaimNames.Exp, 
@@ -74,8 +74,10 @@ public class JwtService(IOptionsMonitor<JwtOptions> jwtOptions) : IJwtService
 
             return principal;
         }
-        catch
+        catch(Exception ex)
         {
+            // Временно — чтобы увидеть реальную причину
+            Console.WriteLine($"GetPrincipalFromExpiredToken failed: {ex.GetType().Name}: {ex.Message}");
             return null;
         }
     }

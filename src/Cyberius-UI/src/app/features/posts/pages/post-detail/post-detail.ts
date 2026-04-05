@@ -1,4 +1,12 @@
-import { Component, computed, HostListener, inject, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  HostListener,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { BlockRenderer } from '../../components/block-renderer/block-renderer';
@@ -14,7 +22,9 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import {
   faAngleLeft,
   faAnglesUp,
-  faCommentDots, faCopy,
+  faBookmark,
+  faCommentDots,
+  faCopy,
   faEye,
   faPenToSquare,
   faTrashCan,
@@ -22,6 +32,8 @@ import {
 import { SeoService } from '../../../../core/services/seo.service';
 import { PostCard } from '../../components/post-card/post-card';
 import { ToastService } from '../../../../core/services/toast.service';
+import { BookmarkService } from '../../../../core/services/bookmarks.service';
+import { faTelegram, faXTwitter } from '@fortawesome/free-brands-svg-icons';
 
 const REACTION_EMOJI: Record<string, string> = {
   Like: '👍',
@@ -51,13 +63,14 @@ export interface TocItem {
   templateUrl: './post-detail.html',
   styleUrl: './post-detail.css',
 })
-export class PostDetail implements OnInit {
+export class PostDetail implements OnInit, OnDestroy {
   private postsService = inject(PostsService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private seo = inject(SeoService);
   private toast = inject(ToastService);
   readonly auth = inject(AuthService);
+  readonly bookmarks = inject(BookmarkService);
 
   protected readonly faAngleLeft = faAngleLeft;
   protected readonly faPenToSquare = faPenToSquare;
@@ -73,6 +86,7 @@ export class PostDetail implements OnInit {
   showScrollTop = signal(false);
   related = signal<PostSummary[]>([]);
   toc = signal<TocItem[]>([]);
+  readingProgress = signal(0);
 
   readonly reactions = Object.entries(REACTION_EMOJI) as [ReactionType, string][];
 
@@ -97,7 +111,10 @@ export class PostDetail implements OnInit {
 
   @HostListener('window:scroll')
   onScroll(): void {
-    this.showScrollTop.set(window.scrollY > 400);
+    const el = document.documentElement;
+    const top = el.scrollTop || document.body.scrollTop;
+    const height = el.scrollHeight - el.clientHeight;
+    this.readingProgress.set(height > 0 ? Math.round((top / height) * 100) : 0);
   }
 
   scrollToTop(): void {
@@ -106,7 +123,7 @@ export class PostDetail implements OnInit {
 
   ngOnInit(): void {
     // Подписываемся на изменения параметров — важно для навигации между статьями
-    this.route.paramMap.subscribe(params => {
+    this.route.paramMap.subscribe((params) => {
       const slug = params.get('slug')!;
 
       // Сбрасываем состояние при смене статьи
@@ -117,7 +134,7 @@ export class PostDetail implements OnInit {
       this.toc.set([]);
 
       this.postsService.getBySlug(slug).subscribe({
-        next: post => {
+        next: (post) => {
           this.post.set(post);
           this.loading.set(false);
           this.trackView(post.id);
@@ -125,18 +142,18 @@ export class PostDetail implements OnInit {
           this.loadRelated(post.id);
 
           this.seo.setPage({
-            title:       post.title,
+            title: post.title,
             description: post.excerpt ?? undefined,
-            image:       post.coverImageUrl
-              ? this.postsService.getImageUrl(post.coverImageUrl) ?? undefined
+            image: post.coverImageUrl
+              ? (this.postsService.getImageUrl(post.coverImageUrl) ?? undefined)
               : undefined,
-            url:         `http://localhost:4200/posts/${post.slug}`,
-            type:        'article',
+            url: `http://localhost:4200/posts/${post.slug}`,
+            type: 'article',
             publishedAt: post.publishedAt ?? undefined,
-            author:      post.author.fullName,
+            author: post.author.fullName,
           });
         },
-        error: err => {
+        error: (err) => {
           this.loading.set(false);
           if (err.status === 404) this.notFound.set(true);
         },
@@ -200,6 +217,33 @@ export class PostDetail implements OnInit {
     });
   }
 
+  toggleBookmark(): void {
+    const p = this.post();
+    if (!p) return;
+    // Конвертируем PostDetail в PostSummary для хранения
+    const summary = {
+      id: p.id,
+      title: p.title,
+      slug: p.slug,
+      excerpt: p.excerpt,
+      coverImageUrl: p.coverImageUrl,
+      readTimeMinutes: p.readTimeMinutes,
+      status: p.status,
+      publishedAt: p.publishedAt,
+      createdAt: p.createdAt,
+      author: p.author,
+      category: p.category,
+      tags: p.tags,
+      viewCount: p.viewCount,
+      commentCount: p.commentCount,
+      reactions: p.reactions,
+    } as any;
+    this.bookmarks.toggle(summary);
+    this.toast.success(
+      this.bookmarks.isBookmarked(p.id) ? 'Добавлено в сохранённые' : 'Удалено из сохранённых',
+    );
+  }
+
   react(type: ReactionType): void {
     if (!this.auth.isAuthenticated() || !this.post()) return;
     this.postsService.react(this.post()!.id, type).subscribe({
@@ -238,6 +282,22 @@ export class PostDetail implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    // Сбрасываем прогресс при уходе со страницы
+    this.readingProgress.set(0);
+  }
+
+  // ── Share ──────────────────────────────────────────────────────
+  shareTo(platform: 'telegram' | 'X'): void {
+    const url = encodeURIComponent(window.location.href);
+    const title = encodeURIComponent(this.post()?.title ?? '');
+    const links: Record<string, string> = {
+      telegram: `https://t.me/share/url?url=${url}&text=${title}`,
+      X: `https://x.com/intent/tweet?url=${url}&text=${title}`,
+    };
+    window.open(links[platform], '_blank', 'noopener,noreferrer,width=600,height=400');
+  }
+
   getReactionCount(type: string): number {
     return this.post()?.reactions[type] ?? 0;
   }
@@ -257,4 +317,7 @@ export class PostDetail implements OnInit {
 
   protected readonly faAnglesUp = faAnglesUp;
   protected readonly faCopy = faCopy;
+  protected readonly faBookmark = faBookmark;
+  protected readonly faTelegram = faTelegram;
+  protected readonly faXTwitter = faXTwitter;
 }

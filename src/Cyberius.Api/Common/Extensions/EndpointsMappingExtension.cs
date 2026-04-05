@@ -13,6 +13,7 @@ public static class EndpointsMappingExtension
         endpoints.MapCommentEndpoints();
         endpoints.MapCategoryEndpoints();
         endpoints.MapTagEndpoints();
+        endpoints.MapFeedEndpoints();
         return endpoints;
     }
 }

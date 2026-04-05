@@ -60,7 +60,8 @@ export class Header {
 
   navLinks = [
     { label: 'Главная', href: '/' },
-    { label: 'Статьи', href: '/posts' }
+    { label: 'Статьи', href: '/posts' },
+    { label: 'Обо мне', href: '/about' },
   ];
 
   @HostListener('window:scroll')

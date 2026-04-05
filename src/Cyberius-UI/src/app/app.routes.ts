@@ -37,14 +37,20 @@ export const routes: Routes = [
   {
     path: 'users/:userId',
     loadComponent: () =>
-      import('./shared/components/user-profile/user-profile').then(
-        (m) => m.UserProfileComponent,
-      ),
+      import('./shared/components/user-profile/user-profile').then((m) => m.UserProfileComponent),
   },
   {
     path: 'admin/categories',
     canActivate: [adminGuard],
     loadComponent: () => import('./features/admin/category/category').then((m) => m.Category),
+  },
+  {
+    path: 'about',
+    loadComponent: () => import('./shared/components/about-me/about-me').then((m) => m.AboutMe),
+  },
+  {
+    path: 'saved',
+    loadComponent: () => import('./features/posts/components/saved/saved').then((m) => m.Saved),
   },
   {
     path: 'profile',

@@ -20,6 +20,18 @@
         </div>
       </a>
 
+      <!-- Desktop Nav -->
+      <nav class="hidden md:flex items-center gap-1">
+        @for (link of navLinks; track link.href) {
+          <a
+            [href]="link.href"
+            class="nav-link px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200"
+          >
+            {{ link.label }}
+          </a>
+        }
+      </nav>
+
       <!-- Actions -->
       <div class="flex items-center gap-3">
 

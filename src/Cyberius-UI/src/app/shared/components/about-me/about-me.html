@@ -1,0 +1,92 @@
+<div class="min-h-screen pt-28 pb-16">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Hero -->
+    <div class="glass-card rounded-2xl p-8 mb-8 flex flex-col sm:flex-row items-center sm:items-start gap-8">
+
+      <!-- Avatar placeholder -->
+      <div class="w-32 h-32 rounded-2xl overflow-hidden shrink-0 user-avatar-btn flex items-center justify-center text-5xl font-black text-white">
+        S
+      </div>
+
+      <div class="flex-1 text-center sm:text-left">
+        <h1 class="text-3xl font-black heading-text mb-1">Salavat Sabirov</h1>
+        <p class="text-sky-400 font-mono text-sm mb-4">Full-stack .NET & Angular Developer</p>
+        <p class="text-slate-300 leading-relaxed mb-6">
+          Разрабатываю backend на C# / .NET и frontend на Angular.
+          Этот блог — место где я делюсь практическим опытом, разбираю архитектурные решения
+          и слежу за новинками экосистемы .NET и Angular.
+        </p>
+
+        <!-- Social links -->
+        <div class="flex items-center gap-3 justify-center sm:justify-start">
+          @for (social of socials; track social.name) {
+            <a
+              [href]="social.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="flex items-center gap-2 px-4 py-2 rounded-xl glass-card border border-white/10 text-sm font-medium text-slate-300 hover:text-white transition-all hover:scale-105"
+              [style.border-color]="social.color + '44'"
+              [style.color]="social.color"
+            >
+              <span class="w-4 h-4 shrink-0"><fa-icon [icon]="social.icon" /></span>
+              {{ social.name }}
+            </a>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- О блоге -->
+    <div class="glass-card rounded-2xl p-8 mb-8">
+      <h2 class="text-xl font-bold heading-text mb-4">О блоге</h2>
+      <div class="space-y-3 text-slate-300 leading-relaxed">
+        <p>
+          Пишу о разработке на <span class="text-sky-400 font-medium">C# 14 / .NET 10</span> и
+          <span class="text-sky-400 font-medium">Angular 21+</span> —
+          от архитектуры и паттернов до конкретных фишек языка и фреймворка.
+        </p>
+        <p>
+          Здесь нет воды — только практика. Каждая статья основана на реальных задачах
+          которые встречаются в продакшн разработке.
+        </p>
+        <p>
+          Если нашли ошибку или хотите обсудить — пишите в комментариях или в Telegram.
+        </p>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-xl font-bold heading-text mb-6">Стек</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        @for (group of skills; track group.title) {
+          <div class="glass-card rounded-2xl p-6">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="text-2xl"><fa-icon [icon]="group.icon" /></span>
+              <h3 class="font-bold heading-text">{{ group.title }}</h3>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              @for (skill of group.skills; track skill) {
+                <span class="px-2.5 py-1 rounded-lg text-xs font-mono bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                  {{ skill }}
+                </span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="glass-card rounded-2xl p-8 text-center">
+      <h2 class="text-xl font-bold heading-text mb-2">Читайте статьи</h2>
+      <p class="text-slate-400 mb-6">Все публикации в одном месте</p>
+      <a routerLink="/posts"
+         class="btn-primary inline-flex items-center gap-2 px-7 py-3 rounded-xl font-semibold text-white transition-all hover:scale-105">
+        <fa-icon [icon]="faFileLines" />
+        Все статьи
+      </a>
+    </div>
+
+  </div>
+</div>

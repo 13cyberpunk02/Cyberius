@@ -74,7 +74,7 @@
             <img [src]="authorAvatarUrl()!" [alt]="post().author.fullName" class="w-full h-full object-cover"/>
           } @else {
             <div class="user-avatar-btn w-full h-full flex items-center justify-center text-xs font-bold text-white">
-              {{ post().author.fullName[0] ?? '?' }}
+              {{ post().author.fullName[0] }}
             </div>
           }
         </div>

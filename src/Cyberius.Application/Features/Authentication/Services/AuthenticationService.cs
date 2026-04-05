@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Cyberius.Application.Features.Authentication.DTOs;
 using Cyberius.Application.Features.Authentication.Interfaces;
 using Cyberius.Application.Features.JWT;
@@ -98,7 +99,7 @@ public class AuthenticationService(IUnitOfWork uow, IJwtService jwtService) : IA
         if(principal is null)
             return Errors.BadRequest("Токен доступа не валидный");
         
-        var userIdClaim = principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        var userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrWhiteSpace(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
             return Errors.BadRequest("Токен доступа не валидный");
         

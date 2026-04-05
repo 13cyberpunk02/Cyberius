@@ -1,10 +1,14 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Cyberius.Api.Hubs;
 
+[Authorize]
 public class NotificationHub : Hub
 {
-    // Клиент подключается и автоматически добавляется в группу по userId
+    /// <summary>
+    /// Клиент подключается и автоматически добавляется в группу по своему Id 
+    /// </summary>
     public override async Task OnConnectedAsync()
     {
         var userId = Context.UserIdentifier;

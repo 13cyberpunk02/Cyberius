@@ -14,6 +14,7 @@ public static class EndpointsMappingExtension
         endpoints.MapCategoryEndpoints();
         endpoints.MapTagEndpoints();
         endpoints.MapFeedEndpoints();
+        endpoints.MapStatsEndpoints();
         return endpoints;
     }
 }

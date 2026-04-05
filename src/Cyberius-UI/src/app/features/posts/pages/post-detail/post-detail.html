@@ -228,7 +228,7 @@
                   @for (item of toc(); track item.id) {
                     <button
                       (click)="scrollToHeading(item.id)"
-                      class="w-full cursor-pointer text-left text-xs text-slate-400 hover:text-sky-400 transition-colors leading-snug py-1 break-words"
+                      class="w-full cursor-pointer text-left text-xs text-slate-400 hover:text-sky-400 transition-colors leading-snug py-1 wrap-break-word"
                       [ngClass]="{ 'pl-3 border-l-2': item.level === 3 }"
                       [style.border-color]="item.level === 3 ? 'rgba(255,255,255,0.1)' : ''"
                     >
@@ -254,15 +254,4 @@
     (confirmed)="confirmDelete()"
     (cancelled)="showDelete.set(false)"
   />
-}
-
-<!-- Scroll to top button -->
-@if (showScrollTop()) {
-  <button
-    (click)="scrollToTop()"
-    class="fixed bottom-6 right-6 z-50 w-11 h-11 cursor-pointer rounded-xl btn-primary text-white flex items-center justify-center shadow-glow transition-all duration-300 hover:scale-110 animate-fadeInUp"
-    title="Наверх"
-  >
-    <fa-icon [icon]="faAnglesUp" />
-  </button>
 }

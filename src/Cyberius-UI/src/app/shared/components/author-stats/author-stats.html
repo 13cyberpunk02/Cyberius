@@ -1,0 +1,123 @@
+@if (loading()) {
+  <div class="glass-card rounded-2xl p-6 animate-pulse space-y-4">
+    <div class="h-5 w-32 rounded bg-white/10"></div>
+    <div class="grid grid-cols-3 gap-4">
+      @for (i of [1,2,3]; track i) {
+        <div class="h-20 rounded-xl bg-white/5"></div>
+      }
+    </div>
+    <div class="h-32 rounded-xl bg-white/5"></div>
+  </div>
+}
+
+@if (!loading() && stats(); as s) {
+  <div class="space-y-6">
+
+    <!-- Заголовок -->
+    <h2 class="text-lg font-bold heading-text">Статистика</h2>
+
+    <!-- Итого -->
+    <div class="grid grid-cols-3 gap-4">
+      <div class="glass-card rounded-2xl p-5 text-center">
+        <p class="text-3xl font-black heading-text mb-1">{{ s.totalViews }}</p>
+        <p class="text-xs text-slate-400">Просмотров</p>
+      </div>
+      <div class="glass-card rounded-2xl p-5 text-center">
+        <p class="text-3xl font-black heading-text mb-1">{{ s.totalPosts }}</p>
+        <p class="text-xs text-slate-400">Статей</p>
+      </div>
+      <div class="glass-card rounded-2xl p-5 text-center">
+        <p class="text-3xl font-black heading-text mb-1">{{ s.totalComments }}</p>
+        <p class="text-xs text-slate-400">Комментариев</p>
+      </div>
+    </div>
+
+    <!-- График просмотров за 30 дней -->
+    @if (s.dailyViews.length > 0) {
+      <div class="glass-card rounded-2xl p-6">
+        <p class="text-sm font-semibold heading-text mb-4">Просмотры за 30 дней</p>
+        <!-- Контейнер с фиксированной высотой 96px -->
+        <div class="flex items-end gap-px" style="height: 96px">
+          @for (day of s.dailyViews; track day.date;) {
+            <div class="flex-1 group relative flex items-end" style="height: 96px">
+              <div
+                class="w-full rounded-t-sm transition-colors cursor-default"
+                [style.height]="barHeightPx(day.count)"
+                [style.background-color]="barColor(day.count)"
+                [class.group-hover:brightness-125]="day.count > 0"
+              ></div>
+              <!-- Tooltip -->
+              @if (day.count > 0) {
+                <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-slate-800 border border-white/10 text-white text-[9px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                  {{ day.count }}
+                </div>
+              }
+            </div>
+          }
+        </div>
+        <!-- X axis labels -->
+        <div class="flex items-center gap-px mt-2">
+          @for (day of s.dailyViews; track day.date; let i = $index) {
+            <div class="flex-1 text-center">
+              @if (showLabel(i)) {
+                <span class="text-[9px] text-slate-500">{{ formatDate(day.date) }}</span>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Топ статей -->
+    @if (s.topPosts.length > 0) {
+      <div class="glass-card rounded-2xl p-6">
+        <p class="text-sm font-semibold heading-text mb-4">Топ статей</p>
+        <div class="space-y-3">
+          @for (post of s.topPosts; track post.id; let i = $index) {
+            <a [routerLink]="['/posts', post.slug]"
+               class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+              <span class="w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center shrink-0"
+                    [class]="i === 0 ? 'bg-amber-500/20 text-amber-400' :
+                         i === 1 ? 'bg-slate-500/20 text-slate-400' :
+                         i === 2 ? 'bg-orange-500/20 text-orange-400' :
+                                   'bg-white/5 text-slate-500'">
+                {{ i + 1 }}
+              </span>
+              <span class="flex-1 text-sm text-slate-300 truncate">{{ post.title }}</span>
+              <div class="flex items-center gap-2 text-xs text-slate-500 shrink-0">
+                <span class="flex items-center gap-1">
+                 <fa-icon [icon]="faEye" />
+                  {{ post.viewCount }}
+                </span>
+                <span>·</span>
+                <span>{{ post.commentCount }} комм.</span>
+              </div>
+            </a>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Реакции -->
+    @if (s.reactions.length > 0) {
+      <div class="glass-card rounded-2xl p-6">
+        <p class="text-sm font-semibold heading-text mb-4">Реакции</p>
+        <div class="flex flex-wrap gap-3">
+          @for (r of s.reactions; track r.type) {
+            <div class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10">
+              <span class="text-xl">{{ reactionEmoji[r.type] != null ? reactionEmoji[r.type] : '👍' }}</span>
+              <span class="font-bold heading-text">{{ r.count }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    @if (s.totalPosts === 0) {
+      <div class="glass-card rounded-2xl p-8 text-center text-slate-500">
+        <div class="text-3xl mb-2">📊</div>
+        <p class="text-sm">Статистика появится после публикации статей</p>
+      </div>
+    }
+  </div>
+}

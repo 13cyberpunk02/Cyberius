@@ -83,7 +83,6 @@ export class PostDetail implements OnInit, OnDestroy {
   notFound = signal(false);
   showDelete = signal(false);
   deleting = signal(false);
-  showScrollTop = signal(false);
   related = signal<PostSummary[]>([]);
   toc = signal<TocItem[]>([]);
   readingProgress = signal(0);
@@ -115,10 +114,6 @@ export class PostDetail implements OnInit, OnDestroy {
     const top = el.scrollTop || document.body.scrollTop;
     const height = el.scrollHeight - el.clientHeight;
     this.readingProgress.set(height > 0 ? Math.round((top / height) * 100) : 0);
-  }
-
-  scrollToTop(): void {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   ngOnInit(): void {
@@ -315,7 +310,6 @@ export class PostDetail implements OnInit, OnDestroy {
     }).format(new Date(dateStr));
   }
 
-  protected readonly faAnglesUp = faAnglesUp;
   protected readonly faCopy = faCopy;
   protected readonly faBookmark = faBookmark;
   protected readonly faTelegram = faTelegram;

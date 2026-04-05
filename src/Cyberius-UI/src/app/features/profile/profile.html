@@ -173,6 +173,14 @@
                      class="email-input w-full px-4 py-3 rounded-xl text-sm opacity-50 cursor-not-allowed"/>
             </div>
 
+            <!-- Success -->
+            @if (saveStatus() === 'success') {
+              <div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm animate-fadeInUp">
+                <fa-icon [icon]="faThumbsUp" class="shrink-0"/>
+                Профиль успешно обновлён
+              </div>
+            }
+
             <!-- Submit -->
             <div class="flex justify-end">
               <button type="submit"
@@ -235,7 +243,7 @@
                   <p class="text-xs text-slate-400 mt-0.5">Это действие необратимо</p>
                 </div>
                 <button class="px-4 py-2 cursor-pointer rounded-xl text-sm font-semibold text-rose-400 border border-rose-500/30 hover:bg-rose-500/10 transition-all duration-200"
-                (click)="showDeleteConfirm.set(true)">
+                        (click)="showDeleteConfirm.set(true)">
                   Удалить
                 </button>
               </div>
@@ -244,13 +252,19 @@
         </div>
       }
     }
+
+    <!-- Статистика автора -->
+    @if (profile()) {
+      <div class="mt-8">
+        <app-author-stats [authorId]="profile()!.userId" />
+      </div>
+    }
   </div>
 </div>
 
 @if (showChangePassword()) {
   <app-change-password-modal (closed)="showChangePassword.set(false)" />
 }
-
 
 @if (showDeleteConfirm()) {
   <app-confirm-dialog

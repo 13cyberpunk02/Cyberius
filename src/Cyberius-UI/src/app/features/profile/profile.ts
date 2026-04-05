@@ -24,6 +24,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { Router } from '@angular/router';
 import { ConfirmDialog, ConfirmDialogConfig } from '../../shared/components/confirm-dialog/confirm-dialog';
 import { ToastService } from '../../core/services/toast.service';
+import { AuthorStatsComponent } from '../../shared/components/author-stats/author-stats';
 
 interface UpdateProfileForm {
   firstName: string;
@@ -39,7 +40,14 @@ const FILES_BASE_URL = 'http://localhost:5273/api/files/';
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, FontAwesomeModule, ChangePasswordModal, ConfirmDialog],
+  imports: [
+    CommonModule,
+    FormsModule,
+    FontAwesomeModule,
+    ChangePasswordModal,
+    ConfirmDialog,
+    AuthorStatsComponent,
+  ],
   templateUrl: './profile.html',
 })
 export class Profile implements OnInit {

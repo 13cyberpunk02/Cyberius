@@ -1,5 +1,6 @@
 using Cyberius.Api.Common;
 using Cyberius.Api.Common.Extensions;
+using Cyberius.Api.Hubs;
 using Cyberius.Application;
 using Cyberius.Infrastructure;
 using Scalar.AspNetCore;
@@ -39,6 +40,7 @@ app.UseCors("CorsPolicy");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapHub<NotificationHub>("/hubs/notifications");
 app.MapAllEndpoints();
 
 app.Run();

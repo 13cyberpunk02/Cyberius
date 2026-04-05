@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, signal } from '@angular/core';
+import { Component, HostListener, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { ThemeService } from '../../../core/services/theme.service';
@@ -24,6 +24,7 @@ import { LoginModal } from '../login-modal/login-modal';
 import { AuthService } from '../../../core/services/auth.service';
 import { RegisterModal } from '../register-modal/register-modal';
 import { FormsModule } from '@angular/forms';
+import { NotificationService } from '../../../core/services/notification.service';
 
 type ModalView = 'none' | 'login' | 'register';
 
@@ -33,9 +34,10 @@ type ModalView = 'none' | 'login' | 'register';
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
-export class Header {
+export class Header implements OnInit, OnDestroy {
   themeService = inject(ThemeService);
   authService = inject(AuthService);
+  notifications = inject(NotificationService);
   private router = inject(Router);
 
   protected readonly moonIcon = faMoon;
@@ -50,11 +52,13 @@ export class Header {
   protected readonly faTag = faTag;
   protected readonly faMagnifyingGlass = faMagnifyingGlass;
   protected readonly faArrowRight = faArrowRight;
+  protected readonly faPenToSquare = faPenToSquare;
 
   isScrolled = signal(false);
   isMobileMenuOpen = signal(false);
   showUserMenu = signal(false);
   showSearch = signal(false);
+  showNotifications = signal(false);
   searchQuery = signal('');
   modal = signal<ModalView>('none');
 
@@ -63,6 +67,17 @@ export class Header {
     { label: 'Статьи', href: '/posts' },
     { label: 'Обо мне', href: '/about' },
   ];
+
+  ngOnInit(): void {
+    // Подключаем SignalR если уже авторизован
+    if (this.authService.isAuthenticated()) {
+      this.notifications.connect();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.notifications.disconnect();
+  }
 
   @HostListener('window:scroll')
   onScroll() {
@@ -74,12 +89,22 @@ export class Header {
     const el = event.target as HTMLElement;
     if (!el.closest('.user-menu-wrapper')) this.showUserMenu.set(false);
     if (!el.closest('.search-wrapper')) this.showSearch.set(false);
+    if (!el.closest('.notifications-wrapper')) this.showNotifications.set(false);
   }
 
   @HostListener('document:keydown.escape')
   onEscape() {
     this.showSearch.set(false);
     this.searchQuery.set('');
+    this.showNotifications.set(false);
+  }
+
+  toggleNotifications(event: MouseEvent): void {
+    event.stopPropagation();
+    this.showNotifications.update((v) => !v);
+    if (this.showNotifications()) {
+      this.notifications.markAllRead();
+    }
   }
 
   toggleMenu() {
@@ -96,6 +121,10 @@ export class Header {
   }
   closeModal() {
     this.modal.set('none');
+  }
+
+  openLoginAndConnect() {
+    this.openLogin();
   }
 
   toggleUserMenu(event: MouseEvent) {
@@ -127,5 +156,5 @@ export class Header {
     this.showUserMenu.set(false);
   }
 
-  protected readonly faPenToSquare = faPenToSquare;
+  protected readonly faBell = faBell;
 }

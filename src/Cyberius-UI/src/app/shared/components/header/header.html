@@ -43,7 +43,7 @@
             <fa-icon [icon]="faMagnifyingGlass" class="text-slate-400" />
           </button>
           @if (showSearch()) {
-            <div class="absolute right-0 top-12 w-72 glass-card rounded-xl p-2 shadow-lg animate-fadeInUp border border-white/20 z-50">
+            <div class="absolute right-0 top-12 w-72 dropdown-solid rounded-xl p-2 shadow-lg animate-fadeInUp border border-white/20 z-50">
               <form (ngSubmit)="submitSearch()" class="flex gap-2">
                 <input
                   id="header-search"
@@ -63,6 +63,77 @@
             </div>
           }
         </div>
+
+        <!-- Notifications bell (only for authenticated) -->
+        @if (authService.isAuthenticated()) {
+          <div class="relative notifications-wrapper">
+            <button
+              (click)="toggleNotifications($event)"
+              class="theme-btn w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 relative"
+              title="Уведомления"
+            >
+              <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+              </svg>
+              @if (notifications.unreadCount() > 0) {
+                <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center">
+                  {{ notifications.unreadCount() > 9 ? '9+' : notifications.unreadCount() }}
+                </span>
+              }
+            </button>
+
+            @if (showNotifications()) {
+              <div class="absolute right-0 top-12 w-80 dropdown-solid rounded-2xl overflow-hidden shadow-lg z-50 animate-slideDown border border-white/20">
+                <div class="flex items-center justify-between px-4 py-3 border-b border-white/10">
+                  <p class="text-sm font-semibold heading-text">Уведомления</p>
+                  @if (notifications.notifications().length > 0) {
+                    <button (click)="notifications.clearAll()"
+                            class="text-xs text-slate-500 hover:text-rose-400 transition-colors">
+                      Очистить
+                    </button>
+                  }
+                </div>
+                <div class="max-h-80 overflow-y-auto">
+                  @if (notifications.notifications().length === 0) {
+                    <div class="px-4 py-8 text-center text-slate-500 text-sm">
+                      <div class="text-3xl mb-2">🔔</div>
+                      Нет уведомлений
+                    </div>
+                  } @else {
+                    @for (n of notifications.notifications(); track n.id) {
+                      <a
+                        [routerLink]="n.postSlug ? ['/posts', n.postSlug] : null"
+                        (click)="notifications.markRead(n.id); showNotifications.set(false)"
+                        class="flex items-start gap-3 px-4 py-3 hover:bg-white/5 transition-colors cursor-pointer border-b border-white/5 last:border-0"
+                        [class.opacity-60]="n.read"
+                      >
+                        <div class="w-8 h-8 rounded-full overflow-hidden shrink-0 user-avatar-btn flex items-center justify-center text-xs font-bold text-white">
+                          @if (n.actorAvatarUrl; as rawUrl) {
+                            <img [src]="rawUrl.startsWith('http') ? rawUrl : authService.FILES_BASE + rawUrl"
+                                 class="w-full h-full object-cover"
+                                 [alt]="n.actorName"/>
+                          } @else {
+                            {{ n.actorName[0] }}
+                          }
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <p class="text-xs text-slate-300 leading-snug">{{ n.message }}</p>
+                          @if (n.postTitle) {
+                            <p class="text-[10px] text-slate-500 mt-0.5 truncate">{{ n.postTitle }}</p>
+                          }
+                        </div>
+                        @if (!n.read) {
+                          <div class="w-2 h-2 rounded-full bg-sky-400 shrink-0 mt-1"></div>
+                        }
+                      </a>
+                    }
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
 
         <!-- Theme Toggle -->
         <button
@@ -117,7 +188,7 @@
 
             <!-- Dropdown menu -->
             @if (showUserMenu()) {
-              <div class="absolute right-0 top-12 w-56 glass-card rounded-2xl overflow-hidden animate-slideDown shadow-glow z-50">
+              <div class="absolute right-0 top-12 w-56 dropdown-solid rounded-2xl overflow-hidden animate-slideDown shadow-glow z-50">
 
                 <!-- User info -->
                 <div class="px-4 py-3 border-b border-white/10">

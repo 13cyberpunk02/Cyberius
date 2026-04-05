@@ -1,4 +1,6 @@
 using System.Text;
+using Cyberius.Api.Notifications;
+using Cyberius.Application.Features.Notifications.Interfaces;
 using Cyberius.Domain.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -16,7 +18,8 @@ public static class AuthenticationExtension
             throw new InvalidOperationException("JWT приватный ключ не задан.");
         if (jwtOption.SecretKey.Length < 32)
             throw new InvalidOperationException("JWT приватный ключ должен содержать хотя бы 32 символа");
-
+        services.AddSignalR();
+        services.AddScoped<INotificationService, SignalRNotificationService>();
         services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -39,6 +42,20 @@ public static class AuthenticationExtension
                     ValidIssuer = jwtOption.Issuer,
                     ValidAudience = jwtOption.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOption.SecretKey))
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var token = context.Request.Query["access_token"];
+                        if (!string.IsNullOrEmpty(token) &&
+                            context.HttpContext.Request.Path.StartsWithSegments("/hubs"))
+                        {
+                            context.Token = token;
+                        }
+                        return Task.CompletedTask;
+                    }
                 };
             });
         services.AddAuthorization();

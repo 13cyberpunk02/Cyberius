@@ -2,6 +2,8 @@ using System.Reflection;
 using Cyberius.Application.Features.Authentication.Interfaces;
 using Cyberius.Application.Features.Authentication.Services;
 using Cyberius.Application.Features.Blog;
+using Cyberius.Application.Features.Blog.Stats.Interfaces;
+using Cyberius.Application.Features.Blog.Stats.Services;
 using Cyberius.Application.Features.JWT;
 using Cyberius.Application.Features.Users.Interfaces;
 using Cyberius.Application.Features.Users.Services;
@@ -17,6 +19,7 @@ public static class ExtensionCollection
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IStatsService, StatsService>();
         services.AddBlogServices();
         
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());

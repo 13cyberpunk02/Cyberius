@@ -1,5 +1,6 @@
 using Cyberius.Application.Features.Blog.Interfaces;
 using Cyberius.Application.Features.Blog.Posts.Models;
+using Cyberius.Application.Features.Notifications.Interfaces;
 using Cyberius.Domain.Entities;
 using Cyberius.Domain.Entities.Enums;
 using Cyberius.Domain.Interfaces;
@@ -7,8 +8,11 @@ using Cyberius.Domain.Shared;
 
 namespace Cyberius.Application.Features.Blog.Posts.Services;
 
-public sealed class PostService(IUnitOfWork uow, IStorageService storageService) : IPostService
+public sealed class PostService(IUnitOfWork uow, IStorageService storageService, INotificationService notifications)
+    : IPostService
 {
+    // ── Queries ────────────────────────────────────────────────────────────
+
     public async Task<Result<PostDetailResponse>> GetByIdAsync(
         Guid id, Guid? currentUserId, CancellationToken ct = default)
     {
@@ -281,10 +285,28 @@ public sealed class PostService(IUnitOfWork uow, IStorageService storageService)
         }
 
         await uow.SaveChangesAsync(ct);
+
+        // Уведомляем автора поста о реакции (только при добавлении новой)
+        var isAdding = !(existing is not null && existing.Type == type);
+        if (isAdding)
+        {
+            var reactor = await uow.Users.GetByIdAsync(userId, ct);
+            if (reactor is not null && post.AuthorId != userId)
+            {
+                var reactorName = $"{reactor.FirstName} {reactor.LastName}".Trim();
+                _ = notifications.SendPostReactionAsync(
+                    post.AuthorId,
+                    reactorName,
+                    reactor.AvatarObjectName,
+                    type.ToString(),
+                    post.Title,
+                    post.Slug,
+                    ct);
+            }
+        }
+
         return Result.Success();
     }
-
-    // ── Private helpers ────────────────────────────────────────────────────
 
     private async Task<string> GenerateUniqueSlugAsync(
         string title, Guid? excludeId, CancellationToken ct)

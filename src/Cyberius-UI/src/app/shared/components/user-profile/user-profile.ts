@@ -9,7 +9,13 @@ import { SeoService } from '../../../core/services/seo.service';
 import { PagedResponse, PostSummary } from '../../../core/models/post.model';
 import { UserProfile } from '../../../core/models/auth.model';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faArrowLeft, faArrowRight, faCalendar } from '@fortawesome/free-solid-svg-icons';
+import {
+  faArrowLeft,
+  faArrowRight,
+  faCalendar,
+  faEnvelopesBulk,
+  faSpinner,
+} from '@fortawesome/free-solid-svg-icons';
 import { faBlogger } from '@fortawesome/free-brands-svg-icons';
 
 @Component({
@@ -26,21 +32,14 @@ export class UserProfileComponent implements OnInit {
   private seo = inject(SeoService);
 
   profile = signal<UserProfile | null>(null);
-  paged = signal<PagedResponse<PostSummary> | null>(null);
+  posts = signal<PostSummary[]>([]);
   loading = signal(true);
+  loadingMore = signal(false);
   notFound = signal(false);
-  currentPage = signal(1);
+  hasMore = signal(false);
+  private page = 1;
+  private userId = '';
   readonly pageSize = 9;
-
-  get posts(): PostSummary[] {
-    return this.paged()?.items ?? [];
-  }
-  get totalPages(): number {
-    return this.paged()?.totalPages ?? 1;
-  }
-  get pages(): number[] {
-    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
-  }
 
   readonly avatarUrl = computed(() => {
     const path = this.profile()?.avatarUrl;
@@ -50,20 +49,20 @@ export class UserProfileComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const userId = this.route.snapshot.paramMap.get('userId')!;
-    this.loadProfile(userId);
+    this.userId = this.route.snapshot.paramMap.get('userId')!;
+    this.loadProfile();
   }
 
-  private loadProfile(userId: string): void {
-    this.http.get<UserProfile>(`${this.auth.API}/auth/${userId}`).subscribe({
+  private loadProfile(): void {
+    this.http.get<UserProfile>(`${this.auth.API}/auth/${this.userId}`).subscribe({
       next: (profile) => {
         this.profile.set(profile);
         const fullName = `${profile.firstName} ${profile.lastName}`.trim();
         this.seo.setPage({
           title: fullName,
-          description: `Статьи автора ${fullName} на Cyberius`,
+          description: `Статьи автора ${fullName} на DevBlog`,
         });
-        this.loadPosts(userId);
+        this.loadPosts(false);
       },
       error: () => {
         this.loading.set(false);
@@ -72,23 +71,33 @@ export class UserProfileComponent implements OnInit {
     });
   }
 
-  private loadPosts(userId: string): void {
+  private loadPosts(append: boolean): void {
+    if (append) this.loadingMore.set(true);
+
     this.postsService
-      .getByAuthor(userId, { page: this.currentPage(), pageSize: this.pageSize })
+      .getByAuthor(this.userId, { page: this.page, pageSize: this.pageSize })
       .subscribe({
         next: (res) => {
-          this.paged.set(res);
+          if (append) {
+            this.posts.update((existing) => [...existing, ...res.items]);
+          } else {
+            this.posts.set(res.items);
+          }
+          this.hasMore.set(this.page < res.totalPages);
           this.loading.set(false);
+          this.loadingMore.set(false);
         },
-        error: () => this.loading.set(false),
+        error: () => {
+          this.loading.set(false);
+          this.loadingMore.set(false);
+        },
       });
   }
 
-  goToPage(page: number): void {
-    this.currentPage.set(page);
-    const userId = this.route.snapshot.paramMap.get('userId')!;
-    this.loadPosts(userId);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  loadMore(): void {
+    if (this.loadingMore() || !this.hasMore()) return;
+    this.page++;
+    this.loadPosts(true);
   }
 
   formatDate(dateStr: string): string {
@@ -103,4 +112,6 @@ export class UserProfileComponent implements OnInit {
   protected readonly faBlogger = faBlogger;
   protected readonly faArrowLeft = faArrowLeft;
   protected readonly faArrowRight = faArrowRight;
+  protected readonly faEnvelopesBulk = faEnvelopesBulk;
+  protected readonly faSpinner = faSpinner;
 }

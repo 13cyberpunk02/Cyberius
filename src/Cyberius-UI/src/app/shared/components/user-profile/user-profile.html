@@ -51,7 +51,7 @@
               </span>
               <span class="flex items-center gap-1.5">
                 <fa-icon [icon]="faBlogger" />
-                {{ paged()?.totalCount ?? 0 }} статей
+                {{ posts()?.length ?? 0 }} статей
               </span>
             </div>
           </div>
@@ -77,36 +77,31 @@
         <h2 class="text-xl font-bold heading-text">Статьи автора</h2>
       </div>
 
-      @if (posts.length === 0) {
+      @if (posts().length === 0) {
         <div class="text-center py-16 text-slate-500">
-          <div class="text-4xl mb-3">📭</div>
+          <div class="text-4xl mb-3"><fa-icon [icon]="faEnvelopesBulk" /></div>
           <p>У автора пока нет опубликованных статей</p>
         </div>
       } @else {
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-          @for (post of posts; track post.id) {
+          @for (post of posts(); track post.id) {
             <app-post-card [post]="post" />
           }
         </div>
 
-        <!-- Pagination -->
-        @if (totalPages > 1) {
-          <div class="flex items-center justify-center gap-2">
-            <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1"
-                    class="btn-secondary w-10 h-10 rounded-xl flex items-center justify-center disabled:opacity-40">
-              <fa-icon [icon]="faArrowRight" />
-            </button>
-            @for (page of pages; track page) {
-              <button (click)="goToPage(page)"
-                      class="w-10 h-10 rounded-xl text-sm font-semibold transition-all"
-                      [class.filter-active]="currentPage() === page"
-                      [class.filter-inactive]="currentPage() !== page">
-                {{ page }}
-              </button>
-            }
-            <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages"
-                    class="btn-secondary w-10 h-10 rounded-xl flex items-center justify-center disabled:opacity-40">
-              <fa-icon [icon]="faArrowLeft" />
+        @if (hasMore()) {
+          <div class="text-center">
+            <button
+              (click)="loadMore()"
+              [disabled]="loadingMore()"
+              class="btn-secondary px-8 py-3 rounded-xl text-sm font-semibold transition-all hover:scale-105 disabled:opacity-50 flex items-center gap-2 mx-auto"
+            >
+              @if (loadingMore()) {
+                <fa-icon [icon]="faSpinner" animation="spin-pulse" />
+                Идёт загрузка...
+              } @else {
+                Загрузить ещё статьи
+              }
             </button>
           </div>
         }

@@ -4,32 +4,41 @@
     <!-- Hero -->
     <div class="glass-card rounded-2xl p-8 mb-8 flex flex-col sm:flex-row items-center sm:items-start gap-8">
 
-      <!-- Avatar placeholder -->
-      <div class="w-32 h-32 rounded-2xl overflow-hidden shrink-0 user-avatar-btn flex items-center justify-center text-5xl font-black text-white">
-        S
+      <!-- Avatar -->
+      <div class="w-32 h-32 rounded-2xl overflow-hidden flex-shrink-0">
+        @if (author.avatarUrl) {
+          <img [src]="author.avatarUrl" [alt]="author.firstName" class="w-full h-full object-cover"/>
+        } @else {
+          <div class="user-avatar-btn w-full h-full flex items-center justify-center text-5xl font-black text-white">
+            {{ author.avatarInitial }}
+          </div>
+        }
       </div>
 
       <div class="flex-1 text-center sm:text-left">
-        <h1 class="text-3xl font-black heading-text mb-1">Salavat Sabirov</h1>
-        <p class="text-sky-400 font-mono text-sm mb-4">Full-stack .NET & Angular Developer</p>
-        <p class="text-slate-300 leading-relaxed mb-6">
-          Разрабатываю backend на C# / .NET и frontend на Angular.
-          Этот блог — место где я делюсь практическим опытом, разбираю архитектурные решения
-          и слежу за новинками экосистемы .NET и Angular.
-        </p>
+        <h1 class="text-3xl font-black heading-text mb-1">
+          {{ author.firstName }} {{ author.lastName }}
+        </h1>
+        <p class="text-sky-400 font-mono text-sm mb-4">{{ author.role }}</p>
+
+        <div class="space-y-2 mb-6">
+          @for (para of author.bio; track para) {
+            <p class="text-slate-300 leading-relaxed text-sm">{{ para }}</p>
+          }
+        </div>
 
         <!-- Social links -->
-        <div class="flex items-center gap-3 justify-center sm:justify-start">
-          @for (social of socials; track social.name) {
+        <div class="flex items-center gap-3 justify-center sm:justify-start flex-wrap">
+          @for (social of author.socials; track social.name) {
             <a
               [href]="social.url"
               target="_blank"
               rel="noopener noreferrer"
-              class="flex items-center gap-2 px-4 py-2 rounded-xl glass-card border border-white/10 text-sm font-medium text-slate-300 hover:text-white transition-all hover:scale-105"
+              class="flex items-center gap-2 px-4 py-2 rounded-xl glass-card text-sm font-medium transition-all hover:scale-105"
               [style.border-color]="social.color + '44'"
               [style.color]="social.color"
             >
-              <span class="w-4 h-4 shrink-0"><fa-icon [icon]="social.icon" /></span>
+              <fa-icon [icon]="social.icon" class="shrink-0" size="lg" />
               {{ social.name }}
             </a>
           }
@@ -37,36 +46,18 @@
       </div>
     </div>
 
-    <!-- О блоге -->
-    <div class="glass-card rounded-2xl p-8 mb-8">
-      <h2 class="text-xl font-bold heading-text mb-4">О блоге</h2>
-      <div class="space-y-3 text-slate-300 leading-relaxed">
-        <p>
-          Пишу о разработке на <span class="text-sky-400 font-medium">C# 14 / .NET 10</span> и
-          <span class="text-sky-400 font-medium">Angular 21+</span> —
-          от архитектуры и паттернов до конкретных фишек языка и фреймворка.
-        </p>
-        <p>
-          Здесь нет воды — только практика. Каждая статья основана на реальных задачах
-          которые встречаются в продакшн разработке.
-        </p>
-        <p>
-          Если нашли ошибку или хотите обсудить — пишите в комментариях или в Telegram.
-        </p>
-      </div>
-    </div>
-
+    <!-- Стек -->
     <div class="mb-8">
       <h2 class="text-xl font-bold heading-text mb-6">Стек</h2>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        @for (group of skills; track group.title) {
+        @for (group of author.skills; track group.title) {
           <div class="glass-card rounded-2xl p-6">
             <div class="flex items-center gap-2 mb-4">
               <span class="text-2xl"><fa-icon [icon]="group.icon" /></span>
               <h3 class="font-bold heading-text">{{ group.title }}</h3>
             </div>
             <div class="flex flex-wrap gap-2">
-              @for (skill of group.skills; track skill) {
+              @for (skill of group.items; track skill) {
                 <span class="px-2.5 py-1 rounded-lg text-xs font-mono bg-sky-500/10 text-sky-400 border border-sky-500/20">
                   {{ skill }}
                 </span>

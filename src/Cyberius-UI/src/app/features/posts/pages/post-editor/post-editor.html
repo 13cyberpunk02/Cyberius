@@ -14,20 +14,24 @@
           <h1 class="text-3xl font-black heading-text">
             {{ isEdit() ? 'Редактировать статью' : 'Новая статья' }}
           </h1>
-          <p class="text-xs text-slate-500 mt-1">Автосохранение каждые 30 сек</p>
+          <div class="flex items-center gap-3 mt-1 text-xs text-slate-500 font-mono">
+            <span>Автосохранение каждые 30 сек</span>
+            <span>·</span>
+            <span class="flex items-center gap-1">
+              <fa-icon [icon]="faClock" />
+              {{ liveReadTime() }} мин чтения
+            </span>
+            <span>·</span>
+            <span class="hidden sm:flex items-center gap-2 text-slate-600">
+              <kbd class="px-1.5 py-0.5 rounded bg-white/10 text-[10px]">Ctrl+S</kbd> черновик
+              <kbd class="px-1.5 py-0.5 rounded bg-white/10 text-[10px]">Ctrl+Enter</kbd> публикация
+            </span>
+          </div>
         </div>
         <a routerLink="/posts" class="btn-secondary px-4 py-2 rounded-xl text-sm transition-all">
           <fa-icon [icon]="faArrowLeft" /> Отмена
         </a>
       </div>
-
-      <!-- Error banner -->
-      @if (saveStatus() === 'error') {
-        <div>
-          <fa-icon [icon]="faInfoCircle" />
-          {{ errorMsg() }}
-        </div>
-      }
 
       <!-- Meta section -->
       <div class="glass-card rounded-2xl p-6 mb-6 space-y-5">
@@ -39,7 +43,7 @@
           <input
             type="text"
             [ngModel]="title()"
-            (ngModelChange)="title.set($event)"
+            (ngModelChange)="title.set($event); markDirty()"
             name="title"
             placeholder="Введите заголовок статьи..."
             class="email-input w-full px-4 py-3 rounded-xl text-sm font-bold"
@@ -51,7 +55,7 @@
           <label class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Краткое описание</label>
           <textarea
             [ngModel]="excerpt()"
-            (ngModelChange)="excerpt.set($event)"
+            (ngModelChange)="excerpt.set($event); markDirty()"
             name="excerpt"
             placeholder="Один-два предложения о чём эта статья..."
             rows="2"
@@ -65,7 +69,7 @@
             <label class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Категория *</label>
             <select
               [ngModel]="categoryId()"
-              (ngModelChange)="categoryId.set($event)"
+              (ngModelChange)="categoryId.set($event); markDirty()"
               name="categoryId"
               class="email-input w-full px-4 py-3 rounded-xl text-sm"
             >
@@ -81,7 +85,7 @@
             <input
               type="text"
               [ngModel]="tags()"
-              (ngModelChange)="tags.set($event)"
+              (ngModelChange)="tags.set($event); markDirty()"
               name="tags"
               placeholder="C# 13, .NET 10, Signals"
               class="email-input w-full px-4 py-3 rounded-xl text-sm font-mono"
@@ -97,7 +101,7 @@
             <input
               type="text"
               [ngModel]="coverImageUrl()"
-              (ngModelChange)="coverImageUrl.set($event)"
+              (ngModelChange)="coverImageUrl.set($event); markDirty()"
               name="coverImageUrl"
               placeholder="URL обложки или загрузите файл..."
               class="email-input flex-1 px-4 py-3 rounded-xl text-sm"
@@ -363,33 +367,48 @@
       </div>
 
       <!-- Action buttons -->
-      <div class="flex flex-col sm:flex-row gap-3 justify-end">
-        <button
-          (click)="save(false)"
-          [disabled]="saveStatus() === 'saving' || saveStatus() === 'publishing'"
-          class="btn-secondary px-6 py-3 rounded-xl text-sm font-semibold transition-all hover:scale-105 disabled:opacity-50 flex items-center gap-2 justify-center"
-        >
-          @if (saveStatus() === 'saving') {
-            <fa-icon [icon]="faSpinner" animation="spin-pulse" />
-            Сохраняем...
-          } @else {
-            <fa-icon [icon]="faFloppyDisk" /> Сохранить черновик
-          }
-        </button>
+      <div class="glass-card rounded-2xl p-5">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <!-- Explanation -->
+          <div class="text-xs text-slate-500 space-y-1">
+            <p>
+              <span class="text-slate-300 font-medium"><fa-icon [icon]="faFloppyDisk" /> Сохранить черновик</span>
+              — сохранит статью как черновик, она не будет видна читателям
+            </p>
+            <p>
+              <span class="text-slate-300 font-medium"><fa-icon [icon]="faRocket" /> Опубликовать</span>
+              — сохранит и сразу опубликует статью
+            </p>
+          </div>
+        </div>
+        <div class="flex justify-center gap-3 shrink-0 mt-2">
+          <button
+            (click)="save(false)"
+            [disabled]="saveStatus() === 'saving' || saveStatus() === 'publishing'"
+            class="btn-secondary px-6 py-3 rounded-xl text-sm font-semibold transition-all hover:scale-105 disabled:opacity-50 flex items-center gap-2"
+          >
+            @if (saveStatus() === 'saving') {
+              <fa-icon [icon]="faSpinner" animation="spin-pulse" />
+              Сохраняем...
+            } @else {
+              <fa-icon [icon]="faFloppyDisk" /> Сохранить черновик
+            }
+          </button>
 
-        <button
-          (click)="save(true)"
-          [disabled]="saveStatus() === 'saving' || saveStatus() === 'publishing'"
-          class="btn-primary px-6 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:scale-105 disabled:opacity-50 flex items-center gap-2 justify-center"
-        >
-          @if (saveStatus() === 'publishing') {
-            <fa-icon [icon]="faSpinner" animation="spin-pulse" />
-            Публикуем...
-          } @else {
-            <fa-icon [icon]="faRocket" /> Опубликовать
+          <button
+            (click)="save(true)"
+            [disabled]="saveStatus() === 'saving' || saveStatus() === 'publishing'"
+            class="btn-primary px-6 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:scale-105 disabled:opacity-50 flex items-center gap-2"
+          >
+            @if (saveStatus() === 'publishing') {
+              <fa-icon [icon]="faSpinner" animation="spin-pulse" />
+              Публикуем...
+            } @else {
+              <fa-icon [icon]="faRocket" /> Опубликовать
           }
         </button>
       </div>
+    </div>
 
     }
   </div>

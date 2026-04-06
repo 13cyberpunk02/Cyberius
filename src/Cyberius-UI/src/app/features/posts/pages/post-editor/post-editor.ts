@@ -29,6 +29,7 @@ import {
   faArrowLeft,
   faArrowUp,
   faClipboardList,
+  faClock,
   faCode,
   faDivide,
   faExclamationTriangle,
@@ -117,6 +118,17 @@ export class PostEditor implements OnInit, OnDestroy {
   coverImageUrl = signal('');
   blocks = signal<EditorBlock[]>([]);
   categories = signal<CategoryResponse[]>([]);
+
+  // Флаг несохранённых изменений
+  private isDirty = false;
+
+  markDirty(): void {
+    this.isDirty = true;
+  }
+
+  private markClean(): void {
+    this.isDirty = false;
+  }
 
   // Время чтения считается в реальном времени по блокам
   readonly liveReadTime = computed(() => {
@@ -287,6 +299,15 @@ export class PostEditor implements OnInit, OnDestroy {
     if (this.autosaveTimer) clearInterval(this.autosaveTimer);
   }
 
+  // ── Защита от случайного закрытия ─────────────────────────────
+  @HostListener('window:beforeunload', ['$event'])
+  onBeforeUnload(e: BeforeUnloadEvent): void {
+    if (this.isDirty) {
+      e.preventDefault();
+      e.returnValue = ''; // Браузер показывает стандартный диалог
+    }
+  }
+
   // ── Keyboard shortcuts ─────────────────────────────────────────
   @HostListener('document:keydown', ['$event'])
   onKeydown(e: KeyboardEvent): void {
@@ -452,6 +473,45 @@ export class PostEditor implements OnInit, OnDestroy {
     };
   }
 
+  // ── Валидация ─────────────────────────────────────────────────
+  validationErrors = signal<string[]>([]);
+
+  private validate(): boolean {
+    const errors: string[] = [];
+
+    if (!this.title().trim()) errors.push('Заголовок не может быть пустым');
+
+    if (this.title().trim().length > 200)
+      errors.push('Заголовок слишком длинный (макс. 200 символов)');
+
+    if (!this.categoryId()) errors.push('Выберите категорию');
+
+    const contentBlocks = this.blocks().filter((b) =>
+      [
+        'Paragraph',
+        'Heading1',
+        'Heading2',
+        'Heading3',
+        'Quote',
+        'Callout',
+        'Code',
+        'Image',
+        'VideoEmbed',
+        'Table',
+      ].includes(b.type),
+    );
+    if (contentBlocks.length === 0) errors.push('Добавьте хотя бы один блок контента');
+
+    const emptyBlocks = this.blocks().filter(
+      (b) => b.type !== 'Divider' && !b.content?.trim() && !b.imageUrl,
+    );
+    if (emptyBlocks.length > 0)
+      errors.push(`Есть пустые блоки (${emptyBlocks.length} шт.) — заполните или удалите`);
+
+    this.validationErrors.set(errors);
+    return errors.length === 0;
+  }
+
   save(andPublish = false): void {
     if (!this.title().trim()) {
       this.toast.error('Введите заголовок');
@@ -472,6 +532,8 @@ export class PostEditor implements OnInit, OnDestroy {
 
     op$.subscribe({
       next: (post) => {
+        this.markClean();
+        this.validationErrors.set([]);
         if (andPublish) {
           this.postsService.publish(post.id).subscribe({
             next: () => {
@@ -496,4 +558,6 @@ export class PostEditor implements OnInit, OnDestroy {
       },
     });
   }
+
+  protected readonly faClock = faClock;
 }

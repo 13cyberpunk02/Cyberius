@@ -70,11 +70,25 @@ export class PostList implements OnInit {
     });
 
     this.route.queryParams.subscribe((params) => {
-      this.activeCategoryId.set(params['category'] ?? null);
-      this.activeTag.set(params['tag'] ?? null);
-      this.currentPage.set(Number(params['page'] ?? 1));
-      this.searchQuery.set(params['q'] ?? '');
-      this.load();
+      const categorySlug = params['categorySlug'] ?? null;
+
+      // Если передан slug — ищем id категории по slug
+      if (categorySlug) {
+        this.categoryService.getAll().subscribe((cats) => {
+          const found = cats.find((c) => c.slug === categorySlug);
+          this.activeCategoryId.set(found?.id ?? null);
+          this.activeTag.set(null);
+          this.currentPage.set(1);
+          this.searchQuery.set('');
+          this.load();
+        });
+      } else {
+        this.activeCategoryId.set(params['category'] ?? null);
+        this.activeTag.set(params['tag'] ?? null);
+        this.currentPage.set(Number(params['page'] ?? 1));
+        this.searchQuery.set(params['q'] ?? '');
+        this.load();
+      }
     });
 
     this.categoryService.getAll().subscribe({

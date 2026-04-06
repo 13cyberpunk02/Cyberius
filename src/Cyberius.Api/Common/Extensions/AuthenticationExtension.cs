@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using Cyberius.Api.Notifications;
 using Cyberius.Application.Features.Notifications.Interfaces;
@@ -31,13 +32,14 @@ public static class AuthenticationExtension
                 options.SaveToken = true;
                 options.RequireHttpsMetadata = false;
 
-                options.TokenValidationParameters = new()
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
                     ClockSkew = TimeSpan.Zero,
+                    RoleClaimType = ClaimTypes.Role,
 
                     ValidIssuer = jwtOption.Issuer,
                     ValidAudience = jwtOption.Audience,

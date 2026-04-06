@@ -167,7 +167,7 @@ html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-sans);
   background-color: var(--bg-base);
   color: var(--text-primary);
   line-height: 1.6;
@@ -194,8 +194,7 @@ body.light {
   background-attachment: fixed;
 }
 
-code, pre, .font-mono {
-  font-family: var(--font-mono), monospace; }
+code, pre, .font-mono { font-family: var(--font-mono); }
 
 /* ─────────────────────────────────────────
    SCROLLBAR
@@ -234,15 +233,23 @@ code, pre, .font-mono {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255,255,255,0.05);
 }
 
-.dark .dropdown-solid {
-  background: rgb(8, 18, 36) !important;
+.light .dropdown-solid {
+  background: rgb(245, 250, 255) !important;
+  border-color: rgba(12, 162, 231, 0.25);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  color: #1e293b;
 }
 
-.light-theme .dropdown-solid {
-  background: rgb(240, 248, 255) !important;
-  border-color: rgba(12, 162, 231, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+.light .dropdown-solid p,
+.light .dropdown-solid span,
+.light .dropdown-solid a {
+  color: #334155;
 }
+
+.light .dropdown-solid .text-slate-300 { color: #334155; }
+.light .dropdown-solid .text-slate-400 { color: #475569; }
+.light .dropdown-solid .text-slate-500 { color: #64748b; }
+.light .dropdown-solid .heading-text    { color: #0f172a; }
 .logo-icon {
   background: linear-gradient(135deg, #0ca2e7 0%, #06b6d4 60%, #818cf8 100%);
   box-shadow: 0 0 16px rgba(12,162,231,0.4);
@@ -703,7 +710,7 @@ body.light .group:hover .heading-text {
 .user-avatar-btn {
   background: linear-gradient(135deg, #0ca2e7 0%, #06b6d4 100%);
   box-shadow: 0 0 14px rgba(12, 162, 231, 0.4);
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-sans);
   cursor: pointer;
   border: none;
 }

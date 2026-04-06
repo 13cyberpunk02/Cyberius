@@ -18,18 +18,24 @@ public class PostRepository(AppDbContext db)
             .Include(p => p.PostTags).ThenInclude(pt => pt.Tag)
             .FirstOrDefaultAsync(p => p.Slug == slug, ct);
 
+    public async Task<int> CountByAuthorAsync(
+        Guid authorId, CancellationToken ct = default) =>
+        await _db.Posts
+            .CountAsync(p => p.AuthorId == authorId 
+                             && p.Status == PostStatus.Published, ct);
+    
     // Предыдущая и следующая статья по дате публикации (для ← →)
     public async Task<(Post? Prev, Post? Next)> GetNeighborsAsync(
         Guid postId, CancellationToken ct = default)
     {
-        var publishedAt = await db.Posts
+        var publishedAt = await _db.Posts
             .Where(p => p.Id == postId && p.Status == PostStatus.Published)
             .Select(p => p.PublishedAt)
             .FirstOrDefaultAsync(ct);
 
         if (publishedAt is null) return (null, null);
 
-        var prev = await db.Posts
+        var prev = await _db.Posts
             .Where(p => p.Status == PostStatus.Published
                         && p.Id != postId
                         && p.PublishedAt < publishedAt)
@@ -37,7 +43,7 @@ public class PostRepository(AppDbContext db)
             .Select(p => new Post { Id = p.Id, Title = p.Title, Slug = p.Slug })
             .FirstOrDefaultAsync(ct);
 
-        var next = await db.Posts
+        var next = await _db.Posts
             .Where(p => p.Status == PostStatus.Published
                         && p.Id != postId
                         && p.PublishedAt > publishedAt)

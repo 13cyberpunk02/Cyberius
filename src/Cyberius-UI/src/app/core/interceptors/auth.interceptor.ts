@@ -2,8 +2,8 @@ import {
   HttpInterceptorFn,
   HttpErrorResponse,
   HttpRequest,
-  HttpHandlerFn,
-  HttpEvent,
+  HttpContext,
+  HttpContextToken,
 } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, switchMap, throwError, Observable } from 'rxjs';
@@ -11,50 +11,14 @@ import { AuthService } from '../services/auth.service';
 
 const AUTH_URLS = ['/auth/login', '/auth/register', '/auth/refresh-token'];
 
+const IS_RETRY = new HttpContextToken<boolean>(() => false);
+
 function isAuthUrl(url: string): boolean {
   return AUTH_URLS.some((path) => url.includes(path));
 }
 
 function addBearer(req: HttpRequest<unknown>, token: string): HttpRequest<unknown> {
   return req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
-}
-
-function sendWithToken(
-  req: HttpRequest<unknown>,
-  next: HttpHandlerFn,
-  auth: AuthService,
-): Observable<HttpEvent<unknown>> {
-  const token = auth.accessToken();
-  const authedReq = token ? addBearer(req, token) : req;
-
-  return next(authedReq).pipe(
-    catchError((err: HttpErrorResponse) => {
-      // Не 401 или не авторизован — пробрасываем ошибку
-      if (err.status !== 401 || !auth.isAuthenticated() || isAuthUrl(req.url)) {
-        return throwError(() => err);
-      }
-
-      // Нет refresh token — сессия точно мертва
-      if (auth.isRefreshTokenExpired()) {
-        auth.clearState();
-        return throwError(() => err);
-      }
-
-      // Пробуем обновить токен
-      return auth.refresh().pipe(
-        switchMap((): Observable<HttpEvent<unknown>> => {
-          const newToken = auth.accessToken();
-          const retryReq = newToken ? addBearer(req, newToken) : req;
-          return next(retryReq);
-        }),
-        catchError((refreshErr) => {
-          // refresh() сам обработает 401/403 и очистит state
-          // Здесь просто пробрасываем ошибку
-          return throwError(() => refreshErr);
-        }),
-      );
-    }),
-  );
 }
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
@@ -66,28 +30,66 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   // Не авторизован — просто шлём без токена
   if (!auth.isAuthenticated()) return next(req);
 
-  // Access token валиден — отправляем как есть
-  if (!auth.isAccessTokenExpiredOrExpiring()) {
-    return sendWithToken(req, next, auth);
+  // Уже повторный запрос после refresh — не делаем ещё один refresh
+  const isRetry = req.context.get(IS_RETRY);
+
+  // Access token истёк/истекает — нужен проактивный refresh
+  if (!isRetry && auth.isAccessTokenExpiredOrExpiring()) {
+    if (auth.isRefreshTokenExpired()) {
+      auth.clearState();
+      return next(req);
+    }
+
+    return auth.refresh().pipe(
+      switchMap(() => {
+        const token = auth.accessToken();
+        const retryReq = token
+          ? addBearer(req, token).clone({
+              context: new HttpContext().set(IS_RETRY, true),
+            })
+          : req;
+        return next(retryReq);
+      }),
+      catchError((err) => {
+        if (err?.status !== 0) {
+          // Сетевые ошибки не разлогиниваем — refresh() сам обработает 401/403
+        }
+        return throwError(() => err);
+      }),
+    );
   }
 
-  // Access token истёк/истекает — нет refresh token → чистим state
-  if (auth.isRefreshTokenExpired()) {
-    auth.clearState();
-    return next(req);
-  }
+  // Токен валиден — отправляем с токеном
+  const token = auth.accessToken();
+  const authedReq = token ? addBearer(req, token) : req;
 
-  // Проактивно обновляем токен
-  return auth.refresh().pipe(
-    switchMap((): Observable<HttpEvent<unknown>> => sendWithToken(req, next, auth)),
-    catchError((err) => {
-      // При сетевой ошибке (status 0) — НЕ разлогиниваем,
-      // пробрасываем ошибку чтобы компонент мог обработать
-      if (err?.status === 0) {
+  return next(authedReq).pipe(
+    catchError((err: HttpErrorResponse) => {
+      // Не 401, не авторизован, auth endpoint, или уже retry — пробрасываем
+      if (err.status !== 401 || !auth.isAuthenticated() || isAuthUrl(req.url) || isRetry) {
         return throwError(() => err);
       }
-      // При серверной ошибке — refresh() уже очистил state если 401/403
-      return throwError(() => err);
+
+      // Нет refresh token — сессия мертва
+      if (auth.isRefreshTokenExpired()) {
+        auth.clearState();
+        return throwError(() => err);
+      }
+
+      // 401 на обычном запросе — пробуем refresh ОДИН раз
+      return auth.refresh().pipe(
+        switchMap(() => {
+          const newToken = auth.accessToken();
+          // Помечаем запрос как retry чтобы не зациклиться
+          const retryReq = newToken
+            ? addBearer(req, newToken).clone({
+                context: new HttpContext().set(IS_RETRY, true),
+              })
+            : req;
+          return next(retryReq);
+        }),
+        catchError((refreshErr) => throwError(() => refreshErr)),
+      );
     }),
   );
 };

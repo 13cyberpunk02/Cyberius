@@ -66,4 +66,6 @@ public interface IPostRepository : IGenericRepository<Post>
     Task<IReadOnlyList<Post>> GetDraftsByAuthorAsync(
         Guid authorId,
         CancellationToken ct = default);
+    
+    Task<int> CountByAuthorAsync(Guid authorId, CancellationToken ct = default);
 }

@@ -18,6 +18,7 @@ import {
   faSun,
   faTag,
   faUser,
+  faUsers,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { LoginModal } from '../login-modal/login-modal';
@@ -157,4 +158,5 @@ export class Header implements OnInit, OnDestroy {
   }
 
   protected readonly faBell = faBell;
+  protected readonly faUsers = faUsers;
 }

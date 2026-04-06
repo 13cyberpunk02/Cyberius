@@ -45,6 +45,14 @@ export const routes: Routes = [
     loadComponent: () => import('./features/admin/category/category').then((m) => m.Category),
   },
   {
+    path: 'admin/users',
+    canActivate: [adminGuard],
+    loadComponent: () =>
+      import('./features/admin/admin-user/admin-user').then(
+        (m) => m.AdminUserComponent,
+      ),
+  },
+  {
     path: 'about',
     loadComponent: () => import('./shared/components/about-me/about-me').then((m) => m.AboutMe),
   },

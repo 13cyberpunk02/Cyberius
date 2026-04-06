@@ -224,6 +224,12 @@
                   <!-- Admin links -->
                   @if (authService.profile()?.roles?.includes('Admin') || authService.profile()?.roles?.includes('Manager')) {
                     <div class="my-1.5 border-t border-white/10"></div>
+                    <!-- Пользователи -->
+                    <a routerLink="/admin/users" (click)="closeUserMenu()"
+                       class="user-menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200">
+                      <fa-icon [icon]="faUsers" class="text-slate-400" />
+                      Пользователи
+                    </a>
                     <a routerLink="/admin/categories" (click)="closeUserMenu()" class="user-menu-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200">
                       <fa-icon [icon]="faTag" class="text-slate-400" />
                       Категории

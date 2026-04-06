@@ -1,4 +1,6 @@
 using System.Reflection;
+using Cyberius.Application.Features.Admin.Interfaces;
+using Cyberius.Application.Features.Admin.Services;
 using Cyberius.Application.Features.Authentication.Interfaces;
 using Cyberius.Application.Features.Authentication.Services;
 using Cyberius.Application.Features.Blog;
@@ -20,6 +22,7 @@ public static class ExtensionCollection
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IStatsService, StatsService>();
+        services.AddScoped<IAdminService, AdminUserService>();
         services.AddBlogServices();
         
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());

@@ -16,7 +16,7 @@ public class AuthenticationService(IUnitOfWork uow, IJwtService jwtService) : IA
         var user = await uow.Users.GetByEmailAsync(request.Email, cancellationToken);
         if(user is null || !user.IsActive)
             return Errors.NotFound(nameof(User), "");
-
+        
         var isPasswordCorrect = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
         if (!isPasswordCorrect)
             return Errors.Unauthorized("Введены неверные данные");
@@ -103,7 +103,7 @@ public class AuthenticationService(IUnitOfWork uow, IJwtService jwtService) : IA
         if (string.IsNullOrWhiteSpace(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
             return Errors.BadRequest("Токен доступа не валидный");
         
-        var user = await uow.Users.GetByIdAsync(userId, cancellationToken);
+        var user = await uow.Users.GetUserWithRolesByIdAsync(userId, cancellationToken);
         if (user is null)
             return Errors.BadRequest("Токен доступа не валидный");
         

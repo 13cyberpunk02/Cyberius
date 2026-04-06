@@ -6,6 +6,9 @@ public interface IPostRepository : IGenericRepository<Post>
 {
     // Получить по slug (для публичного URL /posts/csharp-13-features)
     Task<Post?> GetBySlugAsync(string slug, CancellationToken ct = default);
+    
+    // Предыдущая и следующая статья по дате публикации
+    Task<(Post? Prev, Post? Next)> GetNeighborsAsync(Guid postId, CancellationToken ct = default);
 
     // Получить для редактирования — с тегами (для diff), без блоков (перезаписываем через ExecuteDelete)
     Task<Post?> GetForUpdateAsync(Guid id, CancellationToken ct = default);

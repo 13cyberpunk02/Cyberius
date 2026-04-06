@@ -34,6 +34,22 @@ public sealed class PostService(IUnitOfWork uow, IStorageService storageService,
         return await GetByIdAsync(post.Id, currentUserId, ct);
     }
 
+    public async Task<Result<NeighboursDto>> GetNeighboursAsync(Guid postId, CancellationToken ct = default)
+    {
+        var neighbourPosts = await uow.Posts.GetNeighborsAsync(postId, ct);
+        var prev = neighbourPosts.Prev is null
+            ? null
+            : new NeighbourItem(neighbourPosts.Prev.Id, neighbourPosts.Prev.Title, neighbourPosts.Prev.Slug);
+        
+        var next = neighbourPosts.Next is null
+            ? null
+            : new NeighbourItem(neighbourPosts.Next.Id, neighbourPosts.Next.Title, neighbourPosts.Next.Slug);
+        
+        var result = new NeighboursDto(prev, next);
+
+        return Result<NeighboursDto>.Success(result);
+    }
+
     public async Task<Result<PagedResponse<PostSummaryResponse>>> GetPublishedAsync(
         int page, int pageSize, CancellationToken ct = default)
     {

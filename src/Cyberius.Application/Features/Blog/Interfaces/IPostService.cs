@@ -8,6 +8,7 @@ public interface IPostService
     Task<Result<PostDetailResponse>> GetByIdAsync(Guid id, Guid? currentUserId, CancellationToken ct = default);
     Task<Result<PostDetailResponse>> GetBySlugAsync(string slug, Guid? currentUserId, CancellationToken ct = default);
 
+    Task<Result<NeighboursDto>> GetNeighboursAsync(Guid postId, CancellationToken ct = default);
     Task<Result<PagedResponse<PostSummaryResponse>>> GetPublishedAsync(int page, int pageSize,
         CancellationToken ct = default);
 

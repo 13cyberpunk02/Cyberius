@@ -21,62 +21,90 @@ public static class PostEndpoints
 
         // ── Public ─────────────────────────────────────────────────────────
         group.MapGet("/", GetPublished)
+            .RequireRateLimiting(RateLimitingExtensions.Public)
+            .WithPublicCache(30)
             .WithSummary("Get published posts (paged)");
 
         group.MapGet("{id:guid}", GetById)
+            .RequireRateLimiting(RateLimitingExtensions.Public)
+            .WithPublicCache(60)
             .WithSummary("Get post by id");
 
         group.MapGet("slug/{slug}", GetBySlug)
+            .RequireRateLimiting(RateLimitingExtensions.Public)
+            .WithPublicCache(60)
             .WithSummary("Get post by slug");
 
         group.MapGet("search", Search)
+            .RequireRateLimiting(RateLimitingExtensions.Public)
+            .WithShortCache()
             .WithSummary("Full-text search posts");
 
         group.MapGet("category/{categoryId:guid}", GetByCategory)
+            .RequireRateLimiting(RateLimitingExtensions.Public)
+            .WithPublicCache(60)
             .WithSummary("Get posts by category");
 
         group.MapGet("tag/{tagSlug}", GetByTag)
+            .RequireRateLimiting(RateLimitingExtensions.Public)
+            .WithPublicCache(60)
             .WithSummary("Get posts by tag");
-        
+
         group.MapGet("{id:guid}/related", GetRelated)
+            .RequireRateLimiting(RateLimitingExtensions.Public)
+            .WithPublicCache(120)
             .WithSummary("Get related posts");
-        
+
+        group.MapGet("{id:guid}/neighbors", GetNeighbors)
+            .RequireRateLimiting(RateLimitingExtensions.Public)
+            .WithPublicCache(60)
+            .WithSummary("Get prev/next posts by date");
+
         group.MapGet("author/{authorId:guid}", GetByAuthor)
+            .RequireRateLimiting(RateLimitingExtensions.Public)
+            .WithPublicCache(30)
             .WithSummary("Get posts by author (public)");
 
         // ── Authorized ─────────────────────────────────────────────────────
         group.MapGet("drafts", GetDrafts)
             .RequireAuthorization()
+            .RequireRateLimiting(RateLimitingExtensions.Public)
             .WithSummary("Get author's drafts");
 
         group.MapPost("/", Create)
             .RequireAuthorization()
+            .RequireRateLimiting(RateLimitingExtensions.Mutations)
             .WithRequestValidation<CreatePostRequest>()
             .WithSummary("Create post");
 
         group.MapPut("{id:guid}", Update)
             .RequireAuthorization()
+            .RequireRateLimiting(RateLimitingExtensions.Mutations)
             .WithRequestValidation<UpdatePostRequest>()
             .WithSummary("Update post");
 
         group.MapPost("{id:guid}/publish", Publish)
             .RequireAuthorization()
+            .RequireRateLimiting(RateLimitingExtensions.Mutations)
             .WithSummary("Publish post");
 
         group.MapPost("{id:guid}/unpublish", Unpublish)
             .RequireAuthorization()
+            .RequireRateLimiting(RateLimitingExtensions.Mutations)
             .WithSummary("Unpublish post (back to draft)");
 
         group.MapDelete("{id:guid}", Delete)
             .RequireAuthorization()
+            .RequireRateLimiting(RateLimitingExtensions.Mutations)
             .WithSummary("Delete post");
 
         group.MapPost("{id:guid}/react/{type}", React)
             .RequireAuthorization()
+            .RequireRateLimiting(RateLimitingExtensions.Reactions)
             .WithSummary("React to post (toggle)");
 
-        // Публичный — трекинг просмотра (анонимные тоже считаются)
         group.MapPost("{id:guid}/view", TrackView)
+            .RequireRateLimiting(RateLimitingExtensions.Views)
             .WithSummary("Track post view");
 
         return group;
@@ -170,7 +198,7 @@ public static class PostEndpoints
         var result = await postService.GetByTagAsync(tagSlug, page, pageSize, ct);
         return result.ToHttpResponse();
     }
-    
+
     private static async Task<IResult> GetByAuthor(
         [FromRoute] Guid authorId,
         IPostService postService,
@@ -258,6 +286,15 @@ public static class PostEndpoints
         return result.ToHttpResponse();
     }
     
+    private static async Task<IResult> GetNeighbors(
+        [FromRoute] Guid id,
+        IPostService postService,
+        CancellationToken ct)
+    {
+        var response = await postService.GetNeighboursAsync(id, ct);
+        return response.ToHttpResponse();
+    }
+
     private static async Task<IResult> React(
         [FromRoute] Guid id,
         [FromRoute] string type,

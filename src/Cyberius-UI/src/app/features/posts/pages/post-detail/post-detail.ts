@@ -21,6 +21,7 @@ import { Comments } from '../../components/comments/comments';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import {
   faAngleLeft,
+  faAngleRight,
   faAnglesUp,
   faBookmark,
   faCommentDots,
@@ -86,6 +87,10 @@ export class PostDetail implements OnInit, OnDestroy {
   related = signal<PostSummary[]>([]);
   toc = signal<TocItem[]>([]);
   readingProgress = signal(0);
+  neighbors = signal<{
+    prev: { id: string; title: string; slug: string } | null;
+    next: { id: string; title: string; slug: string } | null;
+  }>({ prev: null, next: null });
 
   readonly reactions = Object.entries(REACTION_EMOJI) as [ReactionType, string][];
 
@@ -212,6 +217,13 @@ export class PostDetail implements OnInit, OnDestroy {
     });
   }
 
+  private loadNeighbors(postId: string): void {
+    this.postsService.getNeighbors(postId).subscribe({
+      next: (data) => this.neighbors.set(data),
+      error: () => {},
+    });
+  }
+
   toggleBookmark(): void {
     const p = this.post();
     if (!p) return;
@@ -314,4 +326,5 @@ export class PostDetail implements OnInit, OnDestroy {
   protected readonly faBookmark = faBookmark;
   protected readonly faTelegram = faTelegram;
   protected readonly faXTwitter = faXTwitter;
+  protected readonly faAngleRight = faAngleRight;
 }

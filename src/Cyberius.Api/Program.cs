@@ -40,6 +40,8 @@ app.UseCors("CorsPolicy");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseBlogRateLimiting();
+app.UseOutputCache();
 app.MapHub<NotificationHub>("/hubs/notifications");
 app.MapAllEndpoints();
 

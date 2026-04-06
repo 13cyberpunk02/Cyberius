@@ -203,6 +203,36 @@
             </span>
         </div>
 
+        @if (neighbors().prev || neighbors().next) {
+          <div class="mt-10 pt-8 border-t border-white/10 grid grid-cols-2 gap-4">
+            @if (neighbors().prev; as prev) {
+              <a [routerLink]="['/posts', prev.slug]"
+                 class="glass-card rounded-xl p-4 hover:border-sky-500/40 transition-all group">
+                <p class="text-[10px] text-slate-500 mb-1 flex items-center gap-1">
+                  <fa-icon [icon]="faAngleLeft" />
+                  Предыдущая
+                  <kbd class="ml-auto px-1 py-0.5 rounded bg-white/10 text-[9px]">←</kbd>
+                </p>
+                <p class="text-sm font-medium text-slate-300 group-hover:text-sky-400 transition-colors line-clamp-2">{{ prev.title }}</p>
+              </a>
+            } @else {
+              <div></div>
+            }
+
+            @if (neighbors().next; as next) {
+              <a [routerLink]="['/posts', next.slug]"
+                 class="glass-card rounded-xl p-4 hover:border-sky-500/40 transition-all group text-right">
+                <p class="text-[10px] text-slate-500 mb-1 flex items-center justify-end gap-1">
+                  <kbd class="mr-auto px-1 py-0.5 rounded bg-white/10 text-[9px]">→</kbd>
+                  Следующая
+                  <fa-icon [icon]="faAngleRight" />
+                </p>
+                <p class="text-sm font-medium text-slate-300 group-hover:text-sky-400 transition-colors line-clamp-2">{{ next.title }}</p>
+              </a>
+            }
+          </div>
+        }
+
         <!-- Related posts -->
         @if (related().length > 0) {
           <div class="mt-14 pt-10 border-t border-white/10">

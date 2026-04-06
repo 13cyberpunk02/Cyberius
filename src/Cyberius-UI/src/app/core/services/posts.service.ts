@@ -109,6 +109,13 @@ export class PostsService {
     return this.http.get<PostSummary[]>(`${this.base}/${id}/related?count=${count}`);
   }
 
+  getNeighbors(id: string): Observable<{
+    prev: { id: string; title: string; slug: string } | null;
+    next: { id: string; title: string; slug: string } | null;
+  }> {
+    return this.http.get<any>(`${this.base}/${id}/neighbors`);
+  }
+
   // ── Helpers ────────────────────────────────────────────────────
 
   private buildPageParams(params: GetPostsParams): HttpParams {

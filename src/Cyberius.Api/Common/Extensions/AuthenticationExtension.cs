@@ -59,7 +59,8 @@ public static class AuthenticationExtension
                 };
             });
         services.AddAuthorization();
-        
+        services.AddBlogRateLimiting();
+        services.AddBlogOutputCache();
         return services;
     }
 }

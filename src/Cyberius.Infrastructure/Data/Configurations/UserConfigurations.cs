@@ -58,6 +58,14 @@ public class UserConfigurations : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.JoinedDate)
             .IsRequired();
+        
+        builder.Property(u => u.IsDeleted)
+            .HasDefaultValue(false)
+            .IsRequired();
+        
+        builder.Property(u => u.IsActive)
+            .HasDefaultValue(true)
+            .IsRequired();
 
         builder.HasOne(u => u.RefreshToken)
             .WithOne(rt => rt.User)

@@ -14,7 +14,7 @@
           type="text"
           [(ngModel)]="searchInput"
           (keydown.enter)="onSearch()"
-          placeholder="Поиск по email или имени..."
+          placeholder="Поиск по эл. почте или имени..."
           class="email-input px-4 py-2 rounded-xl text-sm flex-1 sm:w-72"
         />
         <button (click)="onSearch()" class="btn-primary px-4 py-2 rounded-xl text-sm text-white">
@@ -70,7 +70,7 @@
                   <img [src]="url" [alt]="user.firstName" class="w-full h-full object-cover"/>
                 } @else {
                   <div class="user-avatar-btn w-full h-full flex items-center justify-center text-sm font-bold text-white">
-                    {{ user.firstName[0] ?? '?' }}
+                    {{ user.firstName[0] }}
                   </div>
                 }
               </div>
@@ -87,38 +87,21 @@
 
             <!-- Role -->
             <div class="col-span-2">
-              <div class="relative">
+              <div class="role-menu-wrapper">
                 <button
-                  (click)="roleMenuId.set(roleMenuId() === user.id ? null : user.id)"
+                  (click)="openRoleMenu($event, user.id)"
                   [disabled]="isCurrentUser(user.id) || changingRole() === user.id"
                   class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all hover:opacity-80 disabled:cursor-default disabled:opacity-50"
-                  [class]="getRoleClass(user.roles[0] ?? 'User')"
+                  [class]="getRoleClass(user.roles[0].length === 0 ? 'User' : user.roles[0])"
                 >
                   @if (changingRole() === user.id) {
                     <fa-icon [icon]="faSpinner" animation="spin-pulse" />
                   }
-                  {{ user.roles[0] ?? 'User' }}
+                  {{ user.roles[0].length === 0 ? 'User' :  user.roles[0] }}
                   @if (!isCurrentUser(user.id)) {
                     <fa-icon [icon]="faAngleDown" />
                   }
                 </button>
-
-                <!-- Role dropdown -->
-                @if (roleMenuId() === user.id) {
-                  <div class="absolute top-8 left-0 z-20 dropdown-solid rounded-xl overflow-hidden min-w-28 shadow-lg">
-                    @for (role of allRoles; track role) {
-                      <button
-                        (click)="changeRole(user, role)"
-                        class="w-full text-left px-3 py-2 text-xs hover:bg-white/5 transition-colors"
-                        [class]="getRoleClass(role)"
-                        [class.font-bold]="user.roles[0] === role"
-                      >
-                        {{ role }}
-                        @if (user.roles[0] === role) { ✓ }
-                      </button>
-                    }
-                  </div>
-                }
               </div>
             </div>
 
@@ -221,7 +204,27 @@
   />
 }
 
-<!-- Close role menu on click outside -->
-@if (roleMenuId()) {
-  <div class="fixed inset-0 z-10" (click)="roleMenuId.set(null)"></div>
+@if (roleMenuId(); as openId) {
+  <div
+    class="role-menu-wrapper fixed z-200 dropdown-solid rounded-xl overflow-hidden min-w-32 shadow-lg"
+    [style.top.px]="roleMenuPos().top"
+    [style.left.px]="roleMenuPos().left"
+  >
+    @for (user of users(); track user.id) {
+      @if (user.id === openId) {
+        @for (role of allRoles; track role) {
+          <button
+            (click)="changeRole(user, role)"
+            class="w-full text-left px-4 py-2.5 text-xs font-medium hover:bg-white/10 transition-colors flex items-center justify-between gap-3"
+            [class]="getRoleClass(role)"
+          >
+            {{ role }}
+            @if (user.roles[0] === role) {
+              <span>✓</span>
+            }
+          </button>
+        }
+      }
+    }
+  </div>
 }

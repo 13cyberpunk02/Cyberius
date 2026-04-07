@@ -432,8 +432,12 @@ public sealed class PostService(IUnitOfWork uow, IStorageService storageService,
     private static PostSummaryResponse MapToSummary(Post p, int viewCount = 0, int commentCount = 0) => new(
         p.Id, p.Title, p.Slug, p.Excerpt, p.CoverImageUrl,
         p.ReadTimeMinutes, p.Status, p.PublishedAt, p.CreatedAt,
-        new AuthorDto(p.Author.UserId, p.Author.UserName ?? "", $"{p.Author.FirstName} {p.Author.LastName}".Trim(),
-            p.Author.AvatarObjectName),
+        new AuthorDto(
+            p.Author.UserId,
+            p.Author.IsDeleted ? "deleted" : p.Author.UserName ?? "",
+            p.Author.IsDeleted ? "Удалённый пользователь" : $"{p.Author.FirstName} {p.Author.LastName}".Trim(),
+            p.Author.IsDeleted ? null : p.Author.AvatarObjectName),
+        
         new CategoryDto(p.Category.Id, p.Category.Name, p.Category.Slug, p.Category.Color, p.Category.IconUrl),
         p.PostTags.Select(pt => pt.Tag.Name).ToList(),
         ViewCount: viewCount,
@@ -459,8 +463,11 @@ public sealed class PostService(IUnitOfWork uow, IStorageService storageService,
         return new PostDetailResponse(
             p.Id, p.Title, p.Slug, p.Excerpt, p.CoverImageUrl,
             p.ReadTimeMinutes, p.Status, p.PublishedAt, p.CreatedAt,
-            new AuthorDto(p.Author.UserId, p.Author.UserName ?? "", $"{p.Author.FirstName} {p.Author.LastName}".Trim(),
-                p.Author.AvatarObjectName),
+            new AuthorDto(
+                p.Author.UserId,
+                p.Author.IsDeleted ? "deleted" : p.Author.UserName ?? "",
+                p.Author.IsDeleted ? "Удалённый пользователь" : $"{p.Author.FirstName} {p.Author.LastName}".Trim(),
+                p.Author.IsDeleted ? null : p.Author.AvatarObjectName),
             new CategoryDto(p.Category.Id, p.Category.Name, p.Category.Slug, p.Category.Color, p.Category.IconUrl),
             p.PostTags.Select(pt => pt.Tag.Name).ToList(),
             p.Blocks.OrderBy(b => b.Order).Select(b => new ContentBlockDto(

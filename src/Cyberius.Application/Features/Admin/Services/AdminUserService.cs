@@ -34,7 +34,7 @@ public class AdminUserService(IUnitOfWork uow) : IAdminService
         Guid userId, CancellationToken ct = default)
     {
         var user = await uow.Users.GetByIdAsync(userId, ct);
-        if (user is null)
+        if (user is null || user.IsDeleted)
             return Errors.NotFound(nameof(User), userId.ToString());
 
         var roles = await uow.UserRoles.GetRolesByUserAsync(userId, ct);
@@ -91,7 +91,16 @@ public class AdminUserService(IUnitOfWork uow) : IAdminService
         if (user is null)
             return Errors.NotFound(nameof(User), targetUserId);
 
-        uow.Users.Remove(user);
+        user.IsDeleted   = true;
+        user.IsActive    = false;
+        user.FirstName   = "Deleted";
+        user.LastName    = "User";
+        user.Email       = $"deleted_{targetUserId}@deleted.local";
+        user.UserName    = $"deleted_{targetUserId}";
+        user.AvatarObjectName = null;
+        user.PasswordHash     = null;
+        
+        uow.Users.Update(user);
         await uow.SaveChangesAsync(ct);
 
         return Result.Success();

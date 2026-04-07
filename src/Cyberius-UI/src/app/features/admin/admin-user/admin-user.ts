@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, HostListener, inject, OnInit, signal } from '@angular/core';
 import {
   ConfirmDialog,
   ConfirmDialogConfig,
@@ -17,6 +17,7 @@ import {
   faAngleLeft,
   faAngleRight,
   faBan,
+  faCheck,
   faCheckCircle,
   faEye,
   faSpinner,
@@ -52,7 +53,21 @@ export class AdminUserComponent implements OnInit {
 
   // Смена роли
   roleMenuId = signal<string | null>(null);
+  roleMenuPos = signal<{ top: number; left: number }>({ top: 0, left: 0 });
   changingRole = signal<string | null>(null);
+
+  openRoleMenu(event: MouseEvent, userId: string): void {
+    if (this.roleMenuId() === userId) {
+      this.roleMenuId.set(null);
+      return;
+    }
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    this.roleMenuPos.set({
+      top: rect.bottom + window.scrollY + 4,
+      left: rect.left + window.scrollX,
+    });
+    this.roleMenuId.set(userId);
+  }
 
   readonly allRoles = ALL_ROLES;
   readonly pageSize = 20;
@@ -68,6 +83,13 @@ export class AdminUserComponent implements OnInit {
   ngOnInit(): void {
     this.seo.setPage({ title: 'Управление пользователями' });
     this.load();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(e: MouseEvent): void {
+    if (!(e.target as HTMLElement).closest('.role-menu-wrapper')) {
+      this.roleMenuId.set(null);
+    }
   }
 
   private load(): void {
@@ -189,4 +211,5 @@ export class AdminUserComponent implements OnInit {
   protected readonly faTrashCan = faTrashCan;
   protected readonly faAngleLeft = faAngleLeft;
   protected readonly faAngleRight = faAngleRight;
+  protected readonly faCheck = faCheck;
 }

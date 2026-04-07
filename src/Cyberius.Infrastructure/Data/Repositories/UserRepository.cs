@@ -24,7 +24,9 @@ public class UserRepository(AppDbContext db) : GenericRepository<User>(db), IUse
     public async Task<(IReadOnlyList<User> Items, int TotalCount)> GetAllPagedAsync(
         int page, int pageSize, string? search, CancellationToken ct = default)
     {
-        var query = db.Users.AsQueryable();
+        var query = db.Users
+            .Where(u => !u.IsDeleted)
+            .AsQueryable();
         if (!string.IsNullOrEmpty(search))
             query = query.Where(u =>
                 u.Email.Contains(search) ||

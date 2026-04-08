@@ -2,7 +2,7 @@ import { Component, HostListener, inject, OnDestroy, OnInit, signal } from '@ang
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { ThemeService } from '../../../core/services/theme.service';
-import { FaIconComponent, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
   faArrowRight,
   faArrowRightFromBracket,
@@ -10,7 +10,6 @@ import {
   faBars,
   faBell,
   faBookmark,
-  faBurger,
   faCode,
   faMagnifyingGlass,
   faMoon,
@@ -124,10 +123,6 @@ export class Header implements OnInit, OnDestroy {
     this.modal.set('none');
   }
 
-  openLoginAndConnect() {
-    this.openLogin();
-  }
-
   toggleUserMenu(event: MouseEvent) {
     event.stopPropagation();
     this.showUserMenu.update((v) => !v);
@@ -156,7 +151,6 @@ export class Header implements OnInit, OnDestroy {
     this.authService.logout();
     this.showUserMenu.set(false);
   }
-
-  protected readonly faBell = faBell;
   protected readonly faUsers = faUsers;
+  protected readonly faBell = faBell;
 }

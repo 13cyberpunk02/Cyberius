@@ -1,0 +1,33 @@
+<div class="min-h-screen flex items-center justify-center px-4">
+  <div class="w-full max-w-md text-center">
+
+    <div class="logo-icon w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-6">
+      <fa-icon [icon]="faEnvelope" class="text-white" />
+    </div>
+
+    <div class="glass-card rounded-2xl p-8">
+      @switch (status()) {
+        @case ('loading') {
+          <fa-icon [icon]="faSpinner" class="text-sky-400 mx-auto mb-4" animation="spin-pulse" />
+          <p class="text-slate-400">Обрабатываем запрос...</p>
+        }
+        @case ('success') {
+          <div class="w-12 h-12 rounded-full bg-emerald-500/15 flex items-center justify-center mx-auto mb-4">
+            <fa-icon [icon]="faCheckCircle" class="text-emerald-400" />
+          </div>
+          <h2 class="text-xl font-bold heading-text mb-2">Вы отписаны</h2>
+          <p class="text-slate-400 text-sm mb-6">Больше не будем присылать письма. Всегда можно подписаться снова.</p>
+          <a routerLink="/" class="text-sky-400 hover:underline text-sm">На главную</a>
+        }
+        @case ('error') {
+          <div class="w-12 h-12 rounded-full bg-rose-500/15 flex items-center justify-center mx-auto mb-4">
+            <fa-icon [icon]="faXmark" class="text-rose-400" />
+          </div>
+          <h2 class="text-xl font-bold heading-text mb-2">Ошибка</h2>
+          <p class="text-rose-400 text-sm mb-6">Ссылка недействительна или уже использована</p>
+          <a routerLink="/" class="text-sky-400 hover:underline text-sm">На главную</a>
+        }
+      }
+    </div>
+  </div>
+</div>

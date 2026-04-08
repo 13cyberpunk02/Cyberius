@@ -20,6 +20,7 @@ public class UserConfigurations : IEntityTypeConfiguration<User>
         UserName = "admin",
         JoinedDate = DateTime.Parse("2026-03-30").ToUniversalTime(),
         PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!"),
+        IsEmailConfirmed = true,
     };
     
 

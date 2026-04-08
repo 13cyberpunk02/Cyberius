@@ -12,32 +12,45 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { LoginRequest, FormErrors } from '../../../core/models/auth.model';
 import { validateLogin, isValid } from '../../../core/validators/auth.validator';
-import { faCode, faEnvelope, faLock, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import {
+  faCode,
+  faEnvelope,
+  faLock,
+  faEye,
+  faEyeSlash,
+  faXmark,
+  faExclamationTriangle,
+  faArrowRightToBracket,
+  faSpinner,
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { ToastService } from '../../../core/services/toast.service';
+import { RouterLink } from '@angular/router';
 
 type FormStatus = 'idle' | 'loading' | 'error';
 
 @Component({
   selector: 'app-login-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, FontAwesomeModule],
-  templateUrl: './login-modal.component.html',
+  imports: [CommonModule, FormsModule, FontAwesomeModule, RouterLink],
+  templateUrl: './login-modal.html',
   encapsulation: ViewEncapsulation.None,
 })
 export class LoginModal implements OnInit, OnDestroy {
   private auth = inject(AuthService);
-  private toast = inject(ToastService);
 
   closed = output<void>();
   success = output<void>();
-  openRegister = output<void>(); // переключает на регистрацию
+  openRegister = output<void>();
 
-  faCode = faCode;
-  faEnvelope = faEnvelope;
-  faLock = faLock;
-  faEye = faEye;
-  faEyeSlash = faEyeSlash;
+  protected readonly faCode = faCode;
+  protected readonly faEnvelope = faEnvelope;
+  protected readonly faEye = faEye;
+  protected readonly faEyeSlash = faEyeSlash;
+  protected readonly faXmark = faXmark;
+  protected readonly faLock = faLock;
+  protected readonly faExclamationTriangle = faExclamationTriangle;
+  protected readonly faArrowRightToBracket = faArrowRightToBracket;
+  protected readonly faSpinner = faSpinner;
 
   email = '';
   password = '';
@@ -54,7 +67,6 @@ export class LoginModal implements OnInit, OnDestroy {
     document.body.style.overflow = '';
   }
 
-  // Валидация при потере фокуса
   onBlur(field: keyof LoginRequest): void {
     this.touched.update((t) => ({ ...t, [field]: true }));
     this.validate();
@@ -67,7 +79,6 @@ export class LoginModal implements OnInit, OnDestroy {
   }
 
   submit(): void {
-    // Помечаем все поля как тронутые
     this.touched.set({ email: true, password: true });
     if (!this.validate()) return;
 

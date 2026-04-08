@@ -20,6 +20,7 @@ public class UnitOfWork(AppDbContext db) : IUnitOfWork
     public ITagRepository Tags => field is null ? field ??= new TagRepository(db) : field;
     public IPostTagRepository PostTags => field is null ? field ??= new PostTagRepository(db) : field;
     public IEmailTokenRepository EmailTokens => field is null ? field ??= new EmailTokenRepository(db) : field;
+    public INewsletterRepository Newsletters => field is null ? field ??= new NewsletterRepository(db) : field;
 
     public Task<int> SaveChangesAsync(CancellationToken ct = default)
         => db.SaveChangesAsync(ct);

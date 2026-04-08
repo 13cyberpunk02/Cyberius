@@ -54,7 +54,9 @@ export const routes: Routes = [
   {
     path: 'users/:userId',
     loadComponent: () =>
-      import('./features/users/pages/user-profile/user-profile').then((m) => m.UserProfileComponent),
+      import('./features/users/pages/user-profile/user-profile').then(
+        (m) => m.UserProfileComponent,
+      ),
   },
   {
     path: 'admin/categories',
@@ -79,6 +81,13 @@ export const routes: Routes = [
     path: 'profile',
     canActivate: [authGuard],
     loadComponent: () => import('./features/profile/profile').then((m) => m.Profile),
+  },
+  {
+    path: 'unsubscribe',
+    loadComponent: () =>
+      import('./features/newsletter/components/unsubscribe-component/unsubscribe-component').then(
+        (m) => m.UnsubscribeComponent,
+      ),
   },
   {
     path: '**',

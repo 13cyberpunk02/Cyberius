@@ -9,6 +9,8 @@ using Cyberius.Application.Features.Blog.Stats.Services;
 using Cyberius.Application.Features.Email.Interfaces;
 using Cyberius.Application.Features.Email.Services;
 using Cyberius.Application.Features.JWT;
+using Cyberius.Application.Features.Newsletter.Interfaces;
+using Cyberius.Application.Features.Newsletter.Services;
 using Cyberius.Application.Features.Users.Interfaces;
 using Cyberius.Application.Features.Users.Services;
 using FluentValidation;
@@ -28,6 +30,7 @@ public static class ExtensionCollection
         services.AddScoped<IEmailService, GmailEmailService>();
         services.AddScoped<IPasswordResetService, PasswordResetService>();
         services.AddScoped<IEmailConfirmationService, EmailConfirmationService>();
+        services.AddScoped<INewsletterService, NewsletterService>();
         services.AddBlogServices();
         
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());

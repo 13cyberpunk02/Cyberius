@@ -1,0 +1,65 @@
+<section class="py-16">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="glass-card rounded-3xl p-10 text-center relative overflow-hidden">
+
+      <div class="absolute inset-0 pointer-events-none"
+           style="background: radial-gradient(ellipse at 50% 0%, rgba(12,162,231,0.08) 0%, transparent 70%)"></div>
+
+      @if (success()) {
+        <div class="relative">
+          <div class="w-16 h-16 rounded-2xl bg-emerald-500/15 flex items-center justify-center mx-auto mb-4">
+            <fa-icon [icon]="faCheckCircle" class="text-emerald-400" />
+          </div>
+          <h2 class="text-2xl font-black heading-text mb-2">Вы подписаны!</h2>
+          <p class="text-slate-400">Проверьте почту — мы отправили письмо с подтверждением.</p>
+        </div>
+      } @else {
+        <div class="relative">
+          <div class="logo-icon w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <fa-icon [icon]="faEnvelope" class="text-white" />
+          </div>
+
+          <h2 class="text-3xl font-black heading-text mb-3">Не пропускай новые статьи</h2>
+          <p class="text-slate-400 mb-8 leading-relaxed">
+            Подпишись и получай новые статьи о C#, .NET 10 и Angular прямо в почту.<br/>
+            Без спама, только полезный контент.
+          </p>
+
+          <!-- Error -->
+          @if (error()) {
+            <div class="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-sm">
+              {{ error() }}
+            </div>
+          }
+
+          <!-- Input + Button -->
+          <div class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+            <input
+              type="email"
+              [(ngModel)]="email"
+              (keydown.enter)="submit()"
+              placeholder="your&#64;email.com"
+              class="email-input flex-1 px-5 py-3.5 rounded-xl text-sm"
+              autocomplete="email"
+            />
+            <button
+              (click)="submit()"
+              [disabled]="loading()"
+              class="btn-primary px-6 py-3.5 rounded-xl font-semibold text-white whitespace-nowrap transition-all hover:scale-105 disabled:opacity-50 disabled:scale-100 flex items-center gap-2 justify-center"
+            >
+              @if (loading()) {
+                <fa-icon [icon]="faSpinner" animation="spin-pulse" />
+              }
+              Подписаться
+            </button>
+          </div>
+
+          <p class="text-xs text-slate-500 mt-4 flex items-center justify-center gap-1.5">
+            <fa-icon [icon]="faEnvelope" class="text-sky-500" />
+            Только новые статьи. Никакого спама. Отписка в один клик.
+          </p>
+        </div>
+      }
+    </div>
+  </div>
+</section>

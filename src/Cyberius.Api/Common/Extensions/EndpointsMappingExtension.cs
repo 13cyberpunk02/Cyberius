@@ -16,6 +16,7 @@ public static class EndpointsMappingExtension
         endpoints.MapFeedEndpoints();
         endpoints.MapStatsEndpoints();
         endpoints.MapAdminUserEndpoints();
+        endpoints.MapNewsletterEndpoints();
         return endpoints;
     }
 }

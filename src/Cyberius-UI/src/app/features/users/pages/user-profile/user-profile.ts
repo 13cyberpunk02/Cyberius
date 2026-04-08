@@ -1,13 +1,13 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { PostCard } from '../../../features/posts/components/post-card/post-card';
-import { PostsService } from '../../../core/services/posts.service';
-import { AuthService } from '../../../core/services/auth.service';
+import { PostCard } from '../../../posts/components/post-card/post-card';
+import { PostsService } from '../../../../core/services/posts.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { HttpClient } from '@angular/common/http';
-import { SeoService } from '../../../core/services/seo.service';
-import { PagedResponse, PostSummary } from '../../../core/models/post.model';
-import { UserProfile } from '../../../core/models/auth.model';
+import { SeoService } from '../../../../core/services/seo.service';
+import { PagedResponse, PostSummary } from '../../../../core/models/post.model';
+import { UserProfile } from '../../../../core/models/auth.model';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import {
   faArrowLeft,

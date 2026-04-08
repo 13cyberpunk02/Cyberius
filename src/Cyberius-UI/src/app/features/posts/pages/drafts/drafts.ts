@@ -1,12 +1,12 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { ConfirmDialog, ConfirmDialogConfig } from '../confirm-dialog/confirm-dialog';
-import { PostsService } from '../../../core/services/posts.service';
-import { AuthService } from '../../../core/services/auth.service';
-import { ToastService } from '../../../core/services/toast.service';
-import { SeoService } from '../../../core/services/seo.service';
-import { PostSummary } from '../../../core/models/post.model';
+import { ConfirmDialog, ConfirmDialogConfig } from '../../../../shared/components/confirm-dialog/confirm-dialog';
+import { PostsService } from '../../../../core/services/posts.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { ToastService } from '../../../../core/services/toast.service';
+import { SeoService } from '../../../../core/services/seo.service';
+import { PostSummary } from '../../../../core/models/post.model';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faFilePen, faPen, faPlus, faRocket, faSpinner } from '@fortawesome/free-solid-svg-icons';
 

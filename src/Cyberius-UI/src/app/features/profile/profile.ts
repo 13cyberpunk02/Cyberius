@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { UserProfile } from '../../core/models/auth.model';
 import { HttpClient } from '@angular/common/http';
-import { ChangePasswordModal } from '../../shared/components/change-password-modal/change-password-modal';
+import { ChangePasswordModal } from '../users/components/change-password-modal/change-password-modal';
 import {
   faCamera,
   faAt,
@@ -24,7 +24,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { Router } from '@angular/router';
 import { ConfirmDialog, ConfirmDialogConfig } from '../../shared/components/confirm-dialog/confirm-dialog';
 import { ToastService } from '../../core/services/toast.service';
-import { AuthorStatsComponent } from '../../shared/components/author-stats/author-stats';
+import { AuthorStatsComponent } from './components/author-stats/author-stats';
 
 interface UpdateProfileForm {
   firstName: string;

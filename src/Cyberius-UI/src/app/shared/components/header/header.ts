@@ -21,9 +21,9 @@ import {
   faUsers,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
-import { LoginModal } from '../login-modal/login-modal';
+import { LoginModal } from '../../../features/auth/login-modal/login-modal';
 import { AuthService } from '../../../core/services/auth.service';
-import { RegisterModal } from '../register-modal/register-modal';
+import { RegisterModal } from '../../../features/auth/register-modal/register-modal';
 import { FormsModule } from '@angular/forms';
 import { NotificationService } from '../../../core/services/notification.service';
 

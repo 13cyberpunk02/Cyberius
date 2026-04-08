@@ -11,7 +11,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import {
   faCheck,
   faExclamationTriangle,
@@ -22,7 +22,7 @@ import {
   faSpinner,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
-import { ToastService } from '../../../core/services/toast.service';
+import { ToastService } from '../../../../core/services/toast.service';
 
 interface ChangePasswordForm {
   oldPassword: string;

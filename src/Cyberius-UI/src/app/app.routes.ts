@@ -10,17 +10,17 @@ export const routes: Routes = [
   {
     path: 'forgot-password',
     loadComponent: () =>
-      import('./shared/components/forgot-password/forgot-password').then((m) => m.ForgotPassword),
+      import('./features/auth/forgot-password/forgot-password').then((m) => m.ForgotPassword),
   },
   {
     path: 'reset-password',
     loadComponent: () =>
-      import('./shared/components/reset-password/reset-password').then((m) => m.ResetPassword),
+      import('./features/auth/reset-password/reset-password').then((m) => m.ResetPassword),
   },
   {
     path: 'confirm-email',
     loadComponent: () =>
-      import('./shared/components/confirm-email-component/confirm-email-component').then(
+      import('./features/auth/confirm-email-component/confirm-email-component').then(
         (m) => m.ConfirmEmailComponent,
       ),
   },
@@ -38,7 +38,7 @@ export const routes: Routes = [
   {
     path: 'posts/drafts',
     canActivate: [authGuard],
-    loadComponent: () => import('./shared/components/drafts/drafts').then((m) => m.Drafts),
+    loadComponent: () => import('./features/posts/pages/drafts/drafts').then((m) => m.Drafts),
   },
   {
     path: 'posts/:slug/edit',
@@ -54,7 +54,7 @@ export const routes: Routes = [
   {
     path: 'users/:userId',
     loadComponent: () =>
-      import('./shared/components/user-profile/user-profile').then((m) => m.UserProfileComponent),
+      import('./features/users/pages/user-profile/user-profile').then((m) => m.UserProfileComponent),
   },
   {
     path: 'admin/categories',
@@ -69,11 +69,11 @@ export const routes: Routes = [
   },
   {
     path: 'about',
-    loadComponent: () => import('./shared/components/about-me/about-me').then((m) => m.AboutMe),
+    loadComponent: () => import('./features/about-me/about-me').then((m) => m.AboutMe),
   },
   {
     path: 'saved',
-    loadComponent: () => import('./features/posts/components/saved/saved').then((m) => m.Saved),
+    loadComponent: () => import('./features/saved/saved').then((m) => m.Saved),
   },
   {
     path: 'profile',
@@ -82,6 +82,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    loadComponent: () => import('./shared/components/not-found/not-found').then((m) => m.NotFound),
+    loadComponent: () => import('./features/not-found/not-found').then((m) => m.NotFound),
   },
 ];

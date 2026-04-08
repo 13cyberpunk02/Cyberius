@@ -1,10 +1,10 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { PostCard } from '../post-card/post-card';
-import { SeoService } from '../../../../core/services/seo.service';
-import { PostSummary } from '../../../../core/models/post.model';
-import { BookmarkService } from '../../../../core/services/bookmarks.service';
+import { PostCard } from '../posts/components/post-card/post-card';
+import { SeoService } from '../../core/services/seo.service';
+import { PostSummary } from '../../core/models/post.model';
+import { BookmarkService } from '../../core/services/bookmarks.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faBookmark } from '@fortawesome/free-solid-svg-icons';
 

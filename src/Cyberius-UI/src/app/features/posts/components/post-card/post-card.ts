@@ -4,7 +4,7 @@ import { RouterModule } from '@angular/router';
 import { PostSummary } from '../../../../core/models/post.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faClock, faCommentDots, faEye } from '@fortawesome/free-solid-svg-icons';
+import { faCirclePause, faClock, faCommentDots, faEye } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-post-card',
@@ -47,4 +47,5 @@ export class PostCard {
   protected readonly faClock = faClock;
   protected readonly faEye = faEye;
   protected readonly faCommentDots = faCommentDots;
+  protected readonly faCirclePause = faCirclePause;
 }

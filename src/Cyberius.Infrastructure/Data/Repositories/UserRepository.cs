@@ -44,4 +44,11 @@ public class UserRepository(AppDbContext db) : GenericRepository<User>(db), IUse
 
         return (items, total);
     }
+    
+    public async Task<IReadOnlyList<string?>> GetAllAvatarObjectNamesAsync(
+        CancellationToken ct = default) =>
+        await db.Users
+            .Where(u => u.AvatarObjectName != null)
+            .Select(u => u.AvatarObjectName)
+            .ToListAsync(ct);
 }

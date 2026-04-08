@@ -1,12 +1,16 @@
 using Cyberius.Api.Common;
+using Cyberius.Api.Common.BackgroundServices;
 using Cyberius.Api.Common.Extensions;
 using Cyberius.Api.Hubs;
 using Cyberius.Application;
+using Cyberius.Domain.Options;
 using Cyberius.Infrastructure;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("./Environments/AppEnv.json", optional: true, reloadOnChange: true);
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection(EmailSettings.SectionName));
 builder.Logging.ClearProviders();
 builder.Logging.AddSimpleConsole(options =>
 {
@@ -22,7 +26,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.MapAllServices(builder.Configuration);
-
+builder.Services.AddHostedService<OrphanedFilesCleanupService>();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 var app = builder.Build();

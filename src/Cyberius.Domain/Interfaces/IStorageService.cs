@@ -20,4 +20,10 @@ public interface IStorageService
         CancellationToken ct = default);
     
     string GetPublicUrl(string objectName);
+    
+    /// <summary>Список всех objectName в хранилище</summary>
+    Task<IReadOnlyList<string>> ListAllObjectNamesAsync(CancellationToken ct = default);
+ 
+    /// <summary>Возраст файла (время с момента создания)</summary>
+    Task<TimeSpan> GetObjectAgeAsync(string objectName, CancellationToken ct = default);
 }

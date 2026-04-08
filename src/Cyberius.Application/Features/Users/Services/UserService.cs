@@ -15,7 +15,7 @@ public class UserService(IUnitOfWork uow, IStorageService storage) : IUserServic
             return Errors.BadRequest("ID пользователя не передано");
 
         var user = await uow.Users.GetUserWithRolesByIdAsync(userId, cancellationToken);
-        if (user is null)
+        if (user is null || user.IsDeleted || !user.IsActive)
             return Errors.NotFound(nameof(User), userId.ToString());
         
         var roles = user.UserRoles.Select(ur => ur.Role.Name).ToList();

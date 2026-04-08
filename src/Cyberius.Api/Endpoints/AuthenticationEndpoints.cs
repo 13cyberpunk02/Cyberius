@@ -4,6 +4,8 @@ using Cyberius.Api.Common.Extensions;
 using Cyberius.Api.Common.Filters;
 using Cyberius.Application.Features.Authentication.DTOs;
 using Cyberius.Application.Features.Authentication.Interfaces;
+using Cyberius.Application.Features.Users.DTOs;
+using Cyberius.Application.Features.Users.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cyberius.Api.Endpoints;
@@ -42,6 +44,14 @@ public static class AuthenticationEndpoints
         
         group.MapGet("{userId:guid}", GetPublicProfile)
             .WithSummary("Get public user profile");
+        
+        group.MapPost("forgot-password", ForgotPassword)
+            .WithRequestValidation<ForgotPasswordRequest>()
+            .WithSummary("Send password reset email");
+ 
+        group.MapPost("reset-password", ResetPassword)
+            .WithRequestValidation<ResetPasswordRequest>()
+            .WithSummary("Reset password using token");
         
         return group;
     }
@@ -89,4 +99,27 @@ public static class AuthenticationEndpoints
         [FromRoute] Guid userId,
         IAuthenticationService authService,
         CancellationToken ct) => await authService.GetPublicProfileAsync(userId, ct).ToHttpResponseAsync();
+    
+    private static async Task<IResult> ForgotPassword(
+        [FromBody] ForgotPasswordRequest request,
+        IPasswordResetService service,
+        HttpContext ctx,
+        CancellationToken ct)
+    {
+        // Берём base URL фронтенда из конфига или из Origin заголовка
+        var origin = ctx.Request.Headers.Origin.FirstOrDefault()
+                     ?? "http://localhost:4200";
+ 
+        var result = await service.ForgotPasswordAsync(request.Email, origin, ct);
+        return result.ToHttpResponse();
+    }
+ 
+    private static async Task<IResult> ResetPassword(
+        [FromBody] ResetPasswordRequest request,
+        IPasswordResetService service,
+        CancellationToken ct)
+    {
+        var result = await service.ResetPasswordAsync(request.Token, request.NewPassword, ct);
+        return result.ToHttpResponse();
+    }
 }

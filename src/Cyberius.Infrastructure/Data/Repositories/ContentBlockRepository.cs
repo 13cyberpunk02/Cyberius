@@ -29,4 +29,11 @@ public class ContentBlockRepository(AppDbContext db)
         await _db.ContentBlocks
             .Where(b => b.PostId == postId)
             .ExecuteDeleteAsync(ct);
+    
+    public async Task<IReadOnlyList<string?>> GetAllImageObjectNamesAsync(
+        CancellationToken ct = default) =>
+        await db.ContentBlocks
+            .Where(b => b.ImageUrl != null)
+            .Select(b => b.ImageUrl)
+            .ToListAsync(ct);
 }

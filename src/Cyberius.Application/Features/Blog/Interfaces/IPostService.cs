@@ -38,6 +38,6 @@ public interface IPostService
 
     Task<Result> PublishAsync(Guid postId, Guid currentUserId, CancellationToken ct = default);
     Task<Result> UnpublishAsync(Guid postId, Guid currentUserId, CancellationToken ct = default);
-    Task<Result> DeleteAsync(Guid postId, Guid currentUserId, CancellationToken ct = default);
+    Task<Result> DeleteAsync(Guid postId, Guid currentUserId, bool isPrivileged = false, CancellationToken ct = default);
     Task<Result> ReactAsync(Guid postId, Guid userId, ReactionType type, CancellationToken ct = default);
 }

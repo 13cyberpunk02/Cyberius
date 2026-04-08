@@ -68,4 +68,6 @@ public interface IPostRepository : IGenericRepository<Post>
         CancellationToken ct = default);
     
     Task<int> CountByAuthorAsync(Guid authorId, CancellationToken ct = default);
+    
+    Task<IReadOnlyList<string?>> GetAllCoverObjectNamesAsync(CancellationToken ct = default);
 }

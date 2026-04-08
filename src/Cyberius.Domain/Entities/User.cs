@@ -13,6 +13,7 @@ public class User
     public DateTime JoinedDate { get; set; } = DateTime.UtcNow;
     public bool IsActive { get; set; } = true;
     public bool IsDeleted { get; set; } = false;
+    public bool IsEmailConfirmed { get; set; } = false;
 
     public virtual ICollection<UserRole> UserRoles { get; set; } = [];
     public virtual RefreshToken? RefreshToken { get; set; }

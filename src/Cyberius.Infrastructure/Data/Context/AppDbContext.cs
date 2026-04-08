@@ -19,6 +19,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<CommentReaction> CommentReactions { get; set; }
     public DbSet<ContentBlock> ContentBlocks { get; set; }
     public DbSet<Tag> Tags { get; set; }
+    public DbSet<EmailToken> EmailTokens { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

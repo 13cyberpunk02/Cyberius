@@ -8,6 +8,20 @@ export const routes: Routes = [
     loadComponent: () => import('./features/home/home.component').then((m) => m.HomeComponent),
   },
   {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import('./shared/components/forgot-password/forgot-password').then(
+        (m) => m.ForgotPassword,
+      ),
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./shared/components/reset-password/reset-password').then(
+        (m) => m.ResetPassword,
+      ),
+  },
+  {
     path: 'posts',
     loadComponent: () =>
       import('./features/posts/pages/post-list/post-list').then((m) => m.PostList),
@@ -48,9 +62,7 @@ export const routes: Routes = [
     path: 'admin/users',
     canActivate: [adminGuard],
     loadComponent: () =>
-      import('./features/admin/admin-user/admin-user').then(
-        (m) => m.AdminUserComponent,
-      ),
+      import('./features/admin/admin-user/admin-user').then((m) => m.AdminUserComponent),
   },
   {
     path: 'about',

@@ -253,11 +253,11 @@ public sealed class PostService(IUnitOfWork uow, IStorageService storageService,
     }
 
     public async Task<Result> DeleteAsync(
-        Guid postId, Guid currentUserId, CancellationToken ct = default)
+        Guid postId, Guid currentUserId, bool isPrivileged = false, CancellationToken ct = default)
     {
         var post = await uow.Posts.GetByIdAsync(postId, ct);
         if (post is null) return Errors.Post.NotFound(postId.ToString());
-        if (post.AuthorId != currentUserId) return Errors.Post.NotAuthor();
+        if (post.AuthorId != currentUserId && !isPrivileged) return Errors.Post.NotAuthor();
 
         // Удаляем обложку из Minio
         if (post.CoverImageUrl is not null)

@@ -8,4 +8,6 @@ public interface IUserRepository : IGenericRepository<User>
     Task<User?> GetUserWithRolesByIdAsync(Guid userId, CancellationToken cancellationToken = default);
     Task<(IReadOnlyList<User> Items, int TotalCount)> GetAllPagedAsync(
         int page, int pageSize, string? search, CancellationToken ct = default);
+    
+    Task<IReadOnlyList<string?>> GetAllAvatarObjectNamesAsync(CancellationToken ct = default);
 }

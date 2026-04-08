@@ -58,14 +58,24 @@
 
       @case ('Image') {
         <figure class="my-2">
+          <div
+            class="relative group cursor-zoom-in overflow-hidden rounded-2xl"
+            (click)="openLightbox(getImageUrl(block.imageUrl), block.imageCaption)"
+          >
           <img
             [src]="getImageUrl(block.imageUrl)"
             [alt]="block.imageCaption ?? ''"
-            class="w-full rounded-2xl object-cover shadow-lg"
+            class="w-full object-cover shadow-lg transition-transform duration-300 group-hover:scale-[1.02]"
             loading="lazy"
           />
+            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
+              <div class="opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 rounded-full p-2">
+                <fa-icon [icon]="faMagnifyingGlassPlus" class="text-white" size="lg"/>
+              </div>
+            </div>
+          </div>
           @if (block.imageCaption) {
-            <figcaption class="text-center text-sm text-slate-500 mt-3 italic">
+            <figcaption class="text-center text-xs text-slate-500 mt-2.5 italic leading-relaxed">
               {{ block.imageCaption }}
             </figcaption>
           }
@@ -158,3 +168,32 @@
     }
   }
 </div>
+
+@if (lightboxUrl()) {
+  <div
+    class="fixed inset-0 z-999 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-fadeInUp"
+    (click)="closeLightbox()"
+  >
+    <!-- Кнопка закрыть -->
+    <button
+      (click)="closeLightbox()"
+      class="absolute top-4 right-4 w-10 h-10 cursor-pointer rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors z-10"
+    >
+      <fa-icon [icon]="faXmark" />
+    </button>
+
+    <!-- Изображение -->
+    <div class="max-w-5xl w-full" (click)="$event.stopPropagation()">
+      <img
+        [src]="lightboxUrl()!"
+        [alt]="lightboxCaption() ?? ''"
+        class="w-full max-h-[80vh] object-contain rounded-xl shadow-2xl"
+      />
+      @if (lightboxCaption()) {
+        <p class="text-center text-sm text-slate-400 mt-4 italic">
+          {{ lightboxCaption() }}
+        </p>
+      }
+    </div>
+  </div>
+}

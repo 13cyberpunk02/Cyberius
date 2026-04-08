@@ -9,13 +9,16 @@ using Cyberius.Domain.Shared;
 
 namespace Cyberius.Application.Features.Authentication.Services;
 
-public class AuthenticationService(IUnitOfWork uow, IJwtService jwtService) : IAuthenticationService
+public class AuthenticationService(IUnitOfWork uow, IJwtService jwtService, IEmailConfirmationService emailConfirmation) : IAuthenticationService
 {
     public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
         var user = await uow.Users.GetByEmailAsync(request.Email, cancellationToken);
         if(user is null || !user.IsActive)
             return Errors.NotFound(nameof(User), "");
+        
+        if (!user.IsEmailConfirmed)
+            return Errors.BadRequest("Подтвердите эл. почту. Письмо отправлено при регистрации.");
         
         var isPasswordCorrect = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
         if (!isPasswordCorrect)
@@ -45,8 +48,9 @@ public class AuthenticationService(IUnitOfWork uow, IJwtService jwtService) : IA
         return Result<LoginResponse>.Success(new LoginResponse(accessToken, refreshToken));
     }
 
-    public async Task<Result<LoginResponse>> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<string>> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
     {
+        var origin = "http://localhost:4200";
         var userExists = await uow.Users.GetByEmailAsync(request.Email, cancellationToken);
         if (userExists is not null)
             return Errors.Conflict("Пользователь с такой эл. почтой уже зарегистрирован");
@@ -59,7 +63,8 @@ public class AuthenticationService(IUnitOfWork uow, IJwtService jwtService) : IA
             LastName = request.LastName,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
             DateOfBirth = request.DateOfBirth,
-            JoinedDate = DateTime.UtcNow
+            JoinedDate = DateTime.UtcNow,
+            IsEmailConfirmed = false
         };
 
         await uow.Users.AddAsync(newUser, cancellationToken);
@@ -74,23 +79,9 @@ public class AuthenticationService(IUnitOfWork uow, IJwtService jwtService) : IA
         await uow.UserRoles.AddAsync(userRoleEntity, cancellationToken);
         await uow.SaveChangesAsync(cancellationToken);
 
-        var user = await uow.Users.GetByIdAsync(newUser.UserId, cancellationToken);
-        if (user is null)
-            return Errors.NotFound(nameof(User), newUser.UserId.ToString());
+        await emailConfirmation.SendConfirmationAsync(newUser.UserId, origin, cancellationToken);
         
-        var accessToken = jwtService.GenerateJwtToken(user);
-        var refreshToken = jwtService.GenerateRefreshToken();
-
-        var refreshTokenEntity = new RefreshToken
-        {
-            Token = refreshToken,
-            User = user
-        };
-
-        await uow.RefreshTokens.AddAsync(refreshTokenEntity, cancellationToken);
-        await uow.SaveChangesAsync(cancellationToken);
-        
-        return Result<LoginResponse>.Success(new LoginResponse(accessToken, refreshToken));
+        return Result<string>.Success("Регистрация успешна. Проверьте эл. почту для подтверждения аккаунта.");
     }
 
     public async Task<Result<LoginResponse>> RefreshTokenAsync(RefreshTokenRequest request, CancellationToken cancellationToken = default)
@@ -159,7 +150,7 @@ public class AuthenticationService(IUnitOfWork uow, IJwtService jwtService) : IA
     public async  Task<Result<PublicProfileResponse>> GetPublicProfileAsync(Guid userId, CancellationToken ct = default)
     {
         var user = await uow.Users.GetUserWithRolesByIdAsync(userId, ct);
-        if (user is null) return Errors.NotFound(nameof(User), userId.ToString());
+        if (user is null || user.IsDeleted || !user.IsActive) return Errors.NotFound(nameof(User), userId.ToString());
 
         return new PublicProfileResponse(
             user.UserId,

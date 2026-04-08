@@ -69,9 +69,7 @@
       <!-- Author -->
       @if (post().author.username === 'deleted') {
         <div class="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center">
-          <svg class="w-4 h-4 text-slate-500" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
-          </svg>
+          <fa-icon [icon]="faCirclePause" />
         </div>
       } @else {
         <a [routerLink]="['/users', post().author.id]"

@@ -12,6 +12,8 @@ import {
   faFireBurner,
   faInfoCircle,
   faLightbulb,
+  faMagnifyingGlassPlus,
+  faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 
 interface TableData {
@@ -30,6 +32,21 @@ export class BlockRenderer {
   private auth = inject(AuthService);
 
   copiedId = signal<string | null>(null);
+  lightboxUrl = signal<string | null>(null);
+  lightboxCaption = signal<string | null>(null);
+
+  openLightbox(url: string | null, caption: string | null): void {
+    if (!url) return;
+    this.lightboxUrl.set(url);
+    this.lightboxCaption.set(caption);
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeLightbox(): void {
+    this.lightboxUrl.set(null);
+    this.lightboxCaption.set(null);
+    document.body.style.overflow = '';
+  }
 
   getImageUrl(path: string | null): string | null {
     if (!path) return null;
@@ -83,4 +100,6 @@ export class BlockRenderer {
   protected readonly faFireBurner = faFireBurner;
   protected readonly faLightbulb = faLightbulb;
   protected readonly faInfoCircle = faInfoCircle;
+  protected readonly faMagnifyingGlassPlus = faMagnifyingGlassPlus;
+  protected readonly faXmark = faXmark;
 }

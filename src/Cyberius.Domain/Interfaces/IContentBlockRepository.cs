@@ -18,4 +18,6 @@ public interface IContentBlockRepository: IGenericRepository<ContentBlock>
     Task RemoveAllByPostIdAsync(
         Guid postId,
         CancellationToken ct = default);
+    
+    Task<IReadOnlyList<string?>> GetAllImageObjectNamesAsync(CancellationToken ct = default);
 }

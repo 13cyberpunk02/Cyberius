@@ -240,4 +240,11 @@ public class PostRepository(AppDbContext db)
             .OrderByDescending(p => p.UpdatedAt)
             .AsNoTracking()
             .ToListAsync(ct);
+    
+    public async Task<IReadOnlyList<string?>> GetAllCoverObjectNamesAsync(
+        CancellationToken ct = default) =>
+        await db.Posts
+            .Where(p => p.CoverImageUrl != null)
+            .Select(p => p.CoverImageUrl)
+            .ToListAsync(ct);
 }

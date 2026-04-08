@@ -272,7 +272,8 @@ public static class PostEndpoints
         CancellationToken ct)
     {
         var currentUserId = GetCurrentUserIdRequired(httpContext);
-        var result = await postService.DeleteAsync(id, currentUserId, ct);
+        var isPrivileged = httpContext.User.IsInRole("Admin") || httpContext.User.IsInRole("Manager");
+        var result = await postService.DeleteAsync(id, currentUserId, isPrivileged, ct);
         return result.ToHttpResponse();
     }
 

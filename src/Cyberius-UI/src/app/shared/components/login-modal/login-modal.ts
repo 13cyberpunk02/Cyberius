@@ -25,12 +25,13 @@ import {
 import { FormErrors, LoginRequest } from '../../../core/models/auth.model';
 import { isValid, validateLogin } from '../../../core/validators/auth.validator';
 import { ToastService } from '../../../core/services/toast.service';
+import { RouterLink } from '@angular/router';
 
 type FormStatus = 'idle' | 'loading' | 'error';
 
 @Component({
   selector: 'app-login-modal',
-  imports: [CommonModule, FormsModule, FontAwesomeModule],
+  imports: [CommonModule, FormsModule, FontAwesomeModule, RouterLink],
   templateUrl: './login-modal.html',
   styleUrl: './login-modal.css',
 })
@@ -117,4 +118,6 @@ export class LoginModal implements OnInit, OnDestroy {
   togglePassword(): void {
     this.showPassword.update((v) => !v);
   }
+
+  protected readonly close = close;
 }

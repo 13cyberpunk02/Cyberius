@@ -34,6 +34,7 @@ export class RegisterModal implements OnInit, OnDestroy {
   closed = output<void>();
   success = output<void>();
   openLogin = output<void>();
+  registeredEmail = signal('');
 
   protected readonly faCode = faCode;
   protected readonly faEnvelope = faEnvelope;
@@ -108,6 +109,7 @@ export class RegisterModal implements OnInit, OnDestroy {
     this.auth.register(this.form).subscribe({
       next: () => {
         this.status.set('idle');
+        this.registeredEmail.set(this.form.email);
         this.success.emit();
         this.closed.emit();
       },

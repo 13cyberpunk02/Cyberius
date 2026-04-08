@@ -10,15 +10,18 @@ export const routes: Routes = [
   {
     path: 'forgot-password',
     loadComponent: () =>
-      import('./shared/components/forgot-password/forgot-password').then(
-        (m) => m.ForgotPassword,
-      ),
+      import('./shared/components/forgot-password/forgot-password').then((m) => m.ForgotPassword),
   },
   {
     path: 'reset-password',
     loadComponent: () =>
-      import('./shared/components/reset-password/reset-password').then(
-        (m) => m.ResetPassword,
+      import('./shared/components/reset-password/reset-password').then((m) => m.ResetPassword),
+  },
+  {
+    path: 'confirm-email',
+    loadComponent: () =>
+      import('./shared/components/confirm-email-component/confirm-email-component').then(
+        (m) => m.ConfirmEmailComponent,
       ),
   },
   {

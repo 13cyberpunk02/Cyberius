@@ -184,6 +184,20 @@
 
       </form>
 
+      @if (registeredEmail()) {
+        <div class="text-center py-6">
+          <div class="w-16 h-16 rounded-full bg-sky-500/15 flex items-center justify-center mx-auto mb-4">
+            <fa-icon [icon]="faEnvelope" class="text-sky-400" />
+          </div>
+          <h3 class="text-lg font-bold heading-text mb-2">Проверьте почту</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">
+            Мы отправили письмо на <strong class="text-slate-200">{{ registeredEmail() }}</strong>.
+            Перейдите по ссылке в письме чтобы активировать аккаунт.
+          </p>
+          <p class="text-slate-500 text-xs mt-3">Письмо действительно 24 часа</p>
+        </div>
+      }
+
       <!-- Switch to Login -->
       <div class="mt-6 pt-5 border-t border-white/10 text-center">
         <p class="text-sm text-slate-400">

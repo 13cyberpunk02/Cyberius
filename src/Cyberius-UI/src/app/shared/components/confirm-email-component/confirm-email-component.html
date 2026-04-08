@@ -1,0 +1,53 @@
+<div class="min-h-screen flex items-center justify-center px-4 py-16">
+  <div class="w-full max-w-md">
+
+    <div class="text-center mb-8">
+      <div class="logo-icon w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <fa-icon [icon]="faEnvelope" class="text-white" size="2xl" />
+      </div>
+      <h1 class="text-2xl font-black heading-text">Подтверждение эл. почты</h1>
+    </div>
+
+    <div class="glass-card rounded-2xl p-8 text-center">
+
+      @switch (status()) {
+        @case ('loading') {
+          <div class="py-8">
+            <fa-icon [icon]="faSpinner" animation="spin-pulse" class="text-sky-400 mx-auto mb-4"/>
+            <p class="text-slate-400">Подтверждаем вашу эл. почту ...</p>
+          </div>
+        }
+
+        @case ('success') {
+          <div class="py-4">
+            <div class="w-16 h-16 rounded-full bg-emerald-500/15 flex items-center justify-center mx-auto mb-4">
+              <fa-icon [icon]="faCheckCircle" class="text-emerald-400" size="2xl" />
+            </div>
+            <h2 class="text-lg font-bold heading-text mb-2">Эл. почта подтверждена!</h2>
+            <p class="text-slate-400 text-sm mb-6">
+              Ваш аккаунт активирован. Теперь вы можете войти.
+            </p>
+            <a routerLink="/"
+               class="btn-primary inline-block px-6 py-2.5 rounded-xl font-semibold text-white transition-all hover:scale-105">
+              Войти на сайт
+            </a>
+          </div>
+        }
+
+        @case ('error') {
+          <div class="py-4">
+            <div class="w-16 h-16 rounded-full bg-rose-500/15 flex items-center justify-center mx-auto mb-4">
+              <fa-icon [icon]="faXmark" class="text-rose-400" />
+            </div>
+            <h2 class="text-lg font-bold heading-text mb-2">Ошибка подтверждения</h2>
+            <p class="text-rose-400 text-sm mb-6">{{ error() }}</p>
+            <a routerLink="/forgot-password"
+               class="text-sm text-sky-400 hover:underline">
+              Запросить новую ссылку
+            </a>
+          </div>
+        }
+      }
+    </div>
+  </div>
+</div>

@@ -53,6 +53,12 @@ public static class AuthenticationEndpoints
             .WithRequestValidation<ResetPasswordRequest>()
             .WithSummary("Reset password using token");
         
+        group.MapGet("confirm-email", ConfirmEmail)
+            .WithSummary("Confirm email by token");
+ 
+        group.MapPost("resend-confirmation", ResendConfirmation)
+            .WithSummary("Resend confirmation email");
+        
         return group;
     }
 
@@ -120,6 +126,28 @@ public static class AuthenticationEndpoints
         CancellationToken ct)
     {
         var result = await service.ResetPasswordAsync(request.Token, request.NewPassword, ct);
+        return result.ToHttpResponse();
+    }
+    
+    private static async Task<IResult> ConfirmEmail(
+        [FromQuery] string token,
+        IEmailConfirmationService service,
+        CancellationToken ct)
+    {
+        var result = await service.ConfirmEmailAsync(token, ct);
+        return result.ToHttpResponse();
+    }
+ 
+    private static async Task<IResult> ResendConfirmation(
+        [FromBody] ResendConfirmationRequest request,
+        IEmailConfirmationService service,
+        HttpContext ctx,
+        CancellationToken ct)
+    {
+        var origin = ctx.Request.Headers.Origin.FirstOrDefault()
+                     ?? "http://localhost:4200";
+ 
+        var result = await service.SendConfirmationAsync(request.UserId, origin, ct);
         return result.ToHttpResponse();
     }
 }

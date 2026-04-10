@@ -36,7 +36,7 @@
             <!-- Copy button -->
             <button
               (click)="copyCode(block.id, block.content ?? '')"
-              class="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors"
+              class="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
               [title]="'Скопировать код'"
             >
               @if (copiedId() === block.id) {
@@ -65,7 +65,8 @@
           <img
             [src]="getImageUrl(block.imageUrl)"
             [alt]="block.imageCaption ?? ''"
-            class="w-full object-cover shadow-lg transition-transform duration-300 group-hover:scale-[1.02]"
+            class="w-full object-contain shadow-lg transition-transform duration-300 group-hover:scale-[1.02]"
+            style="max-height: 560px;"
             loading="lazy"
           />
             <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">

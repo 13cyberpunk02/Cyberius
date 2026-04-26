@@ -5,11 +5,13 @@ using Cyberius.Application.Features.Authentication.Interfaces;
 using Cyberius.Application.Features.JWT;
 using Cyberius.Domain.Entities;
 using Cyberius.Domain.Interfaces;
+using Cyberius.Domain.Options;
 using Cyberius.Domain.Shared;
+using Microsoft.Extensions.Options;
 
 namespace Cyberius.Application.Features.Authentication.Services;
 
-public class AuthenticationService(IUnitOfWork uow, IJwtService jwtService, IEmailConfirmationService emailConfirmation) : IAuthenticationService
+public class AuthenticationService(IUnitOfWork uow, IJwtService jwtService, IEmailConfirmationService emailConfirmation, IOptions<JwtOptions> jwtOptions) : IAuthenticationService
 {
     public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
@@ -22,7 +24,7 @@ public class AuthenticationService(IUnitOfWork uow, IJwtService jwtService, IEma
         
         var isPasswordCorrect = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
         if (!isPasswordCorrect)
-            return Errors.Unauthorized("Введены неверные данные");
+            return Errors.BadRequest("Введены неверные данные");
         
         var accessToken = jwtService.GenerateJwtToken(user);
         var refreshToken = jwtService.GenerateRefreshToken();
@@ -50,7 +52,6 @@ public class AuthenticationService(IUnitOfWork uow, IJwtService jwtService, IEma
 
     public async Task<Result<string>> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
     {
-        var origin = "http://localhost:4200";
         var userExists = await uow.Users.GetByEmailAsync(request.Email, cancellationToken);
         if (userExists is not null)
             return Errors.Conflict("Пользователь с такой эл. почтой уже зарегистрирован");
@@ -79,7 +80,7 @@ public class AuthenticationService(IUnitOfWork uow, IJwtService jwtService, IEma
         await uow.UserRoles.AddAsync(userRoleEntity, cancellationToken);
         await uow.SaveChangesAsync(cancellationToken);
 
-        await emailConfirmation.SendConfirmationAsync(newUser.UserId, origin, cancellationToken);
+        await emailConfirmation.SendConfirmationAsync(newUser.UserId, jwtOptions.Value.Issuer, cancellationToken);
         
         return Result<string>.Success("Регистрация успешна. Проверьте эл. почту для подтверждения аккаунта.");
     }

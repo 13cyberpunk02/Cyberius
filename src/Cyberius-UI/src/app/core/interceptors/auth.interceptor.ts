@@ -6,15 +6,29 @@ import {
   HttpContextToken,
 } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { catchError, switchMap, throwError, Observable } from 'rxjs';
+import { catchError, switchMap, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
-
-const AUTH_URLS = ['/auth/login', '/auth/register', '/auth/refresh-token'];
+import { ToastService } from '../services/toast.service';
+import { getApiError } from '../helpers/api-error.helper';
 
 const IS_RETRY = new HttpContextToken<boolean>(() => false);
 
+const SILENT_URLS = [
+  '/auth/login',
+  '/auth/register',
+  '/auth/refresh-token',
+  '/auth/forgot-password',
+  '/auth/reset-password',
+  '/auth/confirm-email',
+  '/newsletter/subscribe',
+];
+
 function isAuthUrl(url: string): boolean {
-  return AUTH_URLS.some((path) => url.includes(path));
+  return ['/auth/login', '/auth/register', '/auth/refresh-token'].some((p) => url.includes(p));
+}
+
+function isSilentUrl(url: string): boolean {
+  return SILENT_URLS.some((p) => url.includes(p));
 }
 
 function addBearer(req: HttpRequest<unknown>, token: string): HttpRequest<unknown> {
@@ -23,17 +37,13 @@ function addBearer(req: HttpRequest<unknown>, token: string): HttpRequest<unknow
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
+  const toast = inject(ToastService);
 
-  // Auth endpoints — без токена
   if (isAuthUrl(req.url)) return next(req);
-
-  // Не авторизован — просто шлём без токена
   if (!auth.isAuthenticated()) return next(req);
 
-  // Уже повторный запрос после refresh — не делаем ещё один refresh
   const isRetry = req.context.get(IS_RETRY);
 
-  // Access token истёк/истекает — нужен проактивный refresh
   if (!isRetry && auth.isAccessTokenExpiredOrExpiring()) {
     if (auth.isRefreshTokenExpired()) {
       auth.clearState();
@@ -50,46 +60,47 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           : req;
         return next(retryReq);
       }),
-      catchError((err) => {
-        if (err?.status !== 0) {
-          // Сетевые ошибки не разлогиниваем — refresh() сам обработает 401/403
-        }
-        return throwError(() => err);
-      }),
+      catchError((err) => throwError(() => err)),
     );
   }
 
-  // Токен валиден — отправляем с токеном
   const token = auth.accessToken();
   const authedReq = token ? addBearer(req, token) : req;
 
   return next(authedReq).pipe(
     catchError((err: HttpErrorResponse) => {
-      // Не 401, не авторизован, auth endpoint, или уже retry — пробрасываем
-      if (err.status !== 401 || !auth.isAuthenticated() || isAuthUrl(req.url) || isRetry) {
-        return throwError(() => err);
+      // 401 — пробуем refresh
+      if (err.status === 401 && !isRetry && !isAuthUrl(req.url) && !auth.isRefreshTokenExpired()) {
+        return auth.refresh().pipe(
+          switchMap(() => {
+            const newToken = auth.accessToken();
+            const retryReq = newToken
+              ? addBearer(req, newToken).clone({
+                  context: new HttpContext().set(IS_RETRY, true),
+                })
+              : req;
+            return next(retryReq);
+          }),
+          catchError((refreshErr) => throwError(() => refreshErr)),
+        );
       }
 
-      // Нет refresh token — сессия мертва
-      if (auth.isRefreshTokenExpired()) {
-        auth.clearState();
-        return throwError(() => err);
+      // Глобальный toast для всех ошибок кроме silent URLs
+      if (!isSilentUrl(req.url)) {
+        const message = getApiError(err);
+
+        if (err.status === 403) {
+          toast.error('Доступ запрещён');
+        } else if (err.status === 404) {
+          // 404 обычно не показываем — компонент сам обработает
+        } else if (err.status >= 500) {
+          toast.error('Ошибка сервера. Попробуйте позже');
+        } else if (err.status !== 401) {
+          toast.error(message);
+        }
       }
 
-      // 401 на обычном запросе — пробуем refresh ОДИН раз
-      return auth.refresh().pipe(
-        switchMap(() => {
-          const newToken = auth.accessToken();
-          // Помечаем запрос как retry чтобы не зациклиться
-          const retryReq = newToken
-            ? addBearer(req, newToken).clone({
-                context: new HttpContext().set(IS_RETRY, true),
-              })
-            : req;
-          return next(retryReq);
-        }),
-        catchError((refreshErr) => throwError(() => refreshErr)),
-      );
+      return throwError(() => err);
     }),
   );
 };

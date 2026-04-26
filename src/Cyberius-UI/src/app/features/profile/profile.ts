@@ -25,6 +25,8 @@ import { Router } from '@angular/router';
 import { ConfirmDialog, ConfirmDialogConfig } from '../../shared/components/confirm-dialog/confirm-dialog';
 import { ToastService } from '../../core/services/toast.service';
 import { AuthorStatsComponent } from './components/author-stats/author-stats';
+import { environment } from '../../../environments/environment';
+import { getApiError } from '../../core/helpers/api-error.helper';
 
 interface UpdateProfileForm {
   firstName: string;
@@ -35,7 +37,7 @@ interface UpdateProfileForm {
 
 type SaveStatus = 'idle' | 'saving' | 'success' | 'error';
 
-const FILES_BASE_URL = 'http://localhost:5273/api/files/';
+const FILES_BASE_URL = environment.filesBaseUrl;
 
 @Component({
   selector: 'app-profile',
@@ -195,9 +197,7 @@ export class Profile implements OnInit {
       },
       error: (err) => {
         this.saveStatus.set('idle');
-        this.toast.error(
-          err?.error?.message ?? err?.error?.title ?? 'Не удалось сохранить изменения',
-        );
+        this.toast.error(getApiError(err, 'Не удалось сохранить изменения'));
       },
     });
   }
@@ -216,7 +216,7 @@ export class Profile implements OnInit {
       error: (err) => {
         this.deleteLoading.set(false);
         this.showDeleteConfirm.set(false);
-        console.error('Delete account failed', err);
+        this.toast.error(getApiError(err, 'Не удалось удалить аккаунт.'))
       },
     });
   }

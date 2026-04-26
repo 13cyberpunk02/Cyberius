@@ -19,6 +19,8 @@ import {
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { isValid, validateRegister } from '../../../core/validators/auth.validator';
+import { ToastService } from '../../../core/services/toast.service';
+import { getApiError } from '../../../core/helpers/api-error.helper';
 
 type FormStatus = 'idle' | 'loading' | 'error';
 
@@ -30,7 +32,7 @@ type FormStatus = 'idle' | 'loading' | 'error';
 })
 export class RegisterModal implements OnInit, OnDestroy {
   private auth = inject(AuthService);
-
+  private toast = inject(ToastService);
   closed = output<void>();
   success = output<void>();
   openLogin = output<void>();
@@ -110,18 +112,13 @@ export class RegisterModal implements OnInit, OnDestroy {
       next: () => {
         this.status.set('idle');
         this.registeredEmail.set(this.form.email);
+        this.toast.success(`Проверьте почту ${this.form.email}, там ссылка для подтверждения аккаунта.`);
         this.success.emit();
         this.closed.emit();
       },
       error: (err) => {
         this.status.set('error');
-        this.serverError.set(
-          err?.status === 409
-            ? 'Пользователь с таким email уже существует'
-            : err?.status === 0
-              ? 'Нет соединения с сервером'
-              : (err?.error?.message ?? 'Произошла ошибка, попробуйте ещё раз'),
-        );
+        this.serverError.set(getApiError(err,"Ошибка регистрации"));
       },
     });
   }

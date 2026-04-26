@@ -12,6 +12,7 @@ import {
   AuthState,
 } from '../models/auth.model';
 import { ToastService } from './toast.service';
+import { environment } from '../../../environments/environment';
 
 const ACCESS_TOKEN_KEY = 'blog_access_token';
 const REFRESH_TOKEN_KEY = 'blog_refresh_token';
@@ -26,8 +27,8 @@ export class AuthService {
   private router = inject(Router);
   private toast = inject(ToastService);
 
-  readonly API = 'http://localhost:5273/api';
-  readonly FILES_BASE = 'http://localhost:5273/api/files/';
+  readonly API = environment.apiUrl;
+  readonly FILES_BASE = environment.filesBaseUrl;
 
   readonly avatarUrl = computed(() => {
     const path = this.state().profile?.avatarUrl;
@@ -92,10 +93,8 @@ export class AuthService {
   }
 
   // ── Register ───────────────────────────────────────────────────
-  register(body: RegisterRequest): Observable<UserProfile> {
-    return this.http.post<AuthResponse>(`${this.API}/auth/register`, body).pipe(
-      tap((res) => this.setTokens(res.accessToken, res.refreshToken)),
-      switchMap(() => this.fetchMe()),
+  register(body: RegisterRequest): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.API}/auth/register`, body).pipe(
       catchError((err) => throwError(() => err)),
     );
   }

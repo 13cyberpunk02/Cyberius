@@ -9,6 +9,7 @@ import { SeoService } from '../../../../core/services/seo.service';
 import { PostSummary } from '../../../../core/models/post.model';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faFilePen, faPen, faPlus, faRocket, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { getApiError } from '../../../../core/helpers/api-error.helper';
 
 @Component({
   selector: 'app-drafts',
@@ -49,7 +50,10 @@ export class Drafts implements OnInit {
         this.drafts.set(res.items);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err) => {
+        this.toast.error(getApiError(err));
+        this.loading.set(false);
+      }
     });
   }
 
@@ -62,7 +66,7 @@ export class Drafts implements OnInit {
         this.publishing.set(null);
       },
       error: (err) => {
-        this.toast.error(err?.error?.message ?? 'Не удалось опубликовать');
+        this.toast.error(getApiError(err, 'Не удалось опубликовать'));
         this.publishing.set(null);
       },
     });
@@ -80,7 +84,7 @@ export class Drafts implements OnInit {
         this.deleting.set(false);
       },
       error: (err) => {
-        this.toast.error(err?.error?.message ?? 'Ошибка при удалении');
+        this.toast.error(getApiError(err, 'Ошибка при удалении'));
         this.deleteId.set(null);
         this.deleting.set(false);
       },

@@ -17,12 +17,12 @@ import {
   faAngleLeft,
   faAngleRight,
   faBan,
-  faCheck,
   faCheckCircle,
   faEye,
   faSpinner,
   faTrashCan,
 } from '@fortawesome/free-solid-svg-icons';
+import { getApiError } from '../../../core/helpers/api-error.helper';
 
 @Component({
   selector: 'app-admin-user',
@@ -35,6 +35,15 @@ export class AdminUserComponent implements OnInit {
   private toast = inject(ToastService);
   private seo = inject(SeoService);
   readonly auth = inject(AuthService);
+
+  protected readonly faSpinner = faSpinner;
+  protected readonly faAngleDown = faAngleDown;
+  protected readonly faEye = faEye;
+  protected readonly faBan = faBan;
+  protected readonly faCheckCircle = faCheckCircle;
+  protected readonly faTrashCan = faTrashCan;
+  protected readonly faAngleLeft = faAngleLeft;
+  protected readonly faAngleRight = faAngleRight;
 
   users = signal<AdminUser[]>([]);
   loading = signal(true);
@@ -135,8 +144,8 @@ export class AdminUserComponent implements OnInit {
         );
         this.togglingId.set(null);
       },
-      error: () => {
-        this.toast.error('Ошибка');
+      error: (err) => {
+        this.toast.error(getApiError(err, 'Ошибка'));
         this.togglingId.set(null);
       },
     });
@@ -154,7 +163,7 @@ export class AdminUserComponent implements OnInit {
         this.changingRole.set(null);
       },
       error: (err) => {
-        this.toast.error(err?.error?.detail ?? 'Ошибка');
+        this.toast.error(getApiError(err, 'Ошибка'));
         this.changingRole.set(null);
       },
     });
@@ -173,7 +182,7 @@ export class AdminUserComponent implements OnInit {
         this.deleting.set(false);
       },
       error: (err) => {
-        this.toast.error(err?.error?.detail ?? 'Ошибка удаления');
+        this.toast.error(getApiError(err, 'Ошибка удаления'));
         this.deleteTarget.set(null);
         this.deleting.set(false);
       },
@@ -202,14 +211,4 @@ export class AdminUserComponent implements OnInit {
   isCurrentUser(userId: string): boolean {
     return this.auth.user()?.id === userId;
   }
-
-  protected readonly faSpinner = faSpinner;
-  protected readonly faAngleDown = faAngleDown;
-  protected readonly faEye = faEye;
-  protected readonly faBan = faBan;
-  protected readonly faCheckCircle = faCheckCircle;
-  protected readonly faTrashCan = faTrashCan;
-  protected readonly faAngleLeft = faAngleLeft;
-  protected readonly faAngleRight = faAngleRight;
-  protected readonly faCheck = faCheck;
 }

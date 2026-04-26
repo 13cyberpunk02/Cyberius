@@ -13,6 +13,8 @@ import {
   faTrashCan,
 } from '@fortawesome/free-solid-svg-icons';
 import { RouterLink } from '@angular/router';
+import { ToastService } from '../../../../core/services/toast.service';
+import { getApiError } from '../../../../core/helpers/api-error.helper';
 
 const REACTION_EMOJI: Record<string, string> = {
   Like: '👍',
@@ -36,6 +38,7 @@ export class Comments implements OnInit {
 
   private commentService = inject(CommentService);
   readonly auth = inject(AuthService);
+  private toast = inject(ToastService);
 
   paged = signal<PagedComments | null>(null);
   loading = signal(true);
@@ -121,7 +124,10 @@ export class Comments implements OnInit {
           this.newText.set('');
           this.submitting.set(false);
         },
-        error: () => this.submitting.set(false),
+        error: (err) => {
+          this.toast.error(getApiError(err));
+          this.submitting.set(false);
+        }
       });
   }
 
@@ -169,7 +175,10 @@ export class Comments implements OnInit {
           this.cancelReply();
           this.submitting.set(false);
         },
-        error: () => this.submitting.set(false),
+        error: (err) => {
+          this.toast.error(getApiError(err));
+          this.submitting.set(false);
+        }
       });
   }
 
@@ -204,7 +213,10 @@ export class Comments implements OnInit {
         this.cancelEdit();
         this.submitting.set(false);
       },
-      error: () => this.submitting.set(false),
+      error: (err) => {
+        this.toast.error(getApiError(err));
+        this.submitting.set(false);
+      },
     });
   }
 

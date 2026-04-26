@@ -1,8 +1,10 @@
 using System.Net;
-using System.Net.Mail;
 using Cyberius.Application.Features.Email.Interfaces;
 using Cyberius.Domain.Options;
+using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.Options;
+using MimeKit;
 
 namespace Cyberius.Application.Features.Email.Services;
 
@@ -13,43 +15,46 @@ public sealed class GmailEmailService(IOptions<EmailSettings> options) : IEmailS
     public async Task SendPasswordResetAsync(
         string toEmail, string toName, string resetLink, CancellationToken ct = default)
     {
-        var subject = "Сброс пароля — Cyberius";
-        var body = BuildResetEmailHtml(toName, resetLink);
-
-        await SendAsync(toEmail, toName, subject, body, ct);
+        await SendAsync(toEmail, toName,
+            "Подтверждение эл. почты — Cyberius",
+            BuildConfirmEmailHtml(toName, resetLink), ct);
     }
 
     private async Task SendAsync(
         string toEmail, string toName, string subject, string body, CancellationToken ct)
     {
-        using var client = new SmtpClient(_settings.Host, _settings.Port)
-        {
-            EnableSsl = _settings.UseSsl,
-            Credentials = new NetworkCredential(_settings.UserName, _settings.Password),
-        };
-
-        using var message = new MailMessage();
-        message.From = new MailAddress(_settings.From, _settings.DisplayName);
+        var message = new MimeMessage();
+        message.From.Add(new MailboxAddress(_settings.DisplayName, _settings.From));
+        message.To.Add(new MailboxAddress(toName, toEmail));
         message.Subject = subject;
-        message.Body = body;
-        message.IsBodyHtml = true;
-        message.To.Add(new MailAddress(toEmail, toName));
+        message.Body = new TextPart("html") { Text = body };
 
-        await client.SendMailAsync(message, ct);
+        using var client = new SmtpClient();
+        client.LocalEndPoint = new IPEndPoint(IPAddress.Any, 0);
+        
+        await client.ConnectAsync(
+            _settings.Host,
+            _settings.Port,
+            SecureSocketOptions.StartTls,
+            ct);
+
+        await client.AuthenticateAsync(_settings.UserName, _settings.Password, ct);
+        await client.SendAsync(message, ct);
+        await client.DisconnectAsync(true, ct);
     }
 
     public async Task SendEmailConfirmationAsync(
         string toEmail, string toName, string confirmLink, CancellationToken ct = default)
     {
-        var subject = "Подтверждение email — Cyberius";
-        var body = BuildConfirmEmailHtml(toName, confirmLink);
-        await SendAsync(toEmail, toName, subject, body, ct);
+        await SendAsync(toEmail, toName,
+            "Подтверждение эл. почты — Cyberius",
+            BuildConfirmEmailHtml(toName, confirmLink), ct);
     }
 
     public async Task SendSubscriptionConfirmationAsync(
         string toEmail, string unsubToken, CancellationToken ct = default)
     {
-        var unsubLink = $"http://localhost:4200/unsubscribe?token={unsubToken}";
+        var unsubLink = $"/unsubscribe?token={unsubToken}";
         var body = $"""
                     <!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"/></head>
                     <body style="margin:0;padding:0;background:#0a0f1e;font-family:'Segoe UI',Arial,sans-serif;">
@@ -96,7 +101,7 @@ public sealed class GmailEmailService(IOptions<EmailSettings> options) : IEmailS
         string toEmail, string subject, string htmlBody,
         string unsubToken, CancellationToken ct = default)
     {
-        var unsubLink = $"http://localhost:4200/unsubscribe?token={unsubToken}";
+        var unsubLink = $"http://localhost:8080/unsubscribe?token={unsubToken}";
         var fullBody = htmlBody.Replace("{{UNSUB_LINK}}", unsubLink);
 
         await SendAsync(toEmail, toEmail, subject, fullBody, ct);
@@ -124,7 +129,7 @@ public sealed class GmailEmailService(IOptions<EmailSettings> options) : IEmailS
                          Привет, <strong>{name}</strong>!
                        </p>
                        <p style="margin:0 0 24px;color:#94a3b8;font-size:14px;line-height:1.6;">
-                         Спасибо за регистрацию на Cyberius. Подтвердите ваш email чтобы начать пользоваться сайтом.
+                         Спасибо за регистрацию на Cyberius. Подтвердите ваш эл. почту чтобы начать пользоваться сайтом.
                          Ссылка действительна <strong style="color:#e2e8f0;">24 часа</strong>.
                        </p>
                        <div style="text-align:center;margin:32px 0;">
@@ -132,7 +137,7 @@ public sealed class GmailEmailService(IOptions<EmailSettings> options) : IEmailS
                            style="display:inline-block;background:linear-gradient(135deg,#0ca2e7,#818cf8);
                                   color:#fff;text-decoration:none;padding:14px 32px;
                                   border-radius:12px;font-size:15px;font-weight:700;">
-                           Подтвердить email
+                           Подтвердить эл. почту
                          </a>
                        </div>
                        <p style="margin:0;color:#64748b;font-size:12px;line-height:1.6;">

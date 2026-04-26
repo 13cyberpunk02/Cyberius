@@ -25,6 +25,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { RouterLink } from '@angular/router';
+import { getApiError } from '../../../core/helpers/api-error.helper';
 
 type FormStatus = 'idle' | 'loading' | 'error';
 
@@ -93,13 +94,7 @@ export class LoginModal implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.status.set('error');
-        this.serverError.set(
-          err?.status === 401
-            ? 'Неверный email или пароль'
-            : err?.status === 0
-              ? 'Нет соединения с сервером'
-              : (err?.error?.message ?? 'Произошла ошибка, попробуйте ещё раз'),
-        );
+        this.serverError.set(getApiError(err, "Ошибка входа"));
       },
     });
   }

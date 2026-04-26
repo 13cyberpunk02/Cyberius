@@ -17,6 +17,8 @@ import {
   faSpinner,
 } from '@fortawesome/free-solid-svg-icons';
 import { faBlogger } from '@fortawesome/free-brands-svg-icons';
+import { ToastService } from '../../../../core/services/toast.service';
+import { getApiError } from '../../../../core/helpers/api-error.helper';
 
 @Component({
   selector: 'app-user-profile',
@@ -30,6 +32,12 @@ export class UserProfileComponent implements OnInit {
   private auth = inject(AuthService);
   private http = inject(HttpClient);
   private seo = inject(SeoService);
+  private toast = inject(ToastService);
+
+  protected readonly faCalendar = faCalendar;
+  protected readonly faBlogger = faBlogger;
+  protected readonly faEnvelopesBulk = faEnvelopesBulk;
+  protected readonly faSpinner = faSpinner;
 
   profile = signal<UserProfile | null>(null);
   posts = signal<PostSummary[]>([]);
@@ -64,9 +72,10 @@ export class UserProfileComponent implements OnInit {
         });
         this.loadPosts(false);
       },
-      error: () => {
+      error: (err) => {
         this.loading.set(false);
         this.notFound.set(true);
+        this.toast.error(getApiError(err));
       },
     });
   }
@@ -87,9 +96,10 @@ export class UserProfileComponent implements OnInit {
           this.loading.set(false);
           this.loadingMore.set(false);
         },
-        error: () => {
+        error: (err) => {
           this.loading.set(false);
           this.loadingMore.set(false);
+          this.toast.error(err);
         },
       });
   }
@@ -107,11 +117,4 @@ export class UserProfileComponent implements OnInit {
       year: 'numeric',
     }).format(new Date(dateStr));
   }
-
-  protected readonly faCalendar = faCalendar;
-  protected readonly faBlogger = faBlogger;
-  protected readonly faArrowLeft = faArrowLeft;
-  protected readonly faArrowRight = faArrowRight;
-  protected readonly faEnvelopesBulk = faEnvelopesBulk;
-  protected readonly faSpinner = faSpinner;
 }

@@ -5,6 +5,8 @@ using Cyberius.Api.Hubs;
 using Cyberius.Application;
 using Cyberius.Domain.Options;
 using Cyberius.Infrastructure;
+using Cyberius.Infrastructure.Data.Context;
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -47,6 +49,17 @@ app.UseAuthorization();
 app.UseBlogRateLimiting();
 app.UseOutputCache();
 app.MapHub<NotificationHub>("/hubs/notifications");
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.MapAllEndpoints();
 
+app.MapFallbackToFile("index.html");
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 app.Run();

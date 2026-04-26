@@ -12,6 +12,7 @@ import {
   faLock,
   faSpinner,
 } from '@fortawesome/free-solid-svg-icons';
+import { getApiError } from '../../../core/helpers/api-error.helper';
 
 @Component({
   selector: 'app-reset-password',
@@ -68,7 +69,7 @@ export class ResetPassword implements OnInit {
           this.loading.set(false);
         },
         error: (err) => {
-          this.error.set(err?.error?.detail ?? 'Ссылка недействительна или истекла');
+          this.error.set(getApiError(err, 'Ссылка недействительна или истекла'));
           this.loading.set(false);
         },
       });

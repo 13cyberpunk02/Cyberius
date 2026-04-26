@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
+import { environment } from '../../../environments/environment';
 
 export interface SeoMeta {
   title: string;
@@ -12,7 +13,7 @@ export interface SeoMeta {
 }
 
 const SITE_NAME = 'Cyberius';
-const BASE_URL = 'http://localhost:4200';
+const BASE_URL = 'https://cyberius.site';
 const DEFAULT_IMAGE = `${BASE_URL}/icons/og-default.png`;
 
 @Injectable({ providedIn: 'root' })

@@ -52,6 +52,7 @@ import {
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { ToastService } from '../../../../core/services/toast.service';
+import { getApiError } from '../../../../core/helpers/api-error.helper';
 
 interface EditorBlock extends CreateContentBlockRequest {
   id: string; // локальный id для track-by
@@ -350,7 +351,10 @@ export class PostEditor implements OnInit, OnDestroy {
           this.coverImageUrl.set(res.url);
           this.uploadingCover.set(false);
         },
-        error: () => this.uploadingCover.set(false),
+        error: (err) => {
+          this.toast.error(getApiError(err));
+          this.uploadingCover.set(false);
+        }
       });
   }
 
@@ -541,7 +545,10 @@ export class PostEditor implements OnInit, OnDestroy {
               this.clearDraft();
               this.router.navigate(['/posts', post.slug]);
             },
-            error: () => this.router.navigate(['/posts', post.slug]),
+            error: (err) => {
+              this.toast.error(getApiError(err));
+              this.router.navigate(['/posts', post.slug]);
+            },
           });
         } else {
           this.saveStatus.set('idle');
@@ -554,7 +561,7 @@ export class PostEditor implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.saveStatus.set('error');
-        this.toast.error(err?.error?.message ?? 'Не удалось сохранить статью');
+        this.toast.error(getApiError(err, 'Не удалось сохранить статью'));
       },
     });
   }

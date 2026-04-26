@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../core/services/auth.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faCheckCircle, faEnvelope, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { getApiError } from '../../../../core/helpers/api-error.helper';
 
 @Component({
   selector: 'app-newsletter-component',
@@ -41,7 +42,7 @@ export class NewsletterComponent {
         this.loading.set(false);
       },
       error: (err) => {
-        this.error.set(err?.error?.detail ?? 'Не удалось подписаться. Попробуйте позже.');
+        this.error.set(getApiError(err, 'Не удалось подписаться. Попробуйте позже.'));
         this.loading.set(false);
       },
     });

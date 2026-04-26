@@ -18,6 +18,8 @@ import {
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { SeoService } from '../../../../core/services/seo.service';
+import { ToastService } from '../../../../core/services/toast.service';
+import { getApiError } from '../../../../core/helpers/api-error.helper';
 
 @Component({
   selector: 'app-post-list',
@@ -32,12 +34,14 @@ export class PostList implements OnInit {
   private router = inject(Router);
   readonly auth = inject(AuthService);
   private seo = inject(SeoService);
+  private toast = inject(ToastService);
 
   protected readonly faPlusCircle = faPlusCircle;
   protected readonly faMagnifyingGlass = faMagnifyingGlass;
   protected readonly faAngleLeft = faAngleLeft;
   protected readonly faAngleRight = faAngleRight;
   protected readonly faXmark = faXmark;
+  protected readonly faPenSquare = faPenSquare;
 
   paged = signal<PagedResponse<PostSummary> | null>(null);
   categories = signal<CategoryResponse[]>([]);
@@ -116,7 +120,10 @@ export class PostList implements OnInit {
         this.paged.set(res);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err) => {
+        this.toast.error(getApiError(err));
+        this.loading.set(false);
+      },
     });
   }
 
@@ -144,6 +151,4 @@ export class PostList implements OnInit {
       queryParamsHandling: 'merge',
     });
   }
-
-  protected readonly faPenSquare = faPenSquare;
 }

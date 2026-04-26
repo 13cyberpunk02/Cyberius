@@ -4,6 +4,7 @@ import { faGithub, faLinkedin, faTelegram } from '@fortawesome/free-brands-svg-i
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faCode } from '@fortawesome/free-solid-svg-icons';
 import { RouterLink } from '@angular/router';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-footer',
@@ -14,6 +15,7 @@ import { RouterLink } from '@angular/router';
 export class Footer {
   currentYear = new Date().getFullYear();
   protected readonly faCode = faCode;
+  protected readonly apiUrl = environment.apiUrl;
   links = {
     blog: [
       { label: 'Все статьи', slug: null },
@@ -25,7 +27,7 @@ export class Footer {
       { label: 'GitHub', href: 'https://github.com' },
       { label: 'Документация .NET', href: 'https://learn.microsoft.com/dotnet' },
       { label: 'Документация Angular', href: 'https://angular.dev' },
-      { label: 'RSS Feed', href: 'http://localhost:5273/feed.xml' },
+      { label: 'RSS Feed', href: `${this.apiUrl}/feed.xml` },
     ],
   };
 

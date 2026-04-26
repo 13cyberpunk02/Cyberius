@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faCheckCircle, faEnvelope, faSpinner, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { getApiError } from '../../../core/helpers/api-error.helper';
 
 @Component({
   selector: 'app-confirm-email-component',
@@ -33,7 +34,7 @@ export class ConfirmEmailComponent implements OnInit {
       next: () => this.status.set('success'),
       error: (err) => {
         this.status.set('error');
-        this.error.set(err?.error?.detail ?? 'Ссылка недействительна или истекла');
+        this.error.set(getApiError(err, 'Ссылка недействительна или истекла'));
       },
     });
   }

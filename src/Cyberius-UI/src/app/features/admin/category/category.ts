@@ -18,6 +18,7 @@ import {
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { ToastService } from '../../../core/services/toast.service';
+import { getApiError } from '../../../core/helpers/api-error.helper';
 
 interface CategoryForm {
   name: string;
@@ -89,7 +90,10 @@ export class Category implements OnInit {
         this.categories.set(cats);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err) => {
+        this.toast.error(getApiError(err));
+        this.loading.set(false)
+      }
     });
   }
 
@@ -237,9 +241,8 @@ export class Category implements OnInit {
       error: (err) => {
         this.deleting.set(false);
         this.showDelete.set(false);
-        const msg = err?.error?.message ?? 'Нельзя удалить — в категории есть статьи';
-        this.errorMsg.set(msg);
-        this.toast.error(msg);
+        this.errorMsg.set(getApiError(err, 'Нельзя удалить — в категории есть статьи'));
+        this.toast.error(getApiError(err));
       },
     });
   }

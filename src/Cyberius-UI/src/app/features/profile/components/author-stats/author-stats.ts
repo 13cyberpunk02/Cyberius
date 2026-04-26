@@ -5,6 +5,8 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../core/services/auth.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
+import { ToastService } from '../../../../core/services/toast.service';
+import { getApiError } from '../../../../core/helpers/api-error.helper';
 
 interface AuthorStats {
   totalViews: number;
@@ -26,6 +28,7 @@ export class AuthorStatsComponent implements OnInit {
 
   private http = inject(HttpClient);
   private auth = inject(AuthService);
+  private toast = inject(ToastService);
 
   stats = signal<AuthorStats | null>(null);
   loading = signal(true);
@@ -36,7 +39,10 @@ export class AuthorStatsComponent implements OnInit {
         this.stats.set(s);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err) => {
+        this.toast.error(getApiError(err));
+        this.loading.set(false);
+      }
     });
   }
 

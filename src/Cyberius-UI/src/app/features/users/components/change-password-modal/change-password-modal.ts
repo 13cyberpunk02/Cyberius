@@ -23,6 +23,7 @@ import {
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { ToastService } from '../../../../core/services/toast.service';
+import { getApiError } from '../../../../core/helpers/api-error.helper';
 
 interface ChangePasswordForm {
   oldPassword: string;
@@ -175,12 +176,8 @@ export class ChangePasswordModal implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.status.set('error');
-        const msg =
-          err?.status === 400
-            ? 'Неверный текущий пароль'
-            : (err?.error?.message ?? err?.error?.title ?? 'Произошла ошибка, попробуйте ещё раз');
-        this.serverError.set(msg);
-        this.toast.error(msg);
+        this.serverError.set(getApiError(err));
+        this.toast.error(getApiError(err));
       },
     });
   }

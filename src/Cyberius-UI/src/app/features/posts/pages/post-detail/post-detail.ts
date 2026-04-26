@@ -35,6 +35,8 @@ import { PostCard } from '../../components/post-card/post-card';
 import { ToastService } from '../../../../core/services/toast.service';
 import { BookmarkService } from '../../../../core/services/bookmarks.service';
 import { faTelegram, faXTwitter } from '@fortawesome/free-brands-svg-icons';
+import { environment } from '../../../../../environments/environment';
+import { getApiError } from '../../../../core/helpers/api-error.helper';
 
 const REACTION_EMOJI: Record<string, string> = {
   Like: '👍',
@@ -93,7 +95,7 @@ export class PostDetail implements OnInit, OnDestroy {
   }>({ prev: null, next: null });
 
   readonly reactions = Object.entries(REACTION_EMOJI) as [ReactionType, string][];
-
+  private readonly apiUrl = environment.apiUrl;
   // Может ли текущий пользователь редактировать/удалять
   readonly canEdit = computed(() => {
     const post = this.post();
@@ -147,7 +149,7 @@ export class PostDetail implements OnInit, OnDestroy {
             image: post.coverImageUrl
               ? (this.postsService.getImageUrl(post.coverImageUrl) ?? undefined)
               : undefined,
-            url: `http://localhost:4200/posts/${post.slug}`,
+            url: `${this.apiUrl}/posts/${post.slug}`,
             type: 'article',
             publishedAt: post.publishedAt ?? undefined,
             author: post.author.fullName,
@@ -156,6 +158,7 @@ export class PostDetail implements OnInit, OnDestroy {
         error: (err) => {
           this.loading.set(false);
           if (err.status === 404) this.notFound.set(true);
+          this.toast.error(getApiError(err));
         },
       });
     });
@@ -213,14 +216,18 @@ export class PostDetail implements OnInit, OnDestroy {
   private loadRelated(postId: string): void {
     this.postsService.getRelated(postId, 3).subscribe({
       next: (posts) => this.related.set(posts),
-      error: () => {},
+      error: (err) => {
+        this.toast.error(getApiError(err));
+      },
     });
   }
 
   private loadNeighbors(postId: string): void {
     this.postsService.getNeighbors(postId).subscribe({
       next: (data) => this.neighbors.set(data),
-      error: () => {},
+      error: (err) => {
+        this.toast.error(getApiError(err));
+      },
     });
   }
 
@@ -282,9 +289,10 @@ export class PostDetail implements OnInit, OnDestroy {
     this.deleting.set(true);
     this.postsService.delete(this.post()!.id).subscribe({
       next: () => this.router.navigate(['/posts']),
-      error: () => {
+      error: (err) => {
         this.deleting.set(false);
         this.showDelete.set(false);
+        this.toast.error(getApiError(err));
       },
     });
   }

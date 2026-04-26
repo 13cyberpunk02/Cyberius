@@ -4,6 +4,7 @@ using Cyberius.Infrastructure.Data.Context;
 using Cyberius.Infrastructure.Data.Repositories;
 using Cyberius.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -28,6 +29,9 @@ public static class ExtensionCollection
             {
                 sqlOptions.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName);
             });
+            
+            options.ConfigureWarnings(w =>
+                w.Ignore(RelationalEventId.PendingModelChangesWarning));
         });
         
         services

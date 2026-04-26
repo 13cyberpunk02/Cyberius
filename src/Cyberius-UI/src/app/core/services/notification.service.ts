@@ -3,6 +3,7 @@ import * as signalR from '@microsoft/signalr';
 import { AuthService } from './auth.service';
 import { ToastService } from './toast.service';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 export interface AppNotification {
   id: string;
@@ -15,6 +16,7 @@ export interface AppNotification {
   createdAt: string;
   read: boolean;
 }
+const hubUrl = `${environment.apiUrl.replace('/api', '')}/hubs/notifications`;
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService implements OnDestroy {
@@ -31,7 +33,7 @@ export class NotificationService implements OnDestroy {
     if (this.hub?.state === signalR.HubConnectionState.Connected) return;
 
     this.hub = new signalR.HubConnectionBuilder()
-      .withUrl('http://localhost:5273/hubs/notifications', {
+      .withUrl(hubUrl, {
         accessTokenFactory: () => {
           // Берём токен из localStorage напрямую (signal может быть null если истёк)
           return localStorage.getItem('blog_access_token') ?? '';

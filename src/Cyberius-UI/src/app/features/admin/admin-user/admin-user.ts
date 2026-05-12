@@ -21,6 +21,7 @@ import {
   faEye,
   faSpinner,
   faTrashCan,
+  faUsers,
 } from '@fortawesome/free-solid-svg-icons';
 import { getApiError } from '../../../core/helpers/api-error.helper';
 
@@ -211,4 +212,6 @@ export class AdminUserComponent implements OnInit {
   isCurrentUser(userId: string): boolean {
     return this.auth.user()?.id === userId;
   }
+
+  protected readonly faUsers = faUsers;
 }

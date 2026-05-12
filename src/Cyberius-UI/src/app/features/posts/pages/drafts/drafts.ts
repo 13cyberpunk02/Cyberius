@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { ConfirmDialog, ConfirmDialogConfig } from '../../../../shared/components/confirm-dialog/confirm-dialog';
 import { PostsService } from '../../../../core/services/posts.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -8,7 +8,14 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { SeoService } from '../../../../core/services/seo.service';
 import { PostSummary } from '../../../../core/models/post.model';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faFilePen, faPen, faPlus, faRocket, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import {
+  faFilePen,
+  faPen,
+  faPenToSquare,
+  faPlus,
+  faRocket,
+  faSpinner,
+} from '@fortawesome/free-solid-svg-icons';
 import { getApiError } from '../../../../core/helpers/api-error.helper';
 
 @Component({
@@ -20,7 +27,6 @@ import { getApiError } from '../../../../core/helpers/api-error.helper';
 export class Drafts implements OnInit {
   private postsService = inject(PostsService);
   private auth = inject(AuthService);
-  private router = inject(Router);
   private toast = inject(ToastService);
   private seo = inject(SeoService);
 
@@ -112,4 +118,5 @@ export class Drafts implements OnInit {
   protected readonly faSpinner = faSpinner;
   protected readonly faRocket = faRocket;
   protected readonly faPen = faPen;
+  protected readonly faPenToSquare = faPenToSquare;
 }

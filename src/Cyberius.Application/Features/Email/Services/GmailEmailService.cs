@@ -16,7 +16,7 @@ public sealed class GmailEmailService(IOptions<EmailSettings> options) : IEmailS
         string toEmail, string toName, string resetLink, CancellationToken ct = default)
     {
         await SendAsync(toEmail, toName,
-            "Подтверждение эл. почты — Cyberius",
+            "Сброс пароля — Cyberius",
             BuildConfirmEmailHtml(toName, resetLink), ct);
     }
 
@@ -54,7 +54,7 @@ public sealed class GmailEmailService(IOptions<EmailSettings> options) : IEmailS
     public async Task SendSubscriptionConfirmationAsync(
         string toEmail, string unsubToken, CancellationToken ct = default)
     {
-        var unsubLink = $"/unsubscribe?token={unsubToken}";
+        var unsubLink = $"{_settings.Host}/unsubscribe?token={unsubToken}";
         var body = $"""
                     <!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"/></head>
                     <body style="margin:0;padding:0;background:#0a0f1e;font-family:'Segoe UI',Arial,sans-serif;">
@@ -101,7 +101,7 @@ public sealed class GmailEmailService(IOptions<EmailSettings> options) : IEmailS
         string toEmail, string subject, string htmlBody,
         string unsubToken, CancellationToken ct = default)
     {
-        var unsubLink = $"http://localhost:8080/unsubscribe?token={unsubToken}";
+        var unsubLink = $"{_settings.Host}/unsubscribe?token={unsubToken}";
         var fullBody = htmlBody.Replace("{{UNSUB_LINK}}", unsubLink);
 
         await SendAsync(toEmail, toEmail, subject, fullBody, ct);

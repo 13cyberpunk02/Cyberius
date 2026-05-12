@@ -31,7 +31,7 @@
     <!-- Empty state -->
     @if (!loading() && drafts().length === 0) {
       <div class="glass-card rounded-2xl p-12 text-center">
-        <div class="text-5xl mb-4">📝</div>
+        <div class="text-5xl mb-4"><fa-icon [icon]="faPenToSquare" /></div>
         <p class="text-xl font-bold heading-text mb-2">Черновиков нет</p>
         <p class="text-slate-400 mb-6">Напишите свою первую статью</p>
         <a routerLink="/posts/create"

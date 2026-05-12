@@ -9,6 +9,7 @@ import {
   faArrowRight,
   faClock,
   faCommentDots,
+  faEnvelopesBulk,
   faEye,
   faFire,
   faHeart,
@@ -83,4 +84,5 @@ export class TopPost implements OnInit {
   protected readonly faArrowRight = faArrowRight;
   protected readonly faFire = faFire;
   protected readonly faNewspaper = faNewspaper;
+  protected readonly faEnvelopesBulk = faEnvelopesBulk;
 }

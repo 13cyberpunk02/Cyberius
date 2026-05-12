@@ -4,6 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 import { ThemeService } from '../../../core/services/theme.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
+  faAddressBook,
   faArrowRight,
   faArrowRightFromBracket,
   faArrowRightToBracket,
@@ -11,6 +12,8 @@ import {
   faBell,
   faBookmark,
   faCode,
+  faEnvelopesBulk,
+  faHouse,
   faMagnifyingGlass,
   faMoon,
   faPenToSquare,
@@ -63,9 +66,9 @@ export class Header implements OnInit, OnDestroy {
   modal = signal<ModalView>('none');
 
   navLinks = [
-    { label: 'Главная', href: '/' },
-    { label: 'Статьи', href: '/posts' },
-    { label: 'Обо мне', href: '/about' },
+    { label: 'Главная', href: '/', exact: true, icon: faHouse },
+    { label: 'Статьи', href: '/posts', exact: false, icon: faEnvelopesBulk },
+    { label: 'Обо мне', href: '/about', exact: false, icon: faAddressBook },
   ];
 
   ngOnInit(): void {

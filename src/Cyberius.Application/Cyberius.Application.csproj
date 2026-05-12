@@ -12,14 +12,14 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="BCrypt.Net-Next" Version="4.1.0" />
+      <PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
       <PackageReference Include="FluentValidation" Version="12.1.1" />
       <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-      <PackageReference Include="MailKit" Version="4.15.1" />
+      <PackageReference Include="MailKit" Version="4.16.0" />
       <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
-      <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.5" />
-      <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.16.0" />
-      <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0" />
+      <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.8" />
+      <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.18.0" />
+      <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.18.0" />
     </ItemGroup>
 
 </Project>

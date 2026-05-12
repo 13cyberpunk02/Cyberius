@@ -12,6 +12,7 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import {
   faAngleLeft,
   faAngleRight,
+  faEnvelopesBulk,
   faMagnifyingGlass,
   faPenSquare,
   faPlusCircle,
@@ -151,4 +152,6 @@ export class PostList implements OnInit {
       queryParamsHandling: 'merge',
     });
   }
+
+  protected readonly faEnvelopesBulk = faEnvelopesBulk;
 }

@@ -167,7 +167,7 @@ html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   background-color: var(--bg-base);
   color: var(--text-primary);
   line-height: 1.6;
@@ -194,7 +194,8 @@ body.light {
   background-attachment: fixed;
 }
 
-code, pre, .font-mono { font-family: var(--font-mono); }
+code, pre, .font-mono {
+  font-family: var(--font-mono), monospace; }
 
 /* ─────────────────────────────────────────
    SCROLLBAR
@@ -276,15 +277,35 @@ code, pre, .font-mono { font-family: var(--font-mono); }
    BUTTONS
    ───────────────────────────────────────── */
 .theme-btn {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.10) 0%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  color: var(--text-secondary);
   transition: all 0.2s ease;
 }
 .theme-btn:hover {
-  background: var(--glass-hover-bg);
-  border-color: rgba(12,162,231,0.3);
+  background: linear-gradient(
+    135deg,
+    rgba(12, 162, 231, 0.18) 0%,
+    rgba(12, 162, 231, 0.06) 100%
+  );
+  border-color: rgba(12, 162, 231, 0.40);
+  box-shadow:
+    0 4px 16px rgba(12, 162, 231, 0.20),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  color: var(--text-accent);
+}
+.theme-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 8px rgba(12, 162, 231, 0.15);
 }
 
 .cta-btn {
@@ -300,16 +321,156 @@ code, pre, .font-mono { font-family: var(--font-mono); }
 .btn-primary:hover { box-shadow: 0 8px 32px rgba(12,162,231,0.55); }
 
 .btn-secondary {
-  background: var(--btn-secondary-bg);
-  border: 1px solid var(--btn-secondary-border);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.09) 0%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: var(--text-primary);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.20),
+    inset 0 1px 0 rgba(255, 255, 255, 0.10);
+  transition: all 0.2s ease;
 }
 .btn-secondary:hover {
-  background: var(--glass-hover-bg);
-  border-color: rgba(12,162,231,0.4);
+  background: linear-gradient(
+    135deg,
+    rgba(12, 162, 231, 0.15) 0%,
+    rgba(12, 162, 231, 0.05) 100%
+  );
+  border-color: rgba(12, 162, 231, 0.40);
+  box-shadow:
+    0 4px 16px rgba(12, 162, 231, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
   color: var(--text-accent);
+}
+
+/* ── Светлая тема ─────────────────────────────────────────────── */
+html.light .theme-btn,
+body.light .theme-btn {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.80) 0%,
+    rgba(255, 255, 255, 0.50) 100%
+  );
+  border-color: rgba(12, 162, 231, 0.20);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.90);
+  color: #475569;
+}
+html.light .theme-btn:hover,
+body.light .theme-btn:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(12, 162, 231, 0.12) 0%,
+    rgba(255, 255, 255, 0.70) 100%
+  );
+  border-color: rgba(12, 162, 231, 0.40);
+  box-shadow:
+    0 4px 16px rgba(12, 162, 231, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+  color: #0ca2e7;
+}
+
+html.light .btn-secondary,
+body.light .btn-secondary {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(240, 248, 255, 0.60) 100%
+  );
+  border-color: rgba(12, 162, 231, 0.22);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  color: #334155;
+}
+html.light .btn-secondary:hover,
+body.light .btn-secondary:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(12, 162, 231, 0.10) 0%,
+    rgba(255, 255, 255, 0.80) 100%
+  );
+  border-color: rgba(12, 162, 231, 0.40);
+  box-shadow:
+    0 4px 16px rgba(12, 162, 231, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+  color: #0ca2e7;
+}
+
+/* ─────────────────────────────────────────
+   NAV SEGMENT — сегментированный контрол
+   ───────────────────────────────────────── */
+.nav-segment {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.nav-segment-item {
+  color: rgba(148, 163, 184, 0.85);
+  position: relative;
+  user-select: none;
+}
+.nav-segment-item:hover {
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.nav-segment-active {
+  color: #fff !important;
+  background: linear-gradient(
+    135deg,
+    rgba(12, 162, 231, 0.30) 0%,
+    rgba(6, 182, 212, 0.15) 100%
+  ) !important;
+  border: 1px solid rgba(12, 162, 231, 0.40);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.30),
+    inset 0 1px 2px rgba(0, 0, 0, 0.20),
+    0 0 12px rgba(12, 162, 231, 0.15);
+  text-shadow: 0 0 12px rgba(12, 162, 231, 0.60);
+}
+
+html.light .nav-segment,
+body.light .nav-segment {
+  background: rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 0, 0, 0.10);
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.60);
+}
+html.light .nav-segment-item,
+body.light .nav-segment-item {
+  color: #64748b;
+}
+html.light .nav-segment-item:hover,
+body.light .nav-segment-item:hover {
+  color: #0f172a;
+  background: rgba(0, 0, 0, 0.05);
+}
+html.light .nav-segment-active,
+body.light .nav-segment-active {
+  color: #0369a1 !important;
+  background: linear-gradient(
+    135deg,
+    rgba(12, 162, 231, 0.18) 0%,
+    rgba(255, 255, 255, 0.70) 100%
+  ) !important;
+  border-color: rgba(12, 162, 231, 0.35);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.08),
+    0 0 10px rgba(12, 162, 231, 0.10);
+  text-shadow: none;
 }
 
 /* ─────────────────────────────────────────
@@ -507,16 +668,6 @@ body.light .nav-link:hover {
   color: #0f172a;
 }
 
-/* ── Btn secondary ── */
-html.light .btn-secondary,
-body.light .btn-secondary {
-  color: #0f172a;
-}
-html.light .btn-secondary:hover,
-body.light .btn-secondary:hover {
-  color: #0081c5;
-}
-
 /* ── Теги постов (#tag) ── */
 html.light .bg-white\/5,
 body.light .bg-white\/5 {
@@ -710,7 +861,7 @@ body.light .group:hover .heading-text {
 .user-avatar-btn {
   background: linear-gradient(135deg, #0ca2e7 0%, #06b6d4 100%);
   box-shadow: 0 0 14px rgba(12, 162, 231, 0.4);
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   cursor: pointer;
   border: none;
 }

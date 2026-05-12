@@ -21,12 +21,15 @@
       </a>
 
       <!-- Desktop Nav -->
-      <nav class="hidden md:flex items-center gap-1">
+      <nav class="hidden md:flex items-center p-1 rounded-2xl nav-segment">
         @for (link of navLinks; track link.href) {
           <a
-            [href]="link.href"
-            class="nav-link px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200"
+            [routerLink]="link.href"
+            routerLinkActive="nav-segment-active"
+            [routerLinkActiveOptions]="{ exact: link.exact ?? false }"
+            class="nav-segment-item px-4 py-1.5 rounded-xl text-sm font-medium transition-all duration-200"
           >
+            <fa-icon [icon]="link.icon" />
             {{ link.label }}
           </a>
         }
@@ -94,7 +97,7 @@
                 <div class="max-h-80 overflow-y-auto">
                   @if (notifications.notifications().length === 0) {
                     <div class="px-4 py-8 text-center text-slate-500 text-sm">
-                      <div class="text-3xl mb-2">🔔</div>
+                      <div class="text-3xl mb-2"><fa-icon [icon]="faBell" /></div>
                       Нет уведомлений
                     </div>
                   } @else {

@@ -26,7 +26,7 @@
           <a
             [routerLink]="link.href"
             routerLinkActive="nav-segment-active"
-            [routerLinkActiveOptions]="{ exact: link.exact ?? false }"
+            [routerLinkActiveOptions]="{ exact: link.exact }"
             class="nav-segment-item px-4 py-1.5 rounded-xl text-sm font-medium transition-all duration-200"
           >
             <fa-icon [icon]="link.icon" />

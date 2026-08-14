@@ -31,7 +31,7 @@ public static class ResultsExtension
             ErrorTypes.NotFound => Results.NotFound(error.ToProblem()),
             ErrorTypes.Conflict => Results.Conflict(error.ToProblem()),
             ErrorTypes.Forbidden => Results.Forbid(),
-            ErrorTypes.Unauthorized => Results.Unauthorized(),
+            ErrorTypes.Unauthorized => Results.Json(error.ToProblem(), statusCode: StatusCodes.Status401Unauthorized),
             ErrorTypes.InternalServerError => Results.InternalServerError(error.ToProblem()),
             _ => Results.Problem(
                 title: error.Code,

@@ -5,7 +5,7 @@
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-10">
       <div>
         <h1 class="text-4xl font-black heading-text mb-1">Статьи</h1>
-        <p class="text-slate-400 text-sm">{{ totalCount }} публикаций</p>
+        <p class="text-slate-400 text-sm">{{ totalCount() }} публикаций</p>
       </div>
       @if (auth.isAuthenticated()) {
         <div class="flex items-center gap-2">
@@ -29,7 +29,6 @@
 
     <!-- Search + Filters -->
     <div class="flex flex-col gap-4 mb-8">
-      <!-- Search -->
       <form (ngSubmit)="search()" class="flex gap-2">
         <div class="relative flex-1">
           <fa-icon [icon]="faMagnifyingGlass" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
@@ -93,49 +92,42 @@
 
     <!-- Posts grid -->
     @if (!loading()) {
-      @if (posts.length === 0) {
+      @if (posts().length === 0) {
         <div class="text-center py-24">
           <div class="text-5xl mb-4"><fa-icon [icon]="faEnvelopesBulk" /></div>
           <p class="text-xl font-bold heading-text mb-2">Статей не найдено</p>
           <p class="text-slate-400">Попробуйте изменить фильтры или поисковый запрос</p>
         </div>
       } @else {
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-          @for (post of posts; track post.id) {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          @for (post of posts(); track post.id) {
             <app-post-card [post]="post" />
           }
         </div>
 
-        <!-- Pagination -->
-        @if (totalPages > 1) {
-          <div class="flex items-center justify-center gap-2">
-            <button
-              (click)="goToPage(currentPage() - 1)"
-              [disabled]="currentPage() === 1"
-              class="btn-secondary w-10 h-10 rounded-xl flex items-center justify-center disabled:opacity-40 transition-all"
-            >
-              <fa-icon [icon]="faAngleLeft" />
-            </button>
+        <!-- Sentinel — IntersectionObserver следит за ним -->
+        @if (hasMore()) {
+          <div id="scroll-sentinel" class="h-4 mt-6"></div>
+        }
 
-            @for (page of pages; track page) {
-              <button
-                (click)="goToPage(page)"
-                class="w-10 h-10 rounded-xl text-sm font-semibold transition-all"
-                [class.filter-active]="currentPage() === page"
-                [class.filter-inactive]="currentPage() !== page"
-              >{{ page }}</button>
-            }
+        <!-- Спиннер подгрузки -->
+        @if (loadingMore()) {
+          <div class="flex justify-center py-10">
+            <div class="flex items-center gap-3 text-slate-400">
+              <fa-icon [icon]="faSpinner" animation="spin-pulse" size="2xl" />
+              <span class="text-sm">Загружаем статьи...</span>
+            </div>
+          </div>
+        }
 
-            <button
-              (click)="goToPage(currentPage() + 1)"
-              [disabled]="currentPage() === totalPages"
-              class="btn-secondary w-10 h-10 rounded-xl flex items-center justify-center disabled:opacity-40 transition-all"
-            >
-              <fa-icon [icon]="faAngleRight" />
-            </button>
+        <!-- Конец списка -->
+        @if (!hasMore() && !loadingMore()) {
+          <div class="text-center py-10 text-slate-600 text-sm">
+            Вы просмотрели все {{ totalCount() }} статей
           </div>
         }
       }
     }
+
   </div>
 </div>

@@ -17,7 +17,7 @@ public sealed class GmailEmailService(IOptions<EmailSettings> options) : IEmailS
     {
         await SendAsync(toEmail, toName,
             "Сброс пароля — Cyberius",
-            BuildConfirmEmailHtml(toName, resetLink), ct);
+            BuildResetEmailHtml(toName, resetLink), ct);
     }
 
     private async Task SendAsync(

@@ -6,6 +6,7 @@ import { SafeHtml } from '@angular/platform-browser';
 import { SvgIconService } from '../../../../core/services/svgIcon.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faArrowRight, faBarsStaggered, faClock } from '@fortawesome/free-solid-svg-icons';
+import { RouterLink } from '@angular/router';
 
 type CategoryMeta = {
   label:        string;
@@ -18,7 +19,7 @@ type FilterValue = 'all' | string; // slug категории
 
 @Component({
   selector: 'app-featured-posts',
-  imports: [CommonModule, FaIconComponent],
+  imports: [CommonModule, FaIconComponent, RouterLink],
   templateUrl: './featured-posts.html',
   styleUrl: './featured-posts.css',
 })

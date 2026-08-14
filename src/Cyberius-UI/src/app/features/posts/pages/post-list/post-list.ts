@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -15,7 +15,7 @@ import {
   faEnvelopesBulk,
   faMagnifyingGlass,
   faPenSquare,
-  faPlusCircle,
+  faPlusCircle, faSpinner,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { SeoService } from '../../../../core/services/seo.service';
@@ -28,7 +28,8 @@ import { getApiError } from '../../../../core/helpers/api-error.helper';
   templateUrl: './post-list.html',
   styleUrl: './post-list.css',
 })
-export class PostList implements OnInit {
+
+export class PostList implements OnInit, OnDestroy {
   private postsService = inject(PostsService);
   private categoryService = inject(CategoryService);
   private route = inject(ActivatedRoute);
@@ -39,34 +40,25 @@ export class PostList implements OnInit {
 
   protected readonly faPlusCircle = faPlusCircle;
   protected readonly faMagnifyingGlass = faMagnifyingGlass;
-  protected readonly faAngleLeft = faAngleLeft;
-  protected readonly faAngleRight = faAngleRight;
   protected readonly faXmark = faXmark;
   protected readonly faPenSquare = faPenSquare;
+  protected readonly faEnvelopesBulk = faEnvelopesBulk;
 
-  paged = signal<PagedResponse<PostSummary> | null>(null);
+  posts = signal<PostSummary[]>([]);
   categories = signal<CategoryResponse[]>([]);
   loading = signal(true);
+  loadingMore = signal(false);
+  hasMore = signal(false);
+  totalCount = signal(0);
   searchQuery = signal('');
 
-  // Filters from query params
   activeCategoryId = signal<string | null>(null);
   activeTag = signal<string | null>(null);
-  currentPage = signal(1);
+  private page = 1;
   readonly pageSize = 9;
 
-  get posts(): PostSummary[] {
-    return this.paged()?.items ?? [];
-  }
-  get totalPages(): number {
-    return this.paged()?.totalPages ?? 1;
-  }
-  get totalCount(): number {
-    return this.paged()?.totalCount ?? 0;
-  }
-  get pages(): number[] {
-    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
-  }
+  // IntersectionObserver — следит за sentinel элементом внизу списка
+  private observer: IntersectionObserver | null = null;
 
   ngOnInit(): void {
     this.seo.setPage({
@@ -77,22 +69,19 @@ export class PostList implements OnInit {
     this.route.queryParams.subscribe((params) => {
       const categorySlug = params['categorySlug'] ?? null;
 
-      // Если передан slug — ищем id категории по slug
       if (categorySlug) {
         this.categoryService.getAll().subscribe((cats) => {
           const found = cats.find((c) => c.slug === categorySlug);
           this.activeCategoryId.set(found?.id ?? null);
           this.activeTag.set(null);
-          this.currentPage.set(1);
           this.searchQuery.set('');
-          this.load();
+          this.resetAndLoad();
         });
       } else {
         this.activeCategoryId.set(params['category'] ?? null);
         this.activeTag.set(params['tag'] ?? null);
-        this.currentPage.set(Number(params['page'] ?? 1));
         this.searchQuery.set(params['q'] ?? '');
-        this.load();
+        this.resetAndLoad();
       }
     });
 
@@ -101,9 +90,26 @@ export class PostList implements OnInit {
     });
   }
 
-  private load(): void {
-    this.loading.set(true);
-    const params = { page: this.currentPage(), pageSize: this.pageSize };
+  ngOnDestroy(): void {
+    this.observer?.disconnect();
+  }
+
+  // Сброс при смене фильтра и загрузка первой страницы
+  private resetAndLoad(): void {
+    this.page = 1;
+    this.posts.set([]);
+    this.hasMore.set(false);
+    this.load(false);
+  }
+
+  private load(append: boolean): void {
+    if (append) {
+      this.loadingMore.set(true);
+    } else {
+      this.loading.set(true);
+    }
+
+    const params = { page: this.page, pageSize: this.pageSize };
     const q = this.searchQuery();
     const catId = this.activeCategoryId();
     const tag = this.activeTag();
@@ -118,31 +124,67 @@ export class PostList implements OnInit {
 
     req$.subscribe({
       next: (res) => {
-        this.paged.set(res);
+        if (append) {
+          this.posts.update((existing) => [...existing, ...res.items]);
+        } else {
+          this.posts.set(res.items);
+          this.totalCount.set(res.totalCount);
+        }
+        this.hasMore.set(this.page < res.totalPages);
         this.loading.set(false);
+        this.loadingMore.set(false);
+
+        // Подключаем observer после рендера
+        if (this.hasMore()) {
+          setTimeout(() => this.setupObserver(), 100);
+        } else {
+          this.observer?.disconnect();
+        }
       },
       error: (err) => {
         this.toast.error(getApiError(err));
         this.loading.set(false);
+        this.loadingMore.set(false);
       },
     });
   }
 
+  loadMore(): void {
+    if (this.loadingMore() || !this.hasMore()) return;
+    this.page++;
+    this.load(true);
+  }
+
+  // Настройка IntersectionObserver на sentinel элемент
+  setupObserver(): void {
+    this.observer?.disconnect();
+
+    const sentinel = document.getElementById('scroll-sentinel');
+    if (!sentinel) return;
+
+    this.observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && this.hasMore() && !this.loadingMore()) {
+          this.loadMore();
+        }
+      },
+      { rootMargin: '200px' }, // начинаем загрузку за 200px до конца списка
+    );
+
+    this.observer.observe(sentinel);
+  }
+
   search(): void {
-    this.navigate({ q: this.searchQuery() || null, page: 1, category: null, tag: null });
+    this.navigate({ q: this.searchQuery() || null, category: null, tag: null });
   }
 
   clearSearch(): void {
     this.searchQuery.set('');
-    this.navigate({ q: null, page: 1 });
+    this.navigate({ q: null });
   }
 
   selectCategory(id: string | null): void {
-    this.navigate({ category: id, page: 1, q: null, tag: null });
-  }
-
-  goToPage(page: number): void {
-    this.navigate({ page });
+    this.navigate({ category: id, q: null, tag: null });
   }
 
   private navigate(extras: Record<string, unknown>): void {
@@ -153,5 +195,6 @@ export class PostList implements OnInit {
     });
   }
 
-  protected readonly faEnvelopesBulk = faEnvelopesBulk;
+  protected readonly faSpinner = faSpinner;
 }
+

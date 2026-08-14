@@ -56,9 +56,14 @@
     @if (post().tags.length > 0) {
       <div class="flex flex-wrap gap-1.5 mb-4">
         @for (tag of post().tags.slice(0, 3); track tag) {
-          <span class="px-2 py-0.5 rounded text-xs font-mono bg-white/5 text-slate-400 border border-white/10">
+          <a
+            [routerLink]="['/posts']"
+            [queryParams]="{ tag: tag }"
+            (click)="$event.stopPropagation()"
+            class="px-2 py-0.5 rounded text-xs font-mono bg-white/5 text-slate-400 border border-white/10 hover:text-sky-400 hover:border-sky-500/30 hover:bg-sky-500/5 transition-colors cursor-pointer"
+            >
             #{{ tag }}
-          </span>
+          </a>
         }
       </div>
     }

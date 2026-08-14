@@ -1,6 +1,7 @@
 using Cyberius.Api.Common;
 using Cyberius.Api.Common.BackgroundServices;
 using Cyberius.Api.Common.Extensions;
+using Cyberius.Api.Common.Middleware;
 using Cyberius.Api.Hubs;
 using Cyberius.Application;
 using Cyberius.Domain.Options;
@@ -52,7 +53,7 @@ app.MapHub<NotificationHub>("/hubs/notifications");
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
-
+app.UseOpenGraph();
 app.MapAllEndpoints();
 
 app.MapFallbackToFile("index.html");

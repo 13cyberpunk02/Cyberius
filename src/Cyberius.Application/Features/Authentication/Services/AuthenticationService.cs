@@ -88,20 +88,20 @@ public class AuthenticationService(IUnitOfWork uow, IJwtService jwtService, IEma
     public async Task<Result<LoginResponse>> RefreshTokenAsync(RefreshTokenRequest request, CancellationToken cancellationToken = default)
     {
         var principal = jwtService.GetPrincipalFromExpiredToken(request.AccessToken);
-        if(principal is null)
-            return Errors.BadRequest("Токен доступа не валидный");
-        
+        if (principal is null)
+            return Errors.Unauthorized("Токен доступа не валидный");
+
         var userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrWhiteSpace(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
-            return Errors.BadRequest("Токен доступа не валидный");
-        
+            return Errors.Unauthorized("Токен доступа не валидный");
+
         var user = await uow.Users.GetUserWithRolesByIdAsync(userId, cancellationToken);
         if (user is null)
-            return Errors.BadRequest("Токен доступа не валидный");
-        
+            return Errors.Unauthorized("Пользователь не найден");
+
         var refreshTokenEntity = await uow.RefreshTokens.GetRefreshTokenByUserId(user.UserId, cancellationToken);
-        if(refreshTokenEntity is null || refreshTokenEntity.Token != request.RefreshToken)
-            return Errors.BadRequest("Токен доступа не валидный");
+        if (refreshTokenEntity is null || refreshTokenEntity.Token != request.RefreshToken)
+            return Errors.Unauthorized("Сессия завершена на другом устройстве");
         
         var newAccessToken = jwtService.GenerateJwtToken(user);
         var newRefreshToken = jwtService.GenerateRefreshToken();

@@ -97,9 +97,14 @@
                 <!-- Tags -->
                 <div class="flex flex-wrap gap-2 mb-4">
                   @for (tag of post.tags.slice(0, 3); track tag) {
-                    <span class="px-2 py-0.5 rounded-md text-xs font-mono bg-white/5 text-slate-400 border border-white/10">
+                    <a
+                      [routerLink]="['/posts']"
+                      [queryParams]="{ tag: tag }"
+                      (click)="$event.stopPropagation()"
+                      class="px-2 py-0.5 rounded-md text-xs font-mono bg-white/5 text-slate-400 border border-white/10 hover:text-sky-400 hover:border-sky-500/30 transition-colors"
+                      >
                       #{{ tag }}
-                    </span>
+                    </a>
                   }
                 </div>
 
@@ -107,7 +112,7 @@
                 <div class="flex items-center justify-between pt-4 border-t border-white/10">
                   <span class="text-xs text-slate-500 font-mono">{{ getReadDate(post) }}</span>
                   <a
-                    [href]="'/posts/' + post.slug"
+                    [routerLink]="['/posts/', post.slug]"
                     class="flex items-center gap-1 text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors group/link"
                   >
                     Читать
@@ -123,7 +128,7 @@
       <!-- View All Button -->
       <div class="text-center mt-12">
         <a
-          href="/posts"
+          routerLink='/posts'
           class="btn-secondary inline-flex items-center gap-2 px-8 py-3.5 rounded-xl font-semibold transition-all duration-300 hover:scale-105 active:scale-95"
         >
           Все статьи

@@ -44,9 +44,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   const isRetry = req.context.get(IS_RETRY);
 
-  // Проактивный refresh — токен истёк или скоро истечёт
+  // Проактивный refresh - токен истёк или скоро истечёт
   if (!isRetry && auth.isAccessTokenExpiredOrExpiring()) {
-    // Refresh token тоже истёк — сразу разлогиниваем
+    // Refresh token тоже истёк - сразу разлогиниваем
     if (auth.isRefreshTokenExpired()) {
       auth.clearState();
       return next(req);
@@ -63,7 +63,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         return next(retryReq);
       }),
       catchError((refreshErr: HttpErrorResponse) => {
-        // Refresh вернул 401/403 — значит токен инвалидирован на сервере
+        // Refresh вернул 401/403 - значит токен инвалидирован на сервере
         // (например зашли с другого устройства и там перевыпустили токены)
         if (refreshErr.status === 401 || refreshErr.status === 403) {
           auth.clearState();
@@ -79,7 +79,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(authedReq).pipe(
     catchError((err: HttpErrorResponse) => {
-      // 401 на обычном запросе — пробуем refresh один раз
+      // 401 на обычном запросе - пробуем refresh один раз
       if (err.status === 401 && !isRetry && !isAuthUrl(req.url)) {
         // Нет смысла рефрешить если refresh token истёк
         if (auth.isRefreshTokenExpired()) {
@@ -98,7 +98,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
             return next(retryReq);
           }),
           catchError((refreshErr: HttpErrorResponse) => {
-            // Refresh не удался — сессия мертва, разлогиниваем
+            // Refresh не удался - сессия мертва, разлогиниваем
             if (refreshErr.status === 401 || refreshErr.status === 403) {
               auth.clearState();
               toast.info('Сессия завершена. Войдите снова.');
@@ -113,7 +113,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         if (err.status === 403) {
           toast.error('Доступ запрещён');
         } else if (err.status === 404) {
-          // 404 — компонент сам обработает
+          // 404 - компонент сам обработает
         } else if (err.status >= 500) {
           toast.error('Ошибка сервера. Попробуйте позже');
         } else if (err.status !== 401) {

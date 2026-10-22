@@ -1,5 +1,5 @@
 /* =====================================================
-   DEVBLOG — Global Styles
+   DEVBLOG - Global Styles
    Tailwind CSS v4  (@import "tailwindcss" + @theme)
    Glassmorphism + Azure palette + Dark / Light themes
    ===================================================== */
@@ -91,7 +91,7 @@
 }
 
 /* ─────────────────────────────────────────
-   CSS CUSTOM PROPERTIES — DARK (default)
+   CSS CUSTOM PROPERTIES - DARK (default)
    ───────────────────────────────────────── */
 :root {
   --bg-base:              #040d18;
@@ -126,7 +126,7 @@
 }
 
 /* ─────────────────────────────────────────
-   CSS CUSTOM PROPERTIES — LIGHT
+   CSS CUSTOM PROPERTIES - LIGHT
    ───────────────────────────────────────── */
 html.light,
 body.light,
@@ -224,7 +224,7 @@ code, pre, .font-mono {
 }
 
 /* ─────────────────────────────────────────
-   DROPDOWNS — всегда непрозрачные
+   DROPDOWNS - всегда непрозрачные
    ───────────────────────────────────────── */
 .dropdown-solid {
   background: rgb(8, 18, 36) !important;
@@ -404,7 +404,7 @@ body.light .btn-secondary:hover {
 }
 
 /* ─────────────────────────────────────────
-   NAV SEGMENT — сегментированный контрол
+   NAV SEGMENT - сегментированный контрол
    ───────────────────────────────────────── */
 .nav-segment {
   background: rgba(0, 0, 0, 0.25);
@@ -612,7 +612,7 @@ body.light .nav-segment-active {
 ::view-transition-new(root) { animation: 300ms ease view-fade-in; }
 
 /* ═══════════════════════════════════════════
-   LIGHT THEME — OVERRIDES FOR HARDCODED COLORS
+   LIGHT THEME - OVERRIDES FOR HARDCODED COLORS
    Перебиваем text-white / text-slate-* из шаблонов
    ═══════════════════════════════════════════ */
 
@@ -700,7 +700,7 @@ body.light .text-slate-600 svg {
    Используются вместо text-white / text-slate-*
    ═══════════════════════════════════════════ */
 
-/* Основные заголовки — белые в тёмной, тёмные в светлой */
+/* Основные заголовки - белые в тёмной, тёмные в светлой */
 .heading-text {
   color: #f1f5f9;
 }
@@ -746,7 +746,7 @@ body.light .group:hover .heading-text {
 }
 
 /* ─────────────────────────────────────────
-   TECH CARD — dynamic outline via CSS var
+   TECH CARD - dynamic outline via CSS var
    ───────────────────────────────────────── */
 .tech-card {
   border: 1px solid var(--glass-border);
@@ -773,7 +773,7 @@ body.light .group:hover .heading-text {
 }
 
 /* ─────────────────────────────────────────
-   TECH CARD — dynamic outline via CSS var
+   TECH CARD - dynamic outline via CSS var
    ───────────────────────────────────────── */
 .tech-card {
   border: 1px solid var(--glass-border);
@@ -802,9 +802,9 @@ body.light .group:hover .heading-text {
 
 
 /* ─────────────────────────────────────────
-   TECH STACK ICON — оригинальные цвета SVG
+   TECH STACK ICON - оригинальные цвета SVG
    Официальные логотипы уже покрашены сами,
-   фильтр не нужен — только размер
+   фильтр не нужен - только размер
    ───────────────────────────────────────── */
 .tech-icon-wrap {
   display: flex;
@@ -815,11 +815,11 @@ body.light .group:hover .heading-text {
   width: 32px;
   height: 32px;
   display: block;
-  /* NO filter — SVG keeps its original brand colors */
+  /* NO filter - SVG keeps its original brand colors */
 }
 
 /* ─────────────────────────────────────────
-   CATEGORY BADGE — outline + icon
+   CATEGORY BADGE - outline + icon
    ───────────────────────────────────────── */
 .category-badge {
   background: color-mix(in srgb, var(--badge-color) 10%, transparent);
@@ -856,7 +856,7 @@ body.light .group:hover .heading-text {
 }
 
 /* ─────────────────────────────────────────
-   AUTH — Avatar & User menu
+   AUTH - Avatar & User menu
    ───────────────────────────────────────── */
 .user-avatar-btn {
   background: linear-gradient(135deg, #0ca2e7 0%, #06b6d4 100%);
@@ -895,7 +895,7 @@ body.light .group:hover .heading-text {
 }
 
 /* ─────────────────────────────────────────
-   AUTH — Login modal backdrop
+   AUTH - Login modal backdrop
    ───────────────────────────────────────── */
 .modal-backdrop {
   animation: fadeIn 0.2s ease-out;
@@ -907,7 +907,7 @@ body.light .group:hover .heading-text {
 }
 
 /* ─────────────────────────────────────────
-   LOGIN MODAL — field icons
+   LOGIN MODAL - field icons
    ───────────────────────────────────────── */
 .field-icon {
   position: absolute;
@@ -918,7 +918,7 @@ body.light .group:hover .heading-text {
   z-index: 1;
 }
 
-/* fa-icon рендерит <svg> внутри себя — передаём color вниз */
+/* fa-icon рендерит <svg> внутри себя - передаём color вниз */
 .field-icon svg {
   color: inherit;
 }
@@ -947,7 +947,7 @@ body.light .group:hover .heading-text {
 
 /* ─────────────────────────────────────────
    MODAL SCROLL CONTAINER
-   Скролл на обёртке, а не на карточке —
+   Скролл на обёртке, а не на карточке -
    так border-radius не обрезается
    ───────────────────────────────────────── */
 .modal-scroll-container {
@@ -969,7 +969,7 @@ body.light .group:hover .heading-text {
 }
 
 /* ─────────────────────────────────────────
-   CONFIRM DIALOG — danger button
+   CONFIRM DIALOG - danger button
    ───────────────────────────────────────── */
 .confirm-btn-danger {
   background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);

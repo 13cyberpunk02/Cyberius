@@ -22,7 +22,7 @@ export class SeoService {
   private meta = inject(Meta);
 
   setPage(data: SeoMeta): void {
-    const fullTitle = data.title.includes(SITE_NAME) ? data.title : `${data.title} — ${SITE_NAME}`;
+    const fullTitle = data.title.includes(SITE_NAME) ? data.title : `${data.title} - ${SITE_NAME}`;
 
     const description = data.description?.slice(0, 160) ?? 'Блог о .NET, C# и Angular разработке';
     const image = data.image ?? DEFAULT_IMAGE;

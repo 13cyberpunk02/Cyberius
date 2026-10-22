@@ -124,7 +124,7 @@ export class PostDetail implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Подписываемся на изменения параметров — важно для навигации между статьями
+    // Подписываемся на изменения параметров - важно для навигации между статьями
     this.route.paramMap.subscribe((params) => {
       const slug = params.get('slug')!;
 
@@ -149,7 +149,7 @@ export class PostDetail implements OnInit, OnDestroy {
             image: post.coverImageUrl
               ? (this.postsService.getImageUrl(post.coverImageUrl) ?? undefined)
               : undefined,
-            url: `${this.apiUrl}/posts/${post.slug}`,
+            url: `${window.location.origin}/posts/${post.slug}`,
             type: 'article',
             publishedAt: post.publishedAt ?? undefined,
             author: post.author.fullName,
@@ -165,7 +165,7 @@ export class PostDetail implements OnInit, OnDestroy {
   }
 
   private trackView(postId: string): void {
-    // Небольшая задержка — считаем просмотр только если пользователь реально открыл статью
+    // Небольшая задержка - считаем просмотр только если пользователь реально открыл статью
     setTimeout(() => {
       this.postsService.trackView(postId).subscribe({ error: () => {} });
     }, 3000);

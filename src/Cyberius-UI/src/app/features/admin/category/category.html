@@ -82,7 +82,7 @@
                 (click)="askDelete(cat.id)"
                 class="px-3 py-1.5 rounded-lg text-xs font-medium text-rose-400 border border-rose-500/30 hover:bg-rose-500/10 transition-all"
                 [disabled]="cat.postCount > 0"
-                [title]="cat.postCount > 0 ? 'Нельзя удалить — есть статьи' : 'Удалить'"
+                [title]="cat.postCount > 0 ? 'Нельзя удалить - есть статьи' : 'Удалить'"
                 [class.opacity-40]="cat.postCount > 0"
                 [class.cursor-not-allowed]="cat.postCount > 0"
               >
@@ -188,7 +188,7 @@
         <div class="space-y-1.5">
           <label class="text-xs font-semibold text-slate-400 uppercase tracking-wide">
             URL иконки
-            <span class="ml-1 font-normal normal-case text-slate-600">— необязательно</span>
+            <span class="ml-1 font-normal normal-case text-slate-600">- необязательно</span>
           </label>
           <input
             type="text"

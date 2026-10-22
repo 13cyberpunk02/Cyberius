@@ -8,7 +8,7 @@ export class SvgIconService {
   private http = inject(HttpClient);
   private sanitizer = inject(DomSanitizer);
 
-  // Кэш — каждый SVG загружается только один раз
+  // Кэш - каждый SVG загружается только один раз
   private cache = new Map<string, Observable<SafeHtml>>();
 
   load(iconName: string): Observable<SafeHtml> {

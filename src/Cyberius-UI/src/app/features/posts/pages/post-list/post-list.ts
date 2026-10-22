@@ -57,7 +57,7 @@ export class PostList implements OnInit, OnDestroy {
   private page = 1;
   readonly pageSize = 9;
 
-  // IntersectionObserver — следит за sentinel элементом внизу списка
+  // IntersectionObserver - следит за sentinel элементом внизу списка
   private observer: IntersectionObserver | null = null;
 
   ngOnInit(): void {

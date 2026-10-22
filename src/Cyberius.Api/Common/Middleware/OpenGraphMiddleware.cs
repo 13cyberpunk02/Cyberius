@@ -35,7 +35,6 @@ public sealed class OpenGraphMiddleware(RequestDelegate next)
         var isBot   = BotAgents.Any(ua.Contains);
         var isPost  = SlugRegex.Match(path);
  
-        // Не бот или не страница статьи — обычная обработка
         if (!isBot || !isPost.Success)
         {
             await next(context);
@@ -90,7 +89,6 @@ public sealed class OpenGraphMiddleware(RequestDelegate next)
             <meta name="twitter:image"       content="{image}"/>
             """;
  
-        // Вставляем теги перед </head>, вырезав существующий <title>
         html = Regex.Replace(html, @"<title>.*?</title>", "", RegexOptions.IgnoreCase);
         html = html.Replace("</head>", metaTags + "\n</head>");
  

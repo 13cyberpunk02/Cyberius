@@ -6,10 +6,8 @@ namespace Cyberius.Infrastructure.Data.Configurations;
 
 public class UserConfigurations : IEntityTypeConfiguration<User>
 {
-    private static readonly Guid _userId = Guid.Parse("08340629-1479-4F74-91CF-798DB48BE6DD");
-    private static readonly Guid _roleId = Guid.Parse("83CF0C0F-D889-4332-8F7F-258CB9A737A4");
     
-    private static readonly User _userSeed = new User
+    private static readonly User UserSeed = new User
     {
         UserId = Guid.Parse("08340629-1479-4F74-91CF-798DB48BE6DD"),
         DateOfBirth = DateOnly.Parse("1992-02-13"),
@@ -73,6 +71,6 @@ public class UserConfigurations : IEntityTypeConfiguration<User>
             .HasForeignKey<RefreshToken>("UserId")
             .OnDelete(DeleteBehavior.Cascade);
         
-        builder.HasData(_userSeed);
+        builder.HasData(UserSeed);
     }
 }

@@ -118,7 +118,7 @@ export class AuthService {
     if (!refreshToken) return throwError(() => new Error('No refresh token'));
 
     // accessToken в state() мог быть обнулён если истёк при загрузке страницы,
-    // но в localStorage он ещё есть (истёкший) — сервер его принимает для валидации пары
+    // но в localStorage он ещё есть (истёкший) - сервер его принимает для валидации пары
     const accessToken = this.state().accessToken ?? localStorage.getItem('blog_access_token') ?? '';
 
     const body: RefreshTokenRequest = { accessToken, refreshToken };
@@ -132,11 +132,11 @@ export class AuthService {
         }),
         catchError((err) => {
           this.refreshInProgress$ = null;
-          // Только при явном отказе сервера (401/403) — сессия точно истекла
-          // При сетевых ошибках (status 0, 503) — НЕ разлогиниваем
+          // Только при явном отказе сервера (401/403) - сессия точно истекла
+          // При сетевых ошибках (status 0, 503) - НЕ разлогиниваем
           if (err?.status === 401 || err?.status === 403) {
             this.clearState();
-            this.toast.info('Сессия истекла — войдите снова');
+            this.toast.info('Сессия истекла - войдите снова');
           }
           return throwError(() => err);
         }),
@@ -191,13 +191,13 @@ export class AuthService {
       const userRaw = localStorage.getItem(USER_KEY);
       const profileRaw = localStorage.getItem(PROFILE_KEY);
 
-      // Без refresh token — точно не авторизован
+      // Без refresh token - точно не авторизован
       if (!refreshToken || !userRaw) return this.emptyState();
 
       const user = JSON.parse(userRaw) as User;
       const profile = profileRaw ? (JSON.parse(profileRaw) as UserProfile) : null;
 
-      // Access token мог истечь — это нормально.
+      // Access token мог истечь - это нормально.
       // isAuthenticated остаётся true, interceptor обновит через refresh
       const accessExpired = accessToken ? this.isTokenExpired(accessToken) : true;
 

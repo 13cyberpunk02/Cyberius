@@ -82,7 +82,7 @@
                    [class.opacity-60]="comment.isDeleted">
                 <div class="flex items-start gap-3">
 
-                  <!-- Avatar (кликабельный) — скрываем для удалённых -->
+                  <!-- Avatar (кликабельный) - скрываем для удалённых -->
                   @if (!comment.isDeleted) {
                     <a [routerLink]="['/users', comment.author.id]"
                        class="shrink-0 hover:opacity-80 transition-opacity">

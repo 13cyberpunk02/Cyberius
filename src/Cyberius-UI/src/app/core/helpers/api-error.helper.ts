@@ -1,16 +1,16 @@
 export function getApiError(err: any, fallback = 'Произошла ошибка'): string {
-  // ProblemDetails.detail — наше русское сообщение
+  // ProblemDetails.detail - наше русское сообщение
   if (err?.error?.detail) return err.error.detail;
 
-  // ValidationProblemDetails — массив ошибок валидации
+  // ValidationProblemDetails - массив ошибок валидации
   if (err?.error?.errors) {
     const errors = err.error.errors;
     if (Array.isArray(errors)) return errors.join(', ');
-    // errors — объект { field: [messages] }
+    // errors - объект { field: [messages] }
     return Object.values(errors).flat().join(', ');
   }
 
-  // ProblemDetails.title — код ошибки как запасной вариант
+  // ProblemDetails.title - код ошибки как запасной вариант
   if (err?.error?.title) return err.error.title;
 
   // HTTP статус коды без тела

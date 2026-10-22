@@ -7,7 +7,7 @@ const USERNAME_RE = /^[a-zA-Z0-9_.-]{3,32}$/;
 // Минимум 8 символов, хотя бы 1 цифра, 1 буква
 const PASSWORD_RE = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
 
-// Минимальный возраст — 13 лет
+// Минимальный возраст - 13 лет
 const MIN_AGE = 13;
 
 function calcAge(dob: string): number {
@@ -94,7 +94,7 @@ export function validateRegister(data: RegisterRequest): FormErrors<RegisterRequ
     if (isNaN(age) || age < 0) {
       errors.dateOfBirth = 'Некорректная дата';
     } else if (age < MIN_AGE) {
-      errors.dateOfBirth = `Минимальный возраст — ${MIN_AGE} лет`;
+      errors.dateOfBirth = `Минимальный возраст - ${MIN_AGE} лет`;
     } else if (age > 120) {
       errors.dateOfBirth = 'Некорректная дата рождения';
     }

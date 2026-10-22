@@ -241,7 +241,7 @@ export class Category implements OnInit {
       error: (err) => {
         this.deleting.set(false);
         this.showDelete.set(false);
-        this.errorMsg.set(getApiError(err, 'Нельзя удалить — в категории есть статьи'));
+        this.errorMsg.set(getApiError(err, 'Нельзя удалить - в категории есть статьи'));
         this.toast.error(getApiError(err));
       },
     });

@@ -61,7 +61,7 @@ export class AuthorStatsComponent implements OnInit {
     const max = Math.max(...(this.stats()?.dailyViews.map((d) => d.count) ?? [1]), 1);
     const px =
       count === 0
-        ? 2 // минимум 2px — всегда видна засечка
+        ? 2 // минимум 2px - всегда видна засечка
         : Math.max(4, Math.round((count / max) * this.CHART_HEIGHT_PX));
     return `${px}px`;
   }

@@ -393,7 +393,7 @@ export class PostEditor implements OnInit, OnDestroy {
       const rutube = url.match(/rutube\.ru\/video\/([a-zA-Z0-9]+)/);
       if (rutube) return `https://rutube.ru/play/embed/${rutube[1]}`;
 
-      // Уже embed URL — возвращаем как есть
+      // Уже embed URL - возвращаем как есть
       if (url.includes('/embed/') || url.includes('player.')) return url;
     } catch {
       /* ignore */
@@ -510,7 +510,7 @@ export class PostEditor implements OnInit, OnDestroy {
       (b) => b.type !== 'Divider' && !b.content?.trim() && !b.imageUrl,
     );
     if (emptyBlocks.length > 0)
-      errors.push(`Есть пустые блоки (${emptyBlocks.length} шт.) — заполните или удалите`);
+      errors.push(`Есть пустые блоки (${emptyBlocks.length} шт.) - заполните или удалите`);
 
     this.validationErrors.set(errors);
     return errors.length === 0;

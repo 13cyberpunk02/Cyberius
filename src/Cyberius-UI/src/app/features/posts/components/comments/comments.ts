@@ -47,7 +47,7 @@ export class Comments implements OnInit {
   // Новый комментарий
   newText = signal('');
 
-  // Ответ — храним весь комментарий для цитаты
+  // Ответ - храним весь комментарий для цитаты
   replyToId = signal<string | null>(null);
   replyToComment = signal<CommentResponse | null>(null);
   replyText = signal('');
@@ -182,7 +182,7 @@ export class Comments implements OnInit {
       });
   }
 
-  // Цитата — первые 120 символов текста родительского комментария
+  // Цитата - первые 120 символов текста родительского комментария
   get quoteText(): string {
     const c = this.replyToComment();
     if (!c) return '';
@@ -244,7 +244,7 @@ export class Comments implements OnInit {
               : p,
           );
         } else {
-          // Soft delete — контент скроется, ответы останутся
+          // Soft delete - контент скроется, ответы останутся
           this.paged.update((p) =>
             p
               ? {

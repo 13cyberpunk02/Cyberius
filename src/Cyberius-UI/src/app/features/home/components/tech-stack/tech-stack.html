@@ -21,12 +21,12 @@
           class="glass-card rounded-2xl p-6 group transition-all duration-300 relative overflow-hidden tech-card"
           [style]="'--card-outline:' + tech.outlineColor"
         >
-          <!-- Фоновый glow на hover — цвет обводки -->
+          <!-- Фоновый glow на hover - цвет обводки -->
           <div
             class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl tech-card-glow"
           ></div>
 
-          <!-- Icon — прозрачный фон, цветная обводка -->
+          <!-- Icon - прозрачный фон, цветная обводка -->
           <div
             class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 tech-icon-wrap"
             [style.border]="'1.5px solid ' + tech.outlineColor"

@@ -22,7 +22,7 @@ export class HighlightDirective implements OnChanges, OnInit {
   private codeEl!: HTMLElement;
 
   constructor() {
-    // При смене темы — переключаем стиль highlight.js
+    // При смене темы - переключаем стиль highlight.js
     effect(() => {
       const t = this.theme.theme();
       this.applyTheme(t);
@@ -47,7 +47,7 @@ export class HighlightDirective implements OnChanges, OnInit {
       const result = hljs.highlight(this.code, { language: lang });
       this.codeEl.innerHTML = result.value;
     } catch {
-      // Если язык не поддерживается — fallback на auto
+      // Если язык не поддерживается - fallback на auto
       try {
         const result = hljs.highlightAuto(this.code ?? '');
         this.codeEl.innerHTML = result.value;

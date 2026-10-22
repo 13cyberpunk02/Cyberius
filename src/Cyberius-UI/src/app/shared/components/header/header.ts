@@ -104,6 +104,8 @@ export class Header implements OnInit, OnDestroy {
 
   toggleNotifications(event: MouseEvent): void {
     event.stopPropagation();
+    this.showSearch.set(false);
+    this.showUserMenu.set(false);
     this.showNotifications.update((v) => !v);
     if (this.showNotifications()) {
       this.notifications.markAllRead();
@@ -128,14 +130,19 @@ export class Header implements OnInit, OnDestroy {
 
   toggleUserMenu(event: MouseEvent) {
     event.stopPropagation();
+    this.showSearch.set(false);
+    this.showNotifications.set(false);
     this.showUserMenu.update((v) => !v);
   }
+
   closeUserMenu() {
     this.showUserMenu.set(false);
   }
 
   toggleSearch(event: MouseEvent) {
     event.stopPropagation();
+    this.showNotifications.set(false);
+    this.showUserMenu.set(false);
     this.showSearch.update((v) => !v);
     if (this.showSearch()) {
       setTimeout(() => document.getElementById('header-search')?.focus(), 50);

@@ -16,8 +16,7 @@
       }
 
       @case ('Paragraph') {
-        <!-- [innerHTML] + formatParagraph сохраняет пустые строки через <br> -->
-        <p class="text-slate-300 leading-relaxed text-lg"
+        <p class="text-slate-300 leading-relaxed text-lg wrap-anywhere"
            [innerHTML]="formatParagraph(block.content)"></p>
       }
 

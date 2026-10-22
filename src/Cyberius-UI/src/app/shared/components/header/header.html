@@ -6,7 +6,7 @@
 >
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div
-      class="glass-card flex items-center justify-between px-6 py-3 rounded-2xl transition-all duration-500"
+      class="glass-card flex items-center justify-between px-3 sm:px-6 py-3 rounded-2xl transition-all duration-500"
       [class.shadow-glow]="isScrolled()"
     >
       <!-- Logo -->
@@ -14,9 +14,11 @@
         <div class="logo-icon w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-lg select-none">
           <span class="relative z-10"><fa-icon [icon]="faCode" /></span>
         </div>
-        <div class="leading-tight">
-          <span class="block text-sm font-bold tracking-wide text-sky-400 group-hover:text-sky-300 transition-colors">Cyberius</span>
-          <span class="block text-xs text-slate-400 font-mono">.NET & Angular</span>
+        <div class="hidden min-[420px]:block">
+          <div class="leading-tight">
+            <span class="block text-sm font-bold tracking-wide text-sky-400 group-hover:text-sky-300 transition-colors">Cyberius</span>
+            <span class="block text-xs text-slate-400 font-mono">.NET & Angular</span>
+          </div>
         </div>
       </a>
 
@@ -36,7 +38,7 @@
       </nav>
 
       <!-- Actions -->
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-1.5 sm:gap-3">
 
         <div class="relative search-wrapper">
           <button

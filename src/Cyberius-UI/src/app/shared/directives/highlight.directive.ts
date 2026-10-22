@@ -42,6 +42,13 @@ export class HighlightDirective implements OnChanges, OnInit {
   private highlight(): void {
     if (!this.code || typeof hljs === 'undefined') return;
 
+    const lang = this.language ?? 'plaintext';
+
+    if (lang === 'plaintext' || lang === 'terminal') {
+      this.codeEl.textContent = this.code;
+      return;
+    }
+
     try {
       const lang = this.language ?? 'plaintext';
       const result = hljs.highlight(this.code, { language: lang });

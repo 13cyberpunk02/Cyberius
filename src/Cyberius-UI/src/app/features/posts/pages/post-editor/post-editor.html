@@ -191,7 +191,14 @@
                       <option value="sql">SQL</option>
                       <option value="yaml">YAML</option>
                       <option value="dockerfile">Dockerfile</option>
+                      <option value="terminal">Терминал</option>
+                      <option value="plaintext">Обычный текст</option>
                     </select>
+                    @if (block.language === 'terminal') {
+                      <p class="text-xs text-slate-500">
+                        Строки с <code class="text-emerald-400">$ </code> в начале - команды, остальные - вывод
+                      </p>
+                    }
                     <textarea [ngModel]="block.content" (ngModelChange)="updateBlock(i, {content: $event})"
                               placeholder="// Вставьте код здесь..."
                               rows="8"
@@ -214,7 +221,7 @@
                            placeholder="Подпись к изображению (необязательно)..."
                            class="email-input w-full px-3 py-2 rounded-lg text-sm"/>
                     @if (block.imageUrl) {
-                      <img [src]="block.imageUrl" class="rounded-lg max-h-48 object-cover" loading="lazy"/>
+                      <img [src]="block.imageUrl" class="rounded-lg max-h-48 object-cover" loading="lazy" alt="Подпись к изображению"/>
                     }
                   </div>
                 }

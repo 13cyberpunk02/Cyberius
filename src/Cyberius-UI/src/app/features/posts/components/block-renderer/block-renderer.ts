@@ -21,6 +21,12 @@ interface TableData {
   rows: string[][];
 }
 
+interface TerminalLine {
+  kind: 'cmd' | 'out';
+  prompt: string;
+  text: string;
+}
+
 @Component({
   selector: 'app-block-renderer',
   imports: [CommonModule, HighlightDirective, SafeUrlPipe, FaIconComponent],
@@ -92,6 +98,23 @@ export class BlockRenderer {
       this.copiedId.set(blockId);
       setTimeout(() => this.copiedId.set(null), 2000);
     });
+  }
+
+  parseTerminal(content: string | null): TerminalLine[] {
+    return (content ?? '').split('\n').map((line) => {
+      const m = line.match(/^([$#])\s(.*)$/);
+      return m
+        ? { kind: 'cmd', prompt: m[1], text: m[2] }
+        : { kind: 'out', prompt: '', text: line };
+    });
+  }
+
+  copyTerminal(blockId: string, content: string | null): void {
+    const commands = this.parseTerminal(content)
+      .filter((l) => l.kind === 'cmd')
+      .map((l) => l.text)
+      .join('\n');
+    this.copyCode(blockId, commands || (content ?? ''));
   }
 
   protected readonly faCheck = faCheck;

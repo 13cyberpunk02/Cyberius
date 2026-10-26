@@ -38,7 +38,6 @@ export class ForgotPassword {
         this.loading.set(false);
       },
       error: () => {
-        // Намеренно показываем успех даже при ошибке - не раскрываем существование email
         this.sent.set(true);
         this.loading.set(false);
       },

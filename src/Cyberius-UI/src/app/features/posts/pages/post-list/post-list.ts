@@ -6,12 +6,10 @@ import { PostCard } from '../../components/post-card/post-card';
 import { PostsService } from '../../../../core/services/posts.service';
 import { CategoryService } from '../../../../core/services/category.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import { PagedResponse, PostSummary } from '../../../../core/models/post.model';
+import { PostSummary } from '../../../../core/models/post.model';
 import { CategoryResponse } from '../../../../core/models/category.model';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import {
-  faAngleLeft,
-  faAngleRight,
   faEnvelopesBulk,
   faMagnifyingGlass,
   faPenSquare,
@@ -20,7 +18,6 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { SeoService } from '../../../../core/services/seo.service';
 import { ToastService } from '../../../../core/services/toast.service';
-import { getApiError } from '../../../../core/helpers/api-error.helper';
 
 @Component({
   selector: 'app-post-list',
@@ -57,7 +54,6 @@ export class PostList implements OnInit, OnDestroy {
   private page = 1;
   readonly pageSize = 9;
 
-  // IntersectionObserver - следит за sentinel элементом внизу списка
   private observer: IntersectionObserver | null = null;
 
   ngOnInit(): void {
@@ -94,7 +90,6 @@ export class PostList implements OnInit, OnDestroy {
     this.observer?.disconnect();
   }
 
-  // Сброс при смене фильтра и загрузка первой страницы
   private resetAndLoad(): void {
     this.page = 1;
     this.posts.set([]);
@@ -134,15 +129,13 @@ export class PostList implements OnInit, OnDestroy {
         this.loading.set(false);
         this.loadingMore.set(false);
 
-        // Подключаем observer после рендера
         if (this.hasMore()) {
           setTimeout(() => this.setupObserver(), 100);
         } else {
           this.observer?.disconnect();
         }
       },
-      error: (err) => {
-        this.toast.error(getApiError(err));
+      error: () => {
         this.loading.set(false);
         this.loadingMore.set(false);
       },

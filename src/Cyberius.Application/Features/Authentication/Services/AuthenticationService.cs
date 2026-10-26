@@ -11,21 +11,26 @@ using Microsoft.Extensions.Options;
 
 namespace Cyberius.Application.Features.Authentication.Services;
 
-public class AuthenticationService(IUnitOfWork uow, IJwtService jwtService, IEmailConfirmationService emailConfirmation, IOptions<JwtOptions> jwtOptions) : IAuthenticationService
+public class AuthenticationService(
+    IUnitOfWork uow,
+    IJwtService jwtService,
+    IEmailConfirmationService emailConfirmation,
+    IOptions<JwtOptions> jwtOptions) : IAuthenticationService
 {
-    public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request,
+        CancellationToken cancellationToken = default)
     {
         var user = await uow.Users.GetByEmailAsync(request.Email, cancellationToken);
-        if(user is null || !user.IsActive)
+        if (user is null || !user.IsActive)
             return Errors.NotFound(nameof(User), "");
-        
+
         if (!user.IsEmailConfirmed)
             return Errors.BadRequest("Подтвердите эл. почту. Письмо отправлено при регистрации.");
-        
+
         var isPasswordCorrect = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
         if (!isPasswordCorrect)
             return Errors.BadRequest("Введены неверные данные");
-        
+
         var accessToken = jwtService.GenerateJwtToken(user);
         var refreshToken = jwtService.GenerateRefreshToken();
 
@@ -45,12 +50,13 @@ public class AuthenticationService(IUnitOfWork uow, IJwtService jwtService, IEma
             refreshTokenEntity.User = user;
             uow.RefreshTokens.Update(refreshTokenEntity);
         }
-        
+
         await uow.SaveChangesAsync(cancellationToken);
         return Result<LoginResponse>.Success(new LoginResponse(accessToken, refreshToken));
     }
 
-    public async Task<Result<string>> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<string>> RegisterAsync(RegisterRequest request,
+        CancellationToken cancellationToken = default)
     {
         var userExists = await uow.Users.GetByEmailAsync(request.Email, cancellationToken);
         if (userExists is not null)
@@ -81,51 +87,53 @@ public class AuthenticationService(IUnitOfWork uow, IJwtService jwtService, IEma
         await uow.SaveChangesAsync(cancellationToken);
 
         await emailConfirmation.SendConfirmationAsync(newUser.UserId, jwtOptions.Value.Issuer, cancellationToken);
-        
+
         return Result<string>.Success("Регистрация успешна. Проверьте эл. почту для подтверждения аккаунта.");
     }
 
-    public async Task<Result<LoginResponse>> RefreshTokenAsync(RefreshTokenRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<LoginResponse>> RefreshTokenAsync(
+        RefreshTokenRequest request, CancellationToken cancellationToken = default)
     {
         var principal = jwtService.GetPrincipalFromExpiredToken(request.AccessToken);
         if (principal is null)
-            return Errors.Unauthorized("Токен доступа не валидный");
+            return Errors.Unauthorized("Токен доступа недействителен");
 
         var userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrWhiteSpace(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
-            return Errors.Unauthorized("Токен доступа не валидный");
+            return Errors.Unauthorized("Токен доступа недействителен");
 
         var user = await uow.Users.GetUserWithRolesByIdAsync(userId, cancellationToken);
-        if (user is null)
-            return Errors.Unauthorized("Пользователь не найден");
+        if (user is null || !user.IsActive || user.IsDeleted)
+            return Errors.Unauthorized("Пользователь не найден или заблокирован");
 
         var refreshTokenEntity = await uow.RefreshTokens.GetRefreshTokenByUserId(user.UserId, cancellationToken);
         if (refreshTokenEntity is null || refreshTokenEntity.Token != request.RefreshToken)
             return Errors.Unauthorized("Сессия завершена на другом устройстве");
-        
+
         var newAccessToken = jwtService.GenerateJwtToken(user);
         var newRefreshToken = jwtService.GenerateRefreshToken();
-        
+
         refreshTokenEntity.Token = newRefreshToken;
         refreshTokenEntity.User = user;
         uow.RefreshTokens.Update(refreshTokenEntity);
-        
+
         await uow.SaveChangesAsync(cancellationToken);
-        
+
         return Result<LoginResponse>.Success(new LoginResponse(newAccessToken, newRefreshToken));
     }
 
-    public async Task<Result<string>> LogoutAsync(Guid requestUserId, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Result<string>> LogoutAsync(Guid requestUserId, Guid userId,
+        CancellationToken cancellationToken = default)
     {
         if (requestUserId != userId)
             return Errors.BadRequest(
                 "ID авторизованного пользователя и ID пользователя отправившего запрос на выход из системы не совпадают");
 
         var user = await uow.Users.GetByIdAsync(userId, cancellationToken);
-        if(user is null)
+        if (user is null)
             return Errors.NotFound(nameof(User), userId.ToString());
-        
-        var refreshTokenEntity = await uow.RefreshTokens.GetRefreshTokenByUserId(user.UserId,  cancellationToken);
+
+        var refreshTokenEntity = await uow.RefreshTokens.GetRefreshTokenByUserId(user.UserId, cancellationToken);
         if (refreshTokenEntity is null)
             return Errors.BadRequest("Вы и не были авторизованы, чтобы выйти из системы");
 
@@ -140,7 +148,7 @@ public class AuthenticationService(IUnitOfWork uow, IJwtService jwtService, IEma
         var user = await uow.Users.GetByIdAsync(userId, cancellationToken);
         if (user is null)
             return Errors.NotFound(nameof(User), userId.ToString());
-        
+
         user.IsActive = false;
         uow.Users.Update(user);
         await uow.SaveChangesAsync(cancellationToken);
@@ -148,7 +156,7 @@ public class AuthenticationService(IUnitOfWork uow, IJwtService jwtService, IEma
         return Result<string>.Success("Пользователь с данного момента не активен.");
     }
 
-    public async  Task<Result<PublicProfileResponse>> GetPublicProfileAsync(Guid userId, CancellationToken ct = default)
+    public async Task<Result<PublicProfileResponse>> GetPublicProfileAsync(Guid userId, CancellationToken ct = default)
     {
         var user = await uow.Users.GetUserWithRolesByIdAsync(userId, ct);
         if (user is null || user.IsDeleted || !user.IsActive) return Errors.NotFound(nameof(User), userId.ToString());

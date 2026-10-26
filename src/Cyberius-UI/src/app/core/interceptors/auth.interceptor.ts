@@ -62,15 +62,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           : req;
         return next(retryReq);
       }),
-      catchError((refreshErr: HttpErrorResponse) => {
-        // Refresh вернул 401/403 - значит токен инвалидирован на сервере
-        // (например зашли с другого устройства и там перевыпустили токены)
-        if (refreshErr.status === 401 || refreshErr.status === 403) {
-          auth.clearState();
-          toast.info(getApiError(refreshErr, 'Сессия завершена. Войдите снова.'));
-        }
-        return throwError(() => refreshErr);
-      }),
+      catchError((refreshErr: HttpErrorResponse) => throwError(() => refreshErr)),
     );
   }
 
@@ -97,14 +89,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
               : req;
             return next(retryReq);
           }),
-          catchError((refreshErr: HttpErrorResponse) => {
-            // Refresh не удался - сессия мертва, разлогиниваем
-            if (refreshErr.status === 401 || refreshErr.status === 403) {
-              auth.clearState();
-              toast.info('Сессия завершена. Войдите снова.');
-            }
-            return throwError(() => refreshErr);
-          }),
+          catchError((refreshErr: HttpErrorResponse) => throwError(() => refreshErr)),
         );
       }
 

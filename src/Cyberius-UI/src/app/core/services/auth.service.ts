@@ -13,6 +13,7 @@ import {
 } from '../models/auth.model';
 import { ToastService } from './toast.service';
 import { environment } from '../../../environments/environment';
+import { getApiError } from '../helpers/api-error.helper';
 
 const ACCESS_TOKEN_KEY = 'blog_access_token';
 const REFRESH_TOKEN_KEY = 'blog_refresh_token';
@@ -136,7 +137,7 @@ export class AuthService {
           // При сетевых ошибках (status 0, 503) - НЕ разлогиниваем
           if (err?.status === 401 || err?.status === 403) {
             this.clearState();
-            this.toast.info('Сессия истекла - войдите снова');
+            this.toast.info(getApiError(err, 'Сессия завершена. Войдите снова.'));
           }
           return throwError(() => err);
         }),

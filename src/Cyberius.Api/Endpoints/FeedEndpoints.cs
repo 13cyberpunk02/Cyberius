@@ -9,7 +9,7 @@ public static class FeedEndpoints
 {
     public static IEndpointRouteBuilder MapFeedEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapGet("/feed.xml", GetRssFeed)
+        endpoints.MapGet("api/feed.xml", GetRssFeed)
             .WithDisplayName("RSS Feed")
             .WithTags("Feed")
             .Produces(200, contentType: "application/rss+xml; charset=utf-8");

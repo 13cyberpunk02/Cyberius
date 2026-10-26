@@ -3,18 +3,22 @@ using Cyberius.Application.Features.Authentication.Interfaces;
 using Cyberius.Application.Features.Email.Interfaces;
 using Cyberius.Domain.Entities;
 using Cyberius.Domain.Interfaces;
+using Cyberius.Domain.Options;
 using Cyberius.Domain.Shared;
+using Microsoft.Extensions.Options;
 
 namespace Cyberius.Application.Features.Authentication.Services;
 
 public class EmailConfirmationService(
     IUnitOfWork uow,
-    IEmailService email) : IEmailConfirmationService
+    IEmailService email,
+    IOptions<AppOptions> appOptions) : IEmailConfirmationService
 {
     private const int TokenLifetimeHours = 24;
+    private readonly string _baseUrl = appOptions.Value.BaseUrl;
 
     public async Task<Result> SendConfirmationAsync(
-        Guid userId, string frontendBaseUrl, CancellationToken ct = default)
+        Guid userId, CancellationToken ct = default)
     {
         var user = await uow.Users.GetByIdAsync(userId, ct);
         if (user is null)
@@ -36,7 +40,7 @@ public class EmailConfirmationService(
 
         await uow.SaveChangesAsync(ct);
 
-        var confirmLink = $"{frontendBaseUrl}/confirm-email?token={token}";
+        var confirmLink = $"{_baseUrl}/confirm-email?token={token}";
         var fullName = $"{user.FirstName} {user.LastName}".Trim();
         await email.SendEmailConfirmationAsync(user.Email, fullName, confirmLink, ct);
 

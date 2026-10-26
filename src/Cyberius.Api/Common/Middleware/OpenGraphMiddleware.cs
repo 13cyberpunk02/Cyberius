@@ -1,6 +1,8 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 using Cyberius.Domain.Interfaces;
+using Cyberius.Domain.Options;
+using Microsoft.Extensions.Options;
 
 namespace Cyberius.Api.Common.Middleware;
 
@@ -27,7 +29,7 @@ public sealed class OpenGraphMiddleware(RequestDelegate next)
         HttpContext context,
         IUnitOfWork uow,
         IWebHostEnvironment env,
-        IConfiguration config)
+        IOptions<AppOptions> appOptions)
     {
         var path = context.Request.Path.Value ?? "";
         var ua   = context.Request.Headers.UserAgent.ToString().ToLowerInvariant();
@@ -50,8 +52,7 @@ public sealed class OpenGraphMiddleware(RequestDelegate next)
             return;
         }
  
-        var baseUrl = config["AppSettings:FrontendUrl"]?.TrimEnd('/')
-                      ?? $"{context.Request.Scheme}://{context.Request.Host}";
+        var baseUrl = appOptions.Value.BaseUrl;
  
         var indexPath = Path.Combine(env.WebRootPath, "index.html");
         if (!File.Exists(indexPath))

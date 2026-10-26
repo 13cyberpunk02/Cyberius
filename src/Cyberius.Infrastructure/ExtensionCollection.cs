@@ -21,6 +21,12 @@ public static class ExtensionCollection
     {
         services.Configure<DatabaseOption>(configuration.GetSection(DatabaseOption.SectionName));
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        services
+            .AddOptions<AppOptions>()
+            .BindConfiguration(AppOptions.SectionName)
+            .Validate(o => Uri.TryCreate(o.FrontendUrl, UriKind.Absolute, out _),
+                "AppSettings:FrontendUrl должен быть полным адресом, например https://example.com")
+            .ValidateOnStart();
         
         services.AddDbContext<AppDbContext>((serviceProvider, options) =>
         {

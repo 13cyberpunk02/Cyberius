@@ -116,7 +116,7 @@ public static class AuthenticationEndpoints
         var origin = ctx.Request.Headers.Origin.FirstOrDefault()
                      ?? "http://localhost:4200";
  
-        var result = await service.ForgotPasswordAsync(request.Email, origin, ct);
+        var result = await service.ForgotPasswordAsync(request.Email, ct);
         return result.ToHttpResponse();
     }
  
@@ -147,7 +147,7 @@ public static class AuthenticationEndpoints
         var origin = ctx.Request.Headers.Origin.FirstOrDefault()
                      ?? "http://localhost:4200";
  
-        var result = await service.SendConfirmationAsync(request.UserId, origin, ct);
+        var result = await service.SendConfirmationAsync(request.UserId, ct);
         return result.ToHttpResponse();
     }
 }

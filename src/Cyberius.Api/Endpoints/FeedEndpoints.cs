@@ -1,5 +1,7 @@
 ﻿using System.Globalization;
 using Cyberius.Application.Features.Blog.Interfaces;
+using Cyberius.Domain.Options;
+using Microsoft.Extensions.Options;
 
 namespace Cyberius.Api.Endpoints;
 
@@ -17,14 +19,15 @@ public static class FeedEndpoints
  
     private static async Task<IResult> GetRssFeed(
         IPostService postService,
+        IOptions<AppOptions> appOptions,
         CancellationToken ct)
     {
         var result = await postService.GetPublishedAsync(1, 20, ct);
         if (result.IsFailure) return Results.Problem("Не удалось загрузить статьи");
  
         var posts    = result.Value.Items;
-        var siteUrl  = "http://localhost:4200";
-        var apiUrl   = "http://localhost:5273";
+        var siteUrl = appOptions.Value.BaseUrl;
+        var apiUrl  = siteUrl;
         var now      = DateTimeOffset.UtcNow.ToString("R");
  
         var items = string.Join('\n', posts.Select(p =>

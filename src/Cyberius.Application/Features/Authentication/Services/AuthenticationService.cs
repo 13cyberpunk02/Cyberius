@@ -86,7 +86,7 @@ public class AuthenticationService(
         await uow.UserRoles.AddAsync(userRoleEntity, cancellationToken);
         await uow.SaveChangesAsync(cancellationToken);
 
-        await emailConfirmation.SendConfirmationAsync(newUser.UserId, jwtOptions.Value.Issuer, cancellationToken);
+        await emailConfirmation.SendConfirmationAsync(newUser.UserId, cancellationToken);
 
         return Result<string>.Success("Регистрация успешна. Проверьте эл. почту для подтверждения аккаунта.");
     }

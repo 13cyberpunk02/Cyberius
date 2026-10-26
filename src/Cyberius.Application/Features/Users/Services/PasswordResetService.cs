@@ -3,16 +3,22 @@ using Cyberius.Application.Features.Email.Interfaces;
 using Cyberius.Application.Features.Users.Interfaces;
 using Cyberius.Domain.Entities;
 using Cyberius.Domain.Interfaces;
+using Cyberius.Domain.Options;
 using Cyberius.Domain.Shared;
+using Microsoft.Extensions.Options;
 
 namespace Cyberius.Application.Features.Users.Services;
 
-public class PasswordResetService(IUnitOfWork uow, IEmailService emailService) : IPasswordResetService
+public class PasswordResetService(
+    IUnitOfWork uow, 
+    IEmailService emailService,
+    IOptions<AppOptions> appOptions) : IPasswordResetService
 {
     private const int TokenLifetimeMinutes = 15;
+    private readonly string _baseUrl = appOptions.Value.BaseUrl;
 
     public async Task<Result> ForgotPasswordAsync(
-        string emailAddress, string frontendBaseUrl, CancellationToken ct = default)
+        string emailAddress, CancellationToken ct = default)
     {
         var user = await uow.Users.GetByEmailAsync(emailAddress, ct);
 
@@ -31,7 +37,7 @@ public class PasswordResetService(IUnitOfWork uow, IEmailService emailService) :
 
         await uow.SaveChangesAsync(ct);
         
-        var resetLink = $"{frontendBaseUrl}/reset-password?token={token}";
+        var resetLink = $"{_baseUrl}/reset-password?token={token}";
         var fullName = $"{user.FirstName} {user.LastName}".Trim();
         await emailService.SendPasswordResetAsync(user.Email, fullName, resetLink, ct);
 

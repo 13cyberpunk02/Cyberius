@@ -67,7 +67,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         // (например зашли с другого устройства и там перевыпустили токены)
         if (refreshErr.status === 401 || refreshErr.status === 403) {
           auth.clearState();
-          toast.info('Сессия завершена. Войдите снова.');
+          toast.info(getApiError(refreshErr, 'Сессия завершена. Войдите снова.'));
         }
         return throwError(() => refreshErr);
       }),
@@ -111,7 +111,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       // Глобальный toast для остальных ошибок
       if (!isSilentUrl(req.url)) {
         if (err.status === 403) {
-          toast.error('Доступ запрещён');
+          toast.error(getApiError(err, 'Доступ запрещён'));
         } else if (err.status === 404) {
           // 404 - компонент сам обработает
         } else if (err.status >= 500) {

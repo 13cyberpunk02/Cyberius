@@ -30,8 +30,14 @@ public static class ResultsExtension
             ErrorTypes.Validation or ErrorTypes.BadRequest => Results.BadRequest(error.ToProblem()),
             ErrorTypes.NotFound => Results.NotFound(error.ToProblem()),
             ErrorTypes.Conflict => Results.Conflict(error.ToProblem()),
-            ErrorTypes.Forbidden => Results.Forbid(),
-            ErrorTypes.Unauthorized => Results.Json(error.ToProblem(), statusCode: StatusCodes.Status401Unauthorized),
+            ErrorTypes.Forbidden => Results.Problem(
+                title: error.Code,
+                detail: error.Message,
+                statusCode: StatusCodes.Status403Forbidden),
+            ErrorTypes.Unauthorized => Results.Problem(
+                title: error.Code,
+                detail: error.Message,
+                statusCode: StatusCodes.Status401Unauthorized),
             ErrorTypes.InternalServerError => Results.InternalServerError(error.ToProblem()),
             _ => Results.Problem(
                 title: error.Code,
